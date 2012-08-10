@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:IMC-FestivalApp.xcodeproj">
+      location = "self:IMCFestivalApp.xcodeproj">
    </FileRef>
 </Workspace>
