@@ -5,8 +5,17 @@
 void testApp::setup(){
     ofSetLogLevel(OF_LOG_VERBOSE);    
 	
+    // Load our eventSite event details from the app bundle
+    // TODO: get the below from YAML OR XML
+    
+    string modelName = "FieldDay 2012 3D.dae";
+    ofxLatLon geoTopLeft(       "51°32'23.03\"N",   "0° 2'27.37\"W");
+    ofxLatLon geoTopRight(      "51°32'23.03\"N",   "0° 1'41.31\"W");
+    ofxLatLon geoBottomLeft(    "51°32'1.96\"N",    "0° 2'27.37\"W");
+    ofxLatLon geoBottomRight(   "51°32'1.96\"N",    "0° 1'41.31\"W");
+    
     // Load our event site 3D model in.
-    eventSite.loadModel("FieldDay 2012 3D.dae");
+    eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
 
     // The following GL setup gets material colour rendering correctly
     // http://forum.openframeworks.cc/index.php?topic=8708.0
