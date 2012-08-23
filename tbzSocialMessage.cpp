@@ -16,5 +16,6 @@ tbzSocialMessage::tbzSocialMessage(string _text, float _latitude, float _longitu
 
 void tbzSocialMessage::draw()
 {
-    ofDrawBitmapString(text, geoLocation);
+    //ofDrawBitmapString(text, geoLocation);
+    ofDrawBitmapString(text, modelLocation);
 }

@@ -16,6 +16,8 @@
 #include "ofxAssimpModelLoader.h"
 #include "ofxGeometry.h"
 
+#include "agg_trans_bilinear.h"
+
 #include "tbzSocialMessage.h"
 
 class tbzEventSite : public ofxMtActionsObject
@@ -48,7 +50,7 @@ protected:
 
     ofxAssimpModelLoader siteModel;
     
-    ofPoint     groundToModel(const ofPoint &modelPoint);
+    ofPoint     groundToModel(const ofPoint &groundPoint);
     
     ofPoint     modelTopLeft;
     ofPoint     modelTopRight;
@@ -58,6 +60,9 @@ protected:
     ofPoint     groundTopRight;
     ofPoint     groundBottomLeft;
     ofPoint     groundBottomRight;
+    
+private:
+    agg::trans_bilinear groundToModelTransform;
 };
 
 #endif

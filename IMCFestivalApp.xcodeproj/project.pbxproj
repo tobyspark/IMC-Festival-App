@@ -18,7 +18,6 @@
 		A662194C15E3B657003B8ACB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194615E3B657003B8ACB /* tinyxmlparser.cpp */; };
 		A662194D15E3B657003B8ACB /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194815E3B657003B8ACB /* ofxXmlSettings.cpp */; };
 		A6621A7815E6A71E003B8ACB /* tbzSocialMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */; };
-		A6621A7E15E6D62A003B8ACB /* agg_trans_affine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6621A7D15E6D62A003B8ACB /* agg_trans_affine.cpp */; };
 		A6B3153715D2E6D3002F427A /* ofxMSAInteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */; };
 		A6B3153915D2E6D3002F427A /* ofxMtActionsObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */; };
 		A6B3153D15D2E6D3002F427A /* ofxMtObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152E15D2E6D3002F427A /* ofxMtObject.cpp */; };
@@ -99,11 +98,10 @@
 		A662194915E3B657003B8ACB /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
 		A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tbzSocialMessage.cpp; path = ../tbzSocialMessage.cpp; sourceTree = "<group>"; };
 		A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tbzSocialMessage.h; path = ../tbzSocialMessage.h; sourceTree = "<group>"; };
-		A6621A7915E6BAD2003B8ACB /* agg_trans_perspective.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_trans_perspective.h; path = ../agg_trans_perspective.h; sourceTree = "<group>"; };
-		A6621A7A15E6D41C003B8ACB /* agg_trans_affine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_trans_affine.h; sourceTree = "<group>"; };
 		A6621A7B15E6D44E003B8ACB /* agg_basics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_basics.h; sourceTree = "<group>"; };
 		A6621A7C15E6D474003B8ACB /* agg_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_config.h; sourceTree = "<group>"; };
-		A6621A7D15E6D62A003B8ACB /* agg_trans_affine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = agg_trans_affine.cpp; sourceTree = "<group>"; };
+		A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_trans_bilinear.h; sourceTree = "<group>"; };
+		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_simul_eq.h; sourceTree = "<group>"; };
 		A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMSAInteractiveObject.cpp; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.cpp; sourceTree = "<group>"; };
 		A6B3151D15D2E6D3002F427A /* ofxMSAInteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMSAInteractiveObject.h; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.h; sourceTree = "<group>"; };
 		A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMtActionsObject.cpp; path = ../../../../addons/ofxMtActions/src/ofxMtActionsObject.cpp; sourceTree = "<group>"; };
@@ -286,9 +284,8 @@
 			children = (
 				A6621A7B15E6D44E003B8ACB /* agg_basics.h */,
 				A6621A7C15E6D474003B8ACB /* agg_config.h */,
-				A6621A7A15E6D41C003B8ACB /* agg_trans_affine.h */,
-				A6621A7D15E6D62A003B8ACB /* agg_trans_affine.cpp */,
-				A6621A7915E6BAD2003B8ACB /* agg_trans_perspective.h */,
+				A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */,
+				A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */,
 				A6F37EB015DD430B00D819F6 /* ofxGeometry.cpp */,
 				A6F37EB115DD430B00D819F6 /* ofxGeometry.h */,
 				A6B3152E15D2E6D3002F427A /* ofxMtObject.cpp */,
@@ -531,7 +528,6 @@
 				A662194C15E3B657003B8ACB /* tinyxmlparser.cpp in Sources */,
 				A662194D15E3B657003B8ACB /* ofxXmlSettings.cpp in Sources */,
 				A6621A7815E6A71E003B8ACB /* tbzSocialMessage.cpp in Sources */,
-				A6621A7E15E6D62A003B8ACB /* agg_trans_affine.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,7 +8,7 @@
 
 #include "tbzEventSite.h"
 
-#include "agg_trans_perspective.h"
+
 
 tbzEventSite::tbzEventSite() {};
 
@@ -55,7 +55,7 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
         groundTopLeft.set(geoTopLeft.lon, geoTopLeft.lat);
         groundTopRight.set(geoTopRight.lon, geoTopRight.lat);
         groundBottomLeft.set(geoBottomLeft.lon, geoBottomLeft.lat);
-        groundBottomRight.set(geoTopLeft.lon, geoTopLeft.lat);
+        groundBottomRight.set(geoBottomRight.lon, geoBottomRight.lat);
         
         // TASK: Calculate earthbound bounds of our eventSite
         
@@ -86,23 +86,16 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
         
         groundBounds.set(boundsX, boundsY, boundsW, boundsH);
         
-        
-        ofPoint test = groundToModel(groundTopLeft);
-        if (test == groundTopLeft)
-        {
-            ofLog(OF_LOG_VERBOSE, "YES!");
-        }
-        else
-        {
-            ofLog(OF_LOG_VERBOSE, "NO!");
-        }
+        // TASK: Calculate ground to model transformation matrix.
         
         double groundQuad[] = {groundTopLeft.x, groundTopLeft.y, groundTopRight.x, groundTopRight.y, groundBottomRight.x, groundBottomRight.y, groundBottomLeft.x, groundBottomLeft.y};
         double modelQuad[] = {modelTopLeft.x, modelTopLeft.y, modelTopRight.x, modelTopRight.y, modelBottomRight.x, modelBottomRight.y, modelBottomLeft.x, modelBottomLeft.y};
         
-        agg::trans_perspective geoToModelPerspective(groundQuad, modelQuad);
-        
-        
+        groundToModelTransform.quad_to_quad(groundQuad, modelQuad);
+        if (!groundToModelTransform.is_valid())
+        {
+            ofLog(OF_LOG_WARNING, "Failed to create mapping from Ground coords to Model coords. Check your numbers.");
+        }
         
         success = true;
     }
@@ -211,6 +204,7 @@ void tbzEventSite::drawContent()
     list<tbzSocialMessage>::iterator message;
     for (message = socialMessages.begin(); message != socialMessages.end(); message++)
     {
+        message->modelLocation = groundToModel(message->geoLocation);
         message->draw();
     }
     
@@ -231,18 +225,14 @@ void tbzEventSite::drawContent()
     }
 }
 
-ofPoint tbzEventSite::groundToModel(const ofPoint &modelPoint)
+ofPoint tbzEventSite::groundToModel(const ofPoint &groundPoint)
 {
-    // TASK: Register ground non-orthogonal quadrangle onto model's orthogonal quadrangle, and then translate from one coordinate to the other
-    double groundQuad[] = {groundTopLeft.x, groundTopLeft.y, groundTopRight.x, groundTopRight.y, groundBottomRight.x, groundBottomRight.y, groundBottomLeft.x, groundBottomLeft.y};
-    double modelQuad[] = {modelTopLeft.x, modelTopLeft.y, modelTopRight.x, modelTopRight.y, modelBottomRight.x, modelBottomRight.y, modelBottomLeft.x, modelBottomLeft.y};
+    // TASK: Convert a ground coordinate to its equivalent coordinate in the model
     
-    agg::trans_perspective geoToModelPerspective(groundQuad, modelQuad);
+    double xToTranslate = groundPoint.x;
+    double yToTranslate = groundPoint.y;
     
-    double xToTranslate = modelPoint.x;
-    double yToTranslate = modelPoint.y;
-    
-    geoToModelPerspective.translate(xToTranslate, yToTranslate);
+    groundToModelTransform.transform(&xToTranslate, &yToTranslate);
     
     return ofPoint(xToTranslate, yToTranslate);
 }
