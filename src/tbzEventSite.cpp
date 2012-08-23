@@ -8,6 +8,8 @@
 
 #include "tbzEventSite.h"
 
+#include "agg_trans_perspective.h"
+
 tbzEventSite::tbzEventSite() {};
 
 bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight)
@@ -54,6 +56,53 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
         groundTopRight.set(geoTopRight.lon, geoTopRight.lat);
         groundBottomLeft.set(geoBottomLeft.lon, geoBottomLeft.lat);
         groundBottomRight.set(geoTopLeft.lon, geoTopLeft.lat);
+        
+        // TASK: Calculate earthbound bounds of our eventSite
+        
+        // our map isn't necessarily oriented north, so we can't assume topLeft value is smaller than topRight
+        float boundsX, boundsY, boundsW, boundsH;
+        
+        if (groundTopLeft.x < groundTopRight.x)
+        {
+            boundsX = min(groundTopLeft.x, groundBottomLeft.x);
+            boundsW = max(groundTopRight.x, groundBottomRight.x) - boundsX;
+        }
+        else
+        {
+            boundsX = min(groundTopRight.x, groundBottomRight.x);
+            boundsW = max(groundTopLeft.x, groundBottomLeft.x) - boundsX;
+        }
+        
+        if (groundTopLeft.y < groundBottomLeft.y)
+        {
+            boundsY = min(groundTopLeft.y, groundTopRight.y);
+            boundsH = max(groundBottomLeft.y, groundBottomRight.y) - boundsY;
+        }
+        else
+        {
+            boundsY = min(groundBottomLeft.y, groundBottomRight.y);
+            boundsH = max(groundTopLeft.y, groundTopRight.y) - boundsY;
+        }
+        
+        groundBounds.set(boundsX, boundsY, boundsW, boundsH);
+        
+        
+        ofPoint test = groundToModel(groundTopLeft);
+        if (test == groundTopLeft)
+        {
+            ofLog(OF_LOG_VERBOSE, "YES!");
+        }
+        else
+        {
+            ofLog(OF_LOG_VERBOSE, "NO!");
+        }
+        
+        double groundQuad[] = {groundTopLeft.x, groundTopLeft.y, groundTopRight.x, groundTopRight.y, groundBottomRight.x, groundBottomRight.y, groundBottomLeft.x, groundBottomLeft.y};
+        double modelQuad[] = {modelTopLeft.x, modelTopLeft.y, modelTopRight.x, modelTopRight.y, modelBottomRight.x, modelBottomRight.y, modelBottomLeft.x, modelBottomLeft.y};
+        
+        agg::trans_perspective geoToModelPerspective(groundQuad, modelQuad);
+        
+        
         
         success = true;
     }
@@ -157,6 +206,14 @@ void tbzEventSite::drawContent()
     
     siteModel.drawFaces();
     
+    // CAN I PUSH THE MATRIX AND TRANSFORM A LA TRANS_PERSPECTIVE SO THAT GEOCOORDS WORK?
+    
+    list<tbzSocialMessage>::iterator message;
+    for (message = socialMessages.begin(); message != socialMessages.end(); message++)
+    {
+        message->draw();
+    }
+    
     if (debug3D)
     {
         ofDrawBitmapString("TL: " + ofToString(groundTopLeft.x,2) + ", " + ofToString(groundTopLeft.y,2), modelTopLeft.x, modelTopLeft.y);
@@ -172,4 +229,20 @@ void tbzEventSite::drawContent()
         ofSetColor(255, 255, 255, 255);
         ofDrawBitmapString("eventSite 0,0,r" + ofToString(ofRadToDeg(rotation)), 0 ,0);
     }
+}
+
+ofPoint tbzEventSite::groundToModel(const ofPoint &modelPoint)
+{
+    // TASK: Register ground non-orthogonal quadrangle onto model's orthogonal quadrangle, and then translate from one coordinate to the other
+    double groundQuad[] = {groundTopLeft.x, groundTopLeft.y, groundTopRight.x, groundTopRight.y, groundBottomRight.x, groundBottomRight.y, groundBottomLeft.x, groundBottomLeft.y};
+    double modelQuad[] = {modelTopLeft.x, modelTopLeft.y, modelTopRight.x, modelTopRight.y, modelBottomRight.x, modelBottomRight.y, modelBottomLeft.x, modelBottomLeft.y};
+    
+    agg::trans_perspective geoToModelPerspective(groundQuad, modelQuad);
+    
+    double xToTranslate = modelPoint.x;
+    double yToTranslate = modelPoint.y;
+    
+    geoToModelPerspective.translate(xToTranslate, yToTranslate);
+    
+    return ofPoint(xToTranslate, yToTranslate);
 }

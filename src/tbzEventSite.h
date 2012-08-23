@@ -16,6 +16,8 @@
 #include "ofxAssimpModelLoader.h"
 #include "ofxGeometry.h"
 
+#include "tbzSocialMessage.h"
+
 class tbzEventSite : public ofxMtActionsObject
 {
 
@@ -36,20 +38,26 @@ public:
     
     // Class properties
     
-    ofxAssimpModelLoader siteModel;
+    ofRectangle groundBounds;
+    
+    list<tbzSocialMessage> socialMessages;
         
 protected:
 
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
+
+    ofxAssimpModelLoader siteModel;
     
-    ofVec2f     modelTopLeft;
-    ofVec2f     modelTopRight;
-    ofVec2f     modelBottomLeft;
-    ofVec2f     modelBottomRight;
-    ofVec2f     groundTopLeft;
-    ofVec2f     groundTopRight;
-    ofVec2f     groundBottomLeft;
-    ofVec2f     groundBottomRight;
+    ofPoint     groundToModel(const ofPoint &modelPoint);
+    
+    ofPoint     modelTopLeft;
+    ofPoint     modelTopRight;
+    ofPoint     modelBottomLeft;
+    ofPoint     modelBottomRight;
+    ofPoint     groundTopLeft;
+    ofPoint     groundTopRight;
+    ofPoint     groundBottomLeft;
+    ofPoint     groundBottomRight;
 };
 
 #endif

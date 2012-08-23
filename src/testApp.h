@@ -3,10 +3,10 @@
 #include "ofMain.h"
 #include "ofxiPhone.h"
 #include "ofxiPhoneExtras.h"
+#include "ofxXmlSettings.h"
 #include "ofMain.h"
 
 #include "tbzEventSite.h"
-//#include "ofxMtActionsHub.h"
 
 class testApp : public ofxiPhoneApp
 {
@@ -30,7 +30,12 @@ class testApp : public ofxiPhoneApp
         void deviceOrientationChanged(int newOrientation);
 
         tbzEventSite eventSite;
-        //ofxMtActionsHub mtActionsHub;
+        ofxXmlSettings eventSiteSettings;
+    
+        ofxXmlSettings socialMessageStore;
+    
+    private:
+        void loadAndParseTwitterTestData();
         
 };
 
