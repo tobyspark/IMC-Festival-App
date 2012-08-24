@@ -18,35 +18,35 @@ void testApp::setup(){
     
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
-
+    
     // The following GL setup gets material colour rendering correctly
     // http://forum.openframeworks.cc/index.php?topic=8708.0
     
     glEnable(GL_DEPTH_TEST);
-    
-    glEnable(GL_LIGHTING);
-    
-    GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
-    
-    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-    
-    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-    
-    GLfloat ambient[] = {0.2, 0.2f, 0.2f, 0.2f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-    
-    GLfloat position[] = { 0.5f, 0.5f, 0.5f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
-    
-    glEnable(GL_LIGHT0);
-    
-    //some model / light stuff
-    glShadeModel(GL_SMOOTH);
-    // light.enable();
-    ofEnableSeparateSpecularLight();
+//    
+//    glEnable(GL_LIGHTING);
+//    
+//    GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+//    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+//    
+//    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+//    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+//    
+//    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+//    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+//    
+//    GLfloat ambient[] = {0.2, 0.2f, 0.2f, 0.2f};
+//    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+//    
+//    GLfloat position[] = { 0.5f, 0.5f, 0.5f, 1.0f};
+//    glLightfv(GL_LIGHT0, GL_POSITION, position);
+//    
+//    glEnable(GL_LIGHT0);
+//    
+//    //some model / light stuff
+//    glShadeModel(GL_SMOOTH);
+//    // light.enable();
+//    ofEnableSeparateSpecularLight();
     
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     
@@ -59,6 +59,8 @@ void testApp::setup(){
     int count = socialMessageStore.getNumTags("message");
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
+    socialMessageFont.loadFont("Arial Narrow.ttf", 10, true, true);
+    socialMessageFont.setGlobalDpi(72);
 }
 
 //--------------------------------------------------------------
@@ -69,7 +71,11 @@ void testApp::update()
     if (indexToDisplay > eventSite.socialMessages.size() && indexToDisplay < socialMessageStore.getNumTags("message"))
     {
         socialMessageStore.pushTag("message", indexToDisplay);
-        eventSite.socialMessages.push_front(tbzSocialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f)));
+        {
+            tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
+            socialMessage.font = &socialMessageFont;
+            eventSite.socialMessages.push_front(socialMessage);
+        }
         socialMessageStore.popTag();
     }
 }
@@ -85,7 +91,8 @@ void testApp::draw()
 	eventSite.render();
 
     ofSetColor(255, 255, 255, 255);
-    ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
+    //ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
+    socialMessageFont.drawString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
 
 }
 

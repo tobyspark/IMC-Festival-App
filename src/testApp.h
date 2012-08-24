@@ -31,8 +31,9 @@ class testApp : public ofxiPhoneApp
 
         tbzEventSite eventSite;
         ofxXmlSettings eventSiteSettings;
-    
+        
         ofxXmlSettings socialMessageStore;
+        ofTrueTypeFont socialMessageFont;
     
     private:
         void loadAndParseTwitterTestData();

@@ -4,13 +4,16 @@
 //========================================================================
 int main( ){
 
-	ofAppiPhoneWindow * window = new ofAppiPhoneWindow();
-	window->enableDepthBuffer();
-	ofSetupOpenGL(window, 1024,768, OF_FULLSCREEN);			// <-------- setup the GL context
-
-	// this kicks off the running of my app
-	// can be OF_WINDOW or OF_FULLSCREEN
-	// pass in width and height too:
+	ofAppiPhoneWindow * iOSWindow = new ofAppiPhoneWindow();
+	
+    iOSWindow->enableAntiAliasing(4);
+	
+	iOSWindow->enableRetinaSupport();
+    
+    iOSWindow->enableDepthBuffer();
+    
+    ofSetupOpenGL(iOSWindow, 480, 320, OF_FULLSCREEN);
+    
 	ofRunApp( new testApp());
 
 }

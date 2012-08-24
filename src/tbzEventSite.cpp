@@ -167,56 +167,69 @@ void tbzEventSite::drawContent()
 {
     bool debug3D = true;
     
-    ofPushMatrix();
-    
-    // TASK: Compensate for being a MSAInteractiveObject, we don't want to draw where we are but in the centre of the screen.
-    
-    // Keep model non-rotated until we want to apply it ourselves
-    ofRotate(ofRadToDeg(-rotation), 0, 0, 1);
-    // Keep model vertically aligned as y coord goes up and down (we're co-opting for elevation angle)
-    ofTranslate(0, -y + ofGetHeight()/2);
-    
-    if (debug3D)
-    {
-        ofSetColor(255, 255, 255, 255);
-        ofDrawBitmapString("eventSite modelLoc", 0 ,0);
-    }
-    
-    // TASK: Pan, twirl and zoom around
-    
-    // Perform scale from centre of screen
-    float scale = width;
-    ofScale(scale, scale, scale);
-    
     // Rotate site around the x axis to change elevation angle from plan to just overhead
     float minElevation = 0;
     float maxElevation = 90;
     float elevationRot = minElevation + (maxElevation - minElevation) * (y / ofGetHeight());
-    ofRotate(elevationRot, 1, 0, 0);
     
-    // Rotate site around its z axis to spin with horizontal swipe
-    ofRotate(ofRadToDeg(rotation), 0, 0, 1);
-    
-    siteModel.drawFaces();
-    
-    // CAN I PUSH THE MATRIX AND TRANSFORM A LA TRANS_PERSPECTIVE SO THAT GEOCOORDS WORK?
-    
-    list<tbzSocialMessage>::iterator message;
-    for (message = socialMessages.begin(); message != socialMessages.end(); message++)
+    ofPushMatrix();
     {
-        message->modelLocation = groundToModel(message->geoLocation);
-        message->draw();
+        // TASK: Compensate for being a MSAInteractiveObject, we don't want to draw where we are but in the centre of the screen.
+        
+        // Keep model non-rotated until we want to apply it ourselves
+        ofRotate(ofRadToDeg(-rotation), 0, 0, 1);
+        // Keep model vertically aligned as y coord goes up and down (we're co-opting for elevation angle)
+        ofTranslate(0, -y + ofGetHeight()/2);
+        
+        if (debug3D)
+        {
+            ofSetColor(255, 255, 255, 255);
+            ofDrawBitmapString("eventSite modelLoc", 0 ,0);
+        }
+        
+        // TASK: Pan, twirl and zoom around
+        ofPushMatrix();
+        {
+            // Perform scale from centre of screen
+            float scale = width;
+            ofScale(scale, scale, scale);
+            
+            ofRotate(elevationRot, 1, 0, 0);
+            
+            // Rotate site around its z axis to spin with horizontal swipe
+            ofRotate(ofRadToDeg(rotation), 0, 0, 1);
+            
+            //siteModel.drawFaces();
+            
+            if (debug3D)
+            {
+                ofDrawBitmapString("TL: " + ofToString(groundTopLeft.x,2) + ", " + ofToString(groundTopLeft.y,2), modelTopLeft.x, modelTopLeft.y);
+                ofDrawBitmapString("TR: " + ofToString(groundTopRight.x,2) + ", " + ofToString(groundTopRight.y,2), modelTopRight.x, modelTopRight.y);
+                ofDrawBitmapString("BL: " + ofToString(groundBottomLeft.x,2) + ", " + ofToString(groundBottomLeft.y,2), modelBottomLeft.x, modelBottomLeft.y);
+                ofDrawBitmapString("BR: " + ofToString(groundBottomRight.x,2) + ", " + ofToString(groundBottomRight.y,2), modelBottomRight.x, modelBottomRight.y);
+            }
+        }
+        ofPopMatrix();
+        
+        ofPushMatrix();
+        {
+            // CAN I PUSH THE MATRIX AND APPLY TRANS_PERSPECTIVE MATRIX SO THAT GEOCOORDS WORK?
+            
+            ofRotate(elevationRot, 1, 0, 0);
+            ofRotate(ofRadToDeg(rotation), 0, 0, 1);
+            
+            list<tbzSocialMessage>::iterator message;
+            for (message = socialMessages.begin(); message != socialMessages.end(); message++)
+            {
+                message->modelLocation = groundToModel(message->geoLocation);
+                message->draw();
+            }
+        }
+        ofPopMatrix();
     }
-    
-    if (debug3D)
-    {
-        ofDrawBitmapString("TL: " + ofToString(groundTopLeft.x,2) + ", " + ofToString(groundTopLeft.y,2), modelTopLeft.x, modelTopLeft.y);
-        ofDrawBitmapString("TR: " + ofToString(groundTopRight.x,2) + ", " + ofToString(groundTopRight.y,2), modelTopRight.x, modelTopRight.y);
-        ofDrawBitmapString("BL: " + ofToString(groundBottomLeft.x,2) + ", " + ofToString(groundBottomLeft.y,2), modelBottomLeft.x, modelBottomLeft.y);
-        ofDrawBitmapString("BR: " + ofToString(groundBottomRight.x,2) + ", " + ofToString(groundBottomRight.y,2), modelBottomRight.x, modelBottomRight.y);
-    }
-    
     ofPopMatrix();
+    
+
     
     if (debug3D)
     {

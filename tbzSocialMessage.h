@@ -18,12 +18,16 @@ class tbzSocialMessage
         
         void draw();
     
-    ofPoint modelLocation;
-    ofPoint geoLocation;
+        ofPoint modelLocation;
+        ofPoint geoLocation;
+    
+        ofTrueTypeFont *font;
     
     protected:
         string text;
         //ofPoint geoLocation;
+    
+        ofPoint arrowTL, arrowTR, arrowB;
 };
 
 #endif /* defined(__IMCFestivalApp__tbzSocialMessage__) */
