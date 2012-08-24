@@ -171,6 +171,9 @@ void tbzEventSite::drawContent()
     float minElevation = 0;
     float maxElevation = 90;
     float elevationRot = minElevation + (maxElevation - minElevation) * (y / ofGetHeight());
+
+    // Get scale for our eventSite
+    float scale = width;
     
     ofPushMatrix();
     {
@@ -191,7 +194,6 @@ void tbzEventSite::drawContent()
         ofPushMatrix();
         {
             // Perform scale from centre of screen
-            float scale = width;
             ofScale(scale, scale, scale);
             
             ofRotate(elevationRot, 1, 0, 0);
@@ -199,7 +201,7 @@ void tbzEventSite::drawContent()
             // Rotate site around its z axis to spin with horizontal swipe
             ofRotate(ofRadToDeg(rotation), 0, 0, 1);
             
-            //siteModel.drawFaces();
+            siteModel.drawFaces();
             
             if (debug3D)
             {
@@ -221,8 +223,12 @@ void tbzEventSite::drawContent()
             list<tbzSocialMessage>::iterator message;
             for (message = socialMessages.begin(); message != socialMessages.end(); message++)
             {
-                message->modelLocation = groundToModel(message->geoLocation);
-                message->draw();
+                ofPushMatrix();
+                {
+                    ofPoint modelLocation = groundToModel(message->geoLocation);
+                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, 20 * scale); // 20 is a magic number standing in for desired height of messages within model
+                    message->draw();
+                };
             }
         }
         ofPopMatrix();

@@ -35,6 +35,10 @@ class testApp : public ofxiPhoneApp
         ofxXmlSettings socialMessageStore;
         ofTrueTypeFont socialMessageFont;
     
+        ofLight light;
+        
+        bool flipFlop;
+        
     private:
         void loadAndParseTwitterTestData();
         

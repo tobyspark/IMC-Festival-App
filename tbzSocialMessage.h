@@ -18,15 +18,12 @@ class tbzSocialMessage
         
         void draw();
     
-        ofPoint modelLocation;
         ofPoint geoLocation;
     
         ofTrueTypeFont *font;
     
     protected:
         string text;
-        //ofPoint geoLocation;
-    
         ofPoint arrowTL, arrowTR, arrowB;
 };
 

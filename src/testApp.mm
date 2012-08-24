@@ -48,6 +48,18 @@ void testApp::setup(){
 //    // light.enable();
 //    ofEnableSeparateSpecularLight();
     
+    // we need GL_TEXTURE_2D for our models coords.
+    //ofDisableArbTex();
+    
+//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+//    glAlphaFunc ( GL_GREATER, 0.5) ;
+//    glEnable ( GL_ALPHA_TEST ) ;
+    
+    //some model / light stuff
+//    glShadeModel(GL_SMOOTH);
+//    light.enable();
+//    ofEnableSeparateSpecularLight();
+    
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     
     success = socialMessageStore.loadFile("socialMessageStore.xml");
@@ -59,8 +71,8 @@ void testApp::setup(){
     int count = socialMessageStore.getNumTags("message");
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
-    socialMessageFont.loadFont("Arial Narrow.ttf", 10, true, true);
-    socialMessageFont.setGlobalDpi(72);
+    socialMessageFont.setGlobalDpi(10);
+    socialMessageFont.loadFont("Arial Narrow.ttf", 100, true, true);
 }
 
 //--------------------------------------------------------------
@@ -122,6 +134,20 @@ void testApp::touchUp(ofTouchEventArgs & touch)
 //--------------------------------------------------------------
 void testApp::touchDoubleTap(ofTouchEventArgs & touch){
 
+    if (flipFlop)
+    {
+        glShadeModel(GL_SMOOTH);
+        light.enable();
+        ofEnableSeparateSpecularLight();
+    }
+    else
+    {
+        glShadeModel(GL_SMOOTH);
+        light.disable();
+        ofDisableSeparateSpecularLight();
+    }
+    
+    flipFlop = !flipFlop;
 }
 
 //--------------------------------------------------------------
