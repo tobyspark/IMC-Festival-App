@@ -20,7 +20,8 @@
 
 #include "tbzSocialMessage.h"
 
-#define kTBZES_ElevationAngle 70
+#define kTBZES_ViewElevationAngle 70
+#define kTBZES_MessageElevationHeight 20
 
 class tbzEventSite : public ofxMtActionsObject
 {

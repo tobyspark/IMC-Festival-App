@@ -14,7 +14,7 @@ void testApp::setup(){
     
     string modelName = eventSiteSettings.getValue("modelName", "eventSiteModelDefault.dae");
     
-    eventSiteSettings.pushTag("MODEL");
+    eventSiteSettings.pushTag("model");
         ofxLatLon geoTopLeft(       eventSiteSettings.getValue("topLeftCorner:latitude", "51°32'23.03\"N"),
                                     eventSiteSettings.getValue("topLeftCorner:longitude", "0° 2'27.37\"W"));
         ofxLatLon geoTopRight(      eventSiteSettings.getValue("topRightCorner:latitude", "51°32'23.03\"N"),
@@ -28,46 +28,14 @@ void testApp::setup(){
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
-    // The following GL setup gets material colour rendering correctly
-    // http://forum.openframeworks.cc/index.php?topic=8708.0
+    // TASK: Configure rendering
     
-    glEnable(GL_DEPTH_TEST);
-//    
-//    glEnable(GL_LIGHTING);
-//    
-//    GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-//    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
-//    
-//    GLfloat specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
-//    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-//    
-//    GLfloat diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
-//    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-//    
-//    GLfloat ambient[] = {0.2, 0.2f, 0.2f, 0.2f};
-//    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-//    
-//    GLfloat position[] = { 0.5f, 0.5f, 0.5f, 1.0f};
-//    glLightfv(GL_LIGHT0, GL_POSITION, position);
-//    
-//    glEnable(GL_LIGHT0);
-//    
-//    //some model / light stuff
-//    glShadeModel(GL_SMOOTH);
-//    // light.enable();
-//    ofEnableSeparateSpecularLight();
-    
-    // we need GL_TEXTURE_2D for our models coords.
-    //ofDisableArbTex();
+    //  we need GL_TEXTURE_2D for our models coords.
+    ofDisableArbTex();
     
 //    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 //    glAlphaFunc ( GL_GREATER, 0.5) ;
 //    glEnable ( GL_ALPHA_TEST ) ;
-    
-    //some model / light stuff
-//    glShadeModel(GL_SMOOTH);
-//    light.enable();
-//    ofEnableSeparateSpecularLight();
     
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
@@ -117,6 +85,7 @@ void testApp::draw()
 {
     ofBackground(50, 50, 50, 0);
 
+    // Draw 3D axes in centre of screen
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     ofColor(255,0,0);

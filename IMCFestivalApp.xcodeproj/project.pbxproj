@@ -21,7 +21,6 @@
 		A6B3153715D2E6D3002F427A /* ofxMSAInteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */; };
 		A6B3153915D2E6D3002F427A /* ofxMtActionsObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */; };
 		A6B3153D15D2E6D3002F427A /* ofxMtObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152E15D2E6D3002F427A /* ofxMtObject.cpp */; };
-		A6F37EAF15DD3D1800D819F6 /* FieldDay 2012 3D.dae in Resources */ = {isa = PBXBuildFile; fileRef = A6F37EAE15DD3D1800D819F6 /* FieldDay 2012 3D.dae */; };
 		A6F37EB215DD430B00D819F6 /* ofxGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6F37EB015DD430B00D819F6 /* ofxGeometry.cpp */; };
 		A6F37EB415DD55F100D819F6 /* tbzEventSite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6F37EB315DD55F100D819F6 /* tbzEventSite.cpp */; };
 		BB16EBD20F2B2A9500518274 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB16EBD10F2B2A9500518274 /* OpenGLES.framework */; };
@@ -102,6 +101,7 @@
 		A6621A7C15E6D474003B8ACB /* agg_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_config.h; sourceTree = "<group>"; };
 		A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_trans_bilinear.h; sourceTree = "<group>"; };
 		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_simul_eq.h; sourceTree = "<group>"; };
+		A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tbzEventSiteSettingsXMLMaker.h; sourceTree = "<group>"; };
 		A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMSAInteractiveObject.cpp; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.cpp; sourceTree = "<group>"; };
 		A6B3151D15D2E6D3002F427A /* ofxMSAInteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMSAInteractiveObject.h; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.h; sourceTree = "<group>"; };
 		A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMtActionsObject.cpp; path = ../../../../addons/ofxMtActions/src/ofxMtActionsObject.cpp; sourceTree = "<group>"; };
@@ -111,7 +111,6 @@
 		A6B3152F15D2E6D3002F427A /* ofxMtObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMtObject.h; path = ../../../../addons/ofxMultiTouchObject/src/ofxMtObject.h; sourceTree = "<group>"; };
 		A6B3153015D2E6D3002F427A /* ofxMtObjectEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMtObjectEvents.h; path = ../../../../addons/ofxMultiTouchObject/src/ofxMtObjectEvents.h; sourceTree = "<group>"; };
 		A6B3153F15D2E89A002F427A /* tbzEventSite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tbzEventSite.h; sourceTree = "<group>"; };
-		A6F37EAE15DD3D1800D819F6 /* FieldDay 2012 3D.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "FieldDay 2012 3D.dae"; sourceTree = "<group>"; };
 		A6F37EB015DD430B00D819F6 /* ofxGeometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxGeometry.cpp; path = ../../../../addons/ofxGeometry/ofxGeometry.cpp; sourceTree = "<group>"; };
 		A6F37EB115DD430B00D819F6 /* ofxGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxGeometry.h; path = ../../../../addons/ofxGeometry/ofxGeometry.h; sourceTree = "<group>"; };
 		A6F37EB315DD55F100D819F6 /* tbzEventSite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tbzEventSite.cpp; sourceTree = "<group>"; };
@@ -320,7 +319,6 @@
 		BB24DD8B10DA77E000E9C588 /* data */ = {
 			isa = PBXGroup;
 			children = (
-				A6F37EAE15DD3D1800D819F6 /* FieldDay 2012 3D.dae */,
 				BB24DD8C10DA77E000E9C588 /* Default.png */,
 				BB24DD8D10DA77E000E9C588 /* Icon.png */,
 			);
@@ -366,6 +364,7 @@
 				A6F37EB315DD55F100D819F6 /* tbzEventSite.cpp */,
 				A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */,
 				A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */,
+				A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */,
 				A6B3153E15D2E737002F427A /* addons here to keep dSYM happy */,
 			);
 			path = src;
@@ -488,7 +487,6 @@
 				BB24DDCA10DA781C00E9C588 /* ofxiphone-Info.plist in Resources */,
 				E41D3ED713B38FB500A75A5D /* Project.xcconfig in Resources */,
 				E41D3EE613B3906D00A75A5D /* CoreOF.xcconfig in Resources */,
-				A6F37EAF15DD3D1800D819F6 /* FieldDay 2012 3D.dae in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

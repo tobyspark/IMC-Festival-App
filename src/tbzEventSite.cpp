@@ -193,7 +193,7 @@ void tbzEventSite::drawContent()
         ofTranslate(0, elevationFactor*(-y + ofGetHeight()*0.6));
         
         // Now rotate coord system
-        float elevationAngle = elevationFactor * kTBZES_ElevationAngle;
+        float elevationAngle = elevationFactor * kTBZES_ViewElevationAngle;
         ofRotate(elevationAngle, 1, 0, 0);
         
         // Now we've rotated, shift back to yPos, which is actually in/out of screen since rotation
@@ -234,7 +234,7 @@ void tbzEventSite::drawContent()
                 ofPushMatrix();
                 {
                     ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, 20 * scale); // 20 is a magic number standing in for desired height of messages within model
+                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
                     message->draw();
                 };
             }

@@ -1,0 +1,19 @@
+<modelName>FieldDay-2012-2D.dae</modelName>
+<model>
+    <topLeftCorner>
+        <latitude>51°32'23.03"N</latitude>
+        <longitude>0° 2'27.37"W</longitude>
+    </topLeftCorner>
+    <topRightCorner>
+        <latitude>51°32'23.03"N</latitude>
+        <longitude>0° 1'41.31"W</longitude>
+    </topRightCorner>
+    <bottomLeftCorner>
+        <latitude>51°32'1.96"N</latitude>
+        <longitude>0° 2'27.37"W</longitude>
+    </bottomLeftCorner>
+    <BottomRightCorner>
+        <latitude>51°32'1.96"N</latitude>
+        <longitude>0° 1'41.31"W</longitude>
+    </BottomRightCorner>
+</model>
