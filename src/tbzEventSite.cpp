@@ -185,17 +185,19 @@ void tbzEventSite::drawContent()
         // elevationFactor of 0 is no elevation, ie. stay in plan view
         // elevationFactor of 1 is max elevation
         
-        // Current viewing point of model is what part of the model is lying at the screen's centre.
+        // Current viewing point of model (focus) is what part of the model is lying at the screen's centre.
         // Change elevation is a rotation of the model around x axis at that point of model.
         
-        // First translate so that point of model lies on x axis
-        ofTranslate(0, elevationFactor*(-y + ofGetHeight()/2));
+        // First translate vertically to where we want model focus to sit on the screen
+        // ie. middle but with a bit more room for 'sky'
+        ofTranslate(0, elevationFactor*(-y + ofGetHeight()*0.6));
         
-        // Now rotate
+        // Now rotate coord system
         float elevationAngle = elevationFactor * kTBZES_ElevationAngle;
         ofRotate(elevationAngle, 1, 0, 0);
         
-        // BUT THIS DOESN'T QUITE WORK, I'M DAMNED IF I CAN WORK IT OUT, AND I'VE TRIED OH SO MANY ALTERNATIVE STRATEGIES ON THE WAY
+        // Now we've rotated, shift back to yPos, which is actually in/out of screen since rotation
+        ofTranslate(0, elevationFactor * (y - ofGetHeight()/2));
         
         // TASK: Draw model, coord space will be scaled
         ofPushMatrix();
@@ -203,13 +205,14 @@ void tbzEventSite::drawContent()
             // Perform scale from centre of screen
             ofScale(scale, scale, scale);
             
-            //siteModel.drawFaces();
-            ofSetColor(100, 100, 100, 255);
-            ofFill();
-            ofRect(modelTopLeft.x, modelTopLeft.y, modelTopRight.x - modelTopLeft.x, modelBottomLeft.y - modelTopLeft.y);
+            siteModel.drawFaces();
             
             if (debug3D)
             {
+                ofSetColor(100, 100, 100, 255);
+                ofFill();
+                ofRect(modelTopLeft.x, modelTopLeft.y, modelTopRight.x - modelTopLeft.x, modelBottomLeft.y - modelTopLeft.y);
+                
                 ofSetColor(0, 0, 255, 255);
                 ofDrawBitmapString("eventSite modelLoc", 0 ,0);
                 ofDrawBitmapString("TL: " + ofToString(groundTopLeft.x,2) + ", " + ofToString(groundTopLeft.y,2), modelTopLeft.x, modelTopLeft.y);
