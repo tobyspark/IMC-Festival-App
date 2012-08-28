@@ -125,8 +125,7 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     minSize = 1;
     maxSize = 5;
     
-    // We can drag horizontally to navigate around site
-    // We can drag vertically to change elevation onto site
+    // We can drag horizontally and vertically to navigate around site
     int *tRange = new int[2];
     tRange[0] = 1;
     tRange[1] = -4;;
@@ -139,72 +138,80 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     setIsScalable(true, tRange, 1 );
     delete [] tRange;
     
-    // We can rotate to navigate around site
-    tRange = new int[2];
-    tRange[0] = 2;
-    tRange[1] = 3;
-    setIsRotatable(true, tRange, 2 );
-    delete [] tRange;
-    
     // We can tap on venues?
     setIsTappable(true);    
 }
 
 void tbzEventSite::updateContent()
 {
-    // TASK: Bound Y to height of screen, thus clamping elevation angle
-    y = max(y, 0.0f);
-    y = min(y, (float)ofGetHeight());
+    float scale = width;
     
-    // TASK: Bound x to within screen given scale factor
-    // if scale = 1, bounds are screenwidth/2,screenwidth/2
-    // if scale = 2, bounds are 0, screenwidth
-    x = max(x, ofGetWidth() - width*ofGetWidth()/2);
-    x = min(x, width*ofGetWidth()/2);
+    // TASK: Bound Y such that the model cannot leave the centreline of screen
+    // This ensures our elevation view should stay centered on a part of the model
+    y = min(y, ofGetHeight()/2 - modelTopLeft.y*scale);
+    y = max(y, ofGetHeight()/2 - modelBottomLeft.y*scale);
+    
+//    // TASK: Bound x to within screen given scale factor
+//    // if scale = 1, bounds are screenwidth/2,screenwidth/2
+//    // if scale = 2, bounds are 0, screenwidth
+//    x = max(x, ofGetWidth() - scale*ofGetWidth()/2);
+//    x = min(x, scale*ofGetWidth()/2);
+    
+    // TASK: If we're dragging, elevate to plan view.
+    if (state == FIXE)
+    {
+        elevationFactorTarget = 1.0f;
+    }
+    else
+    {
+        elevationFactorTarget = 0.0f;
+    }
+    
+    float damping = 0.1;
+    elevationFactor += (elevationFactorTarget - elevationFactor) * damping;
 }
 
 void tbzEventSite::drawContent()
 {
     bool debug3D = true;
     
-    // Rotate site around the x axis to change elevation angle from plan to just overhead
-    float minElevation = 0;
-    float maxElevation = 90;
-    float elevationRot = minElevation + (maxElevation - minElevation) * (y / ofGetHeight());
-
     // Get scale for our eventSite
     float scale = width;
     
     ofPushMatrix();
     {
-        // TASK: Compensate for being a MSAInteractiveObject, we don't want to draw where we are but in the centre of the screen.
+        // TASK: Rotate model for viewing elevation
+        // We want to maintain the current viewing point of the model and change elevation from plan to a view looking across model from above head height.
+        // elevationFactor of 0 is no elevation, ie. stay in plan view
+        // elevationFactor of 1 is max elevation
         
-        // Keep model non-rotated until we want to apply it ourselves
-        ofRotate(ofRadToDeg(-rotation), 0, 0, 1);
-        // Keep model vertically aligned as y coord goes up and down (we're co-opting for elevation angle)
-        ofTranslate(0, -y + ofGetHeight()/2);
+        // Current viewing point of model is what part of the model is lying at the screen's centre.
+        // Change elevation is a rotation of the model around x axis at that point of model.
         
-        if (debug3D)
-        {
-            ofSetColor(255, 255, 255, 255);
-            ofDrawBitmapString("eventSite modelLoc", 0 ,0);
-        }
+        // First translate so that point of model lies on x axis
+        ofTranslate(0, elevationFactor*(-y + ofGetHeight()/2));
         
-        // TASK: Pan, twirl and zoom around
+        // Now rotate
+        float elevationAngle = elevationFactor * kTBZES_ElevationAngle;
+        ofRotate(elevationAngle, 1, 0, 0);
+        
+        // BUT THIS DOESN'T QUITE WORK, I'M DAMNED IF I CAN WORK IT OUT, AND I'VE TRIED OH SO MANY ALTERNATIVE STRATEGIES ON THE WAY
+        
+        // TASK: Draw model, coord space will be scaled
         ofPushMatrix();
         {
             // Perform scale from centre of screen
             ofScale(scale, scale, scale);
             
-            ofRotate(elevationRot, 1, 0, 0);
-            
-            // Rotate site around its z axis to spin with horizontal swipe
-            ofRotate(ofRadToDeg(rotation), 0, 0, 1);
-            
-            siteModel.drawFaces();
+            //siteModel.drawFaces();
+            ofSetColor(100, 100, 100, 255);
+            ofFill();
+            ofRect(modelTopLeft.x, modelTopLeft.y, modelTopRight.x - modelTopLeft.x, modelBottomLeft.y - modelTopLeft.y);
             
             if (debug3D)
             {
+                ofSetColor(0, 0, 255, 255);
+                ofDrawBitmapString("eventSite modelLoc", 0 ,0);
                 ofDrawBitmapString("TL: " + ofToString(groundTopLeft.x,2) + ", " + ofToString(groundTopLeft.y,2), modelTopLeft.x, modelTopLeft.y);
                 ofDrawBitmapString("TR: " + ofToString(groundTopRight.x,2) + ", " + ofToString(groundTopRight.y,2), modelTopRight.x, modelTopRight.y);
                 ofDrawBitmapString("BL: " + ofToString(groundBottomLeft.x,2) + ", " + ofToString(groundBottomLeft.y,2), modelBottomLeft.x, modelBottomLeft.y);
@@ -213,19 +220,17 @@ void tbzEventSite::drawContent()
         }
         ofPopMatrix();
         
+        // TASK: Draw what isn't model, coord space will not be scaled
         ofPushMatrix();
         {
-            // CAN I PUSH THE MATRIX AND APPLY TRANS_PERSPECTIVE MATRIX SO THAT GEOCOORDS WORK?
-            
-            ofRotate(elevationRot, 1, 0, 0);
-            ofRotate(ofRadToDeg(rotation), 0, 0, 1);
+            // CAN I PUSH THE MATRIX AND APPLY TRANS_PERSPECTIVE DERIVED MATRIX SO THAT GEOCOORDS WORK?
             
             list<tbzSocialMessage>::iterator message;
             for (message = socialMessages.begin(); message != socialMessages.end(); message++)
             {
                 ofPushMatrix();
                 {
-                    ofPoint modelLocation = groundToModel(message->geoLocation);
+                    ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                     ofTranslate(modelLocation.x * scale, modelLocation.y * scale, 20 * scale); // 20 is a magic number standing in for desired height of messages within model
                     message->draw();
                 };
@@ -235,12 +240,10 @@ void tbzEventSite::drawContent()
     }
     ofPopMatrix();
     
-
-    
     if (debug3D)
     {
-        ofSetColor(255, 255, 255, 255);
-        ofDrawBitmapString("eventSite 0,0,r" + ofToString(ofRadToDeg(rotation)), 0 ,0);
+        ofSetColor(0, 0, 255, 255);
+        ofDrawBitmapString("eventSite 0,0,r" + ofToString(ofRadToDeg(rotation),0) + " at " + ofToString(x,0) + "," + ofToString(y,0), 0 ,0);
     }
 }
 

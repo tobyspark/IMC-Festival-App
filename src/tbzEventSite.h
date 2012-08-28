@@ -20,6 +20,8 @@
 
 #include "tbzSocialMessage.h"
 
+#define kTBZES_ElevationAngle 70
+
 class tbzEventSite : public ofxMtActionsObject
 {
 
@@ -49,6 +51,8 @@ protected:
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
 
     ofxAssimpModelLoader siteModel;
+    float       elevationFactor;
+    float       elevationFactorTarget;
     
     ofPoint     groundToModel(const ofPoint &groundPoint);
     
