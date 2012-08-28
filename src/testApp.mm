@@ -7,14 +7,23 @@ void testApp::setup(){
 	
     bool success = false;
     
-    // Load our eventSite event details from the app bundle
-    // TODO: get the below from YAML OR XML
+    // TASK: Load our eventSite event details from the app bundle
+    success = eventSiteSettings.loadFile("eventSiteSettings.xml");
     
-    string modelName = "FieldDay 2012 3D.dae";
-    ofxLatLon geoTopLeft(       "51°32'23.03\"N",   "0° 2'27.37\"W");
-    ofxLatLon geoTopRight(      "51°32'23.03\"N",   "0° 1'41.31\"W");
-    ofxLatLon geoBottomLeft(    "51°32'1.96\"N",    "0° 2'27.37\"W");
-    ofxLatLon geoBottomRight(   "51°32'1.96\"N",    "0° 1'41.31\"W");
+    if (!success) ofLog(OF_LOG_WARNING, "Failed to load eventSiteSettings.xml");
+    
+    string modelName = eventSiteSettings.getValue("modelName", "eventSiteModelDefault.dae");
+    
+    eventSiteSettings.pushTag("MODEL");
+        ofxLatLon geoTopLeft(       eventSiteSettings.getValue("topLeftCorner:latitude", "51°32'23.03\"N"),
+                                    eventSiteSettings.getValue("topLeftCorner:longitude", "0° 2'27.37\"W"));
+        ofxLatLon geoTopRight(      eventSiteSettings.getValue("topRightCorner:latitude", "51°32'23.03\"N"),
+                                    eventSiteSettings.getValue("topRightCorner:longitude", "0° 1'41.31\"W"));
+        ofxLatLon geoBottomLeft(    eventSiteSettings.getValue("bottomLeftCorner:latitude", "51°32'1.96\"N"),
+                                    eventSiteSettings.getValue("bottomLeftCorner:longitude", "0° 2'27.37\"W"));
+        ofxLatLon geoBottomRight(   eventSiteSettings.getValue("bottomRightCorner:latitude", "51°32'1.96\"N"),
+                                    eventSiteSettings.getValue("bottomRightCorner:longitude", "0° 1'41.31\"W"));
+    eventSiteSettings.popTag();
     
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
@@ -79,24 +88,27 @@ void testApp::setup(){
     int count = socialMessageStore.getNumTags("message");
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
-    socialMessageFont.setGlobalDpi(10);
-    socialMessageFont.loadFont("Arial Narrow.ttf", 100, true, true);
+    socialMessageFont.setGlobalDpi(72);
+    socialMessageFont.loadFont("Arial Narrow.ttf", 16, true, true);
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-    // TASK: Add all social messages at the rate of ten per second
-    int indexToDisplay = ofGetElapsedTimeMillis() / 100.0f;
-    if (indexToDisplay > eventSite.socialMessages.size() && indexToDisplay < socialMessageStore.getNumTags("message"))
+    // TASK: Cycle through social messages
+    int indexToDisplay = ofGetFrameNum() % socialMessageStore.getNumTags("message");
+
+    socialMessageStore.pushTag("message", indexToDisplay);
     {
-        socialMessageStore.pushTag("message", indexToDisplay);
-        {
-            tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
-            socialMessage.font = &socialMessageFont;
-            eventSite.socialMessages.push_front(socialMessage);
-        }
-        socialMessageStore.popTag();
+        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
+        socialMessage.font = &socialMessageFont;
+        eventSite.socialMessages.push_front(socialMessage);
+    }
+    socialMessageStore.popTag();
+    
+    if (eventSite.socialMessages.size() > 10)
+    {
+        eventSite.socialMessages.pop_back();
     }
 }
 
