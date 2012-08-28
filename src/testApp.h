@@ -34,6 +34,7 @@ class testApp : public ofxiPhoneApp
         
         ofxXmlSettings socialMessageStore;
         ofTrueTypeFont socialMessageFont;
+        string         socialMessageStoreFileLoc;
     
         ofLight light;
         

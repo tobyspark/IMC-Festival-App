@@ -61,8 +61,13 @@ void testApp::setup(){
 //    ofEnableSeparateSpecularLight();
     
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
+    socialMessageStoreFileLoc = "socialMessageStore.xml";
     
-    success = socialMessageStore.loadFile("socialMessageStore.xml");
+    #ifdef TARGET_OF_IPHONE
+    // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
+    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + "socialMessageStore.xml";
+    #endif
+    
     if (!success)
     {
         ofLog(OF_LOG_WARNING, "No existing social message store found");
@@ -282,7 +287,8 @@ void testApp::loadAndParseTwitterTestData()
             
         }
         
-        if (addedMessage) socialMessageStore.saveFile("socialMessageStore.xml");
+        if (addedMessage) socialMessageStore.saveFile(socialMessageStoreFileLoc);
+        
     }
     else
     {
