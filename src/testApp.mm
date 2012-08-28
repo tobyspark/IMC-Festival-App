@@ -68,11 +68,14 @@ void testApp::setup(){
     socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + "socialMessageStore.xml";
     #endif
     
+    success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
+    
     if (!success)
     {
         ofLog(OF_LOG_WARNING, "No existing social message store found");
         loadAndParseTwitterTestData();
     }
+    
     int count = socialMessageStore.getNumTags("message");
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
@@ -101,10 +104,17 @@ void testApp::update()
 void testApp::draw()
 {
     ofBackground(50, 50, 50, 0);
-    
-	//note we have to enable depth buffer in main.mm
-	//see: window->enableDepthBuffer(); in main.mm
 
+    ofPushMatrix();
+    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+    ofColor(255,0,0);
+    ofLine(0, 0, 0, 100, 0, 0);
+    ofColor(0,255,0);
+    ofLine(0, 0, 0, 0, 100, 0);
+    ofColor(0,0,255);
+    ofLine(0, 0, 0, 0, 0, 100);
+    ofPopMatrix();
+    
 	eventSite.render();
 
     ofSetColor(255, 255, 255, 255);
