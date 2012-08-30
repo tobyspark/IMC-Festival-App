@@ -9,7 +9,7 @@ void testApp::setup(){
         
     bool success = false;
     
-    // TASK: Load our eventSite event details from the app bundle
+    //// TASK: Load our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
     
     if (!success) ofLog(OF_LOG_WARNING, "Failed to load eventSiteSettings.xml");
@@ -30,7 +30,11 @@ void testApp::setup(){
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
-    // TASK: Configure rendering
+    //// TASK: Configure rendering
+    
+    // currently have some frame-by-frame rather than time based decays etc., so lets keep framerate consistent on OSX
+    ofSetVerticalSync(true);
+	ofSetFrameRate(60);
     
     // we're rendering a true 3D scene, depth is by position not rendering order!
     glEnable(GL_DEPTH_TEST);
@@ -43,7 +47,7 @@ void testApp::setup(){
     glAlphaFunc ( GL_GREATER, 0.5);
     glEnable ( GL_ALPHA_TEST );
     
-    // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
+    //// TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
     
     #if TARGET_OS_IPHONE
