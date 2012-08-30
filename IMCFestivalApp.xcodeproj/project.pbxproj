@@ -96,12 +96,12 @@
 		A662194615E3B657003B8ACB /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
 		A662194815E3B657003B8ACB /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxXmlSettings.cpp; sourceTree = "<group>"; };
 		A662194915E3B657003B8ACB /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
-		A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tbzSocialMessage.cpp; path = ../tbzSocialMessage.cpp; sourceTree = "<group>"; };
-		A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tbzSocialMessage.h; path = ../tbzSocialMessage.h; sourceTree = "<group>"; };
-		A6621A7B15E6D44E003B8ACB /* agg_basics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_basics.h; sourceTree = "<group>"; };
-		A6621A7C15E6D474003B8ACB /* agg_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_config.h; sourceTree = "<group>"; };
-		A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_trans_bilinear.h; sourceTree = "<group>"; };
-		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agg_simul_eq.h; sourceTree = "<group>"; };
+		A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tbzSocialMessage.cpp; sourceTree = "<group>"; };
+		A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tbzSocialMessage.h; sourceTree = "<group>"; };
+		A6621A7B15E6D44E003B8ACB /* agg_basics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_basics.h; path = _thirdParty/agg_basics.h; sourceTree = "<group>"; };
+		A6621A7C15E6D474003B8ACB /* agg_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_config.h; path = _thirdParty/agg_config.h; sourceTree = "<group>"; };
+		A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_trans_bilinear.h; path = _thirdParty/agg_trans_bilinear.h; sourceTree = "<group>"; };
+		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_simul_eq.h; path = _thirdParty/agg_simul_eq.h; sourceTree = "<group>"; };
 		A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tbzEventSiteSettingsXMLMaker.h; sourceTree = "<group>"; };
 		A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMSAInteractiveObject.cpp; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.cpp; sourceTree = "<group>"; };
 		A6B3151D15D2E6D3002F427A /* ofxMSAInteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMSAInteractiveObject.h; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.h; sourceTree = "<group>"; };
