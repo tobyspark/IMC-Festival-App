@@ -89,6 +89,7 @@
 		907f2521dc2465da06c6af1d1c18c799 /* aiAnim.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = aiAnim.h; path = ../../../addons/ofxAssimpModelLoader/libs/assimp/include/aiAnim.h; sourceTree = SOURCE_ROOT; };
 		9812ab5b873dce671edd4e6ddd281e54 /* aiTypes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = aiTypes.h; path = ../../../addons/ofxAssimpModelLoader/libs/assimp/include/aiTypes.h; sourceTree = SOURCE_ROOT; };
 		9d3fbfbcc1ee3203c85613ccf7e80431 /* DefaultLogger.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = DefaultLogger.h; path = ../../../addons/ofxAssimpModelLoader/libs/assimp/include/DefaultLogger.h; sourceTree = SOURCE_ROOT; };
+		A656A27615EF82AF007802DB /* tbzPlatformDefineTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tbzPlatformDefineTests.h; sourceTree = "<group>"; };
 		A662194315E3B657003B8ACB /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
 		A662194415E3B657003B8ACB /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
 		A662194515E3B657003B8ACB /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
@@ -365,6 +366,7 @@
 				A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */,
 				A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */,
 				A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */,
+				A656A27615EF82AF007802DB /* tbzPlatformDefineTests.h */,
 				A6B3153E15D2E737002F427A /* addons here to keep dSYM happy */,
 			);
 			path = src;

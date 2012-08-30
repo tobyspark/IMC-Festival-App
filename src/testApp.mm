@@ -3,8 +3,10 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    ofSetLogLevel(OF_LOG_VERBOSE);    
-	
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    
+    #include "tbzPlatformDefineTests.h"
+        
     bool success = false;
     
     // TASK: Load our eventSite event details from the app bundle
@@ -29,6 +31,9 @@ void testApp::setup(){
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
     // TASK: Configure rendering
+    
+    // we're rendering a true 3D scene, depth is by position not rendering order
+    glEnable(GL_DEPTH_TEST);
     
     //  we need GL_TEXTURE_2D for our models coords.
     ofDisableArbTex();
@@ -109,6 +114,8 @@ void testApp::exit(){
     
 }
 
+#if TARGET_OS_IPHONE
+
 //--------------------------------------------------------------
 void testApp::touchDown(ofTouchEventArgs & touch)
 {
@@ -170,6 +177,60 @@ void testApp::gotMemoryWarning(){
 void testApp::deviceOrientationChanged(int newOrientation){
     
 }
+
+#endif
+
+#ifdef TARGET_OSX
+
+//--------------------------------------------------------------
+void testApp::keyPressed(int key){
+    
+}
+
+//--------------------------------------------------------------
+void testApp::keyReleased(int key){
+    
+}
+
+//--------------------------------------------------------------
+void testApp::mouseMoved(int x, int y){
+    
+}
+
+//--------------------------------------------------------------
+void testApp::mouseDragged(int x, int y, int button)
+{
+    eventSite.actionTouchMoved(x, y, 0);
+}
+
+//--------------------------------------------------------------
+void testApp::mousePressed(int x, int y, int button)
+{
+    eventSite.actionTouchDown(x, y, 0);
+}
+
+//--------------------------------------------------------------
+void testApp::mouseReleased(int x, int y, int button)
+{
+    eventSite.actionTouchUp(x, y, 0);
+}
+
+//--------------------------------------------------------------
+void testApp::windowResized(int w, int h){
+    
+}
+
+//--------------------------------------------------------------
+void testApp::gotMessage(ofMessage msg){
+    
+}
+
+//--------------------------------------------------------------
+void testApp::dragEvent(ofDragInfo dragInfo){
+    
+}
+
+#endif
 
 void testApp::loadAndParseTwitterTestData()
 {
