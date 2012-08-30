@@ -32,15 +32,16 @@ void testApp::setup(){
     
     // TASK: Configure rendering
     
-    // we're rendering a true 3D scene, depth is by position not rendering order
+    // we're rendering a true 3D scene, depth is by position not rendering order!
     glEnable(GL_DEPTH_TEST);
     
     //  we need GL_TEXTURE_2D for our models coords.
     ofDisableArbTex();
     
-//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-//    glAlphaFunc ( GL_GREATER, 0.5) ;
-//    glEnable ( GL_ALPHA_TEST ) ;
+    // we need alpha blending as we have images with alpha in 3D space
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    glAlphaFunc ( GL_GREATER, 0.5);
+    glEnable ( GL_ALPHA_TEST );
     
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
@@ -73,8 +74,8 @@ void testApp::update()
 
     socialMessageStore.pushTag("message", indexToDisplay);
     {
-        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
-        socialMessage.font = &socialMessageFont;
+        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f),
+            &socialMessageFont);
         eventSite.socialMessages.push_front(socialMessage);
     }
     socialMessageStore.popTag();
@@ -137,20 +138,6 @@ void testApp::touchUp(ofTouchEventArgs & touch)
 //--------------------------------------------------------------
 void testApp::touchDoubleTap(ofTouchEventArgs & touch){
 
-    if (flipFlop)
-    {
-        glShadeModel(GL_SMOOTH);
-        light.enable();
-        ofEnableSeparateSpecularLight();
-    }
-    else
-    {
-        glShadeModel(GL_SMOOTH);
-        light.disable();
-        ofDisableSeparateSpecularLight();
-    }
-    
-    flipFlop = !flipFlop;
 }
 
 //--------------------------------------------------------------
@@ -184,21 +171,6 @@ void testApp::deviceOrientationChanged(int newOrientation){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-    
-    if (flipFlop)
-    {
-        glShadeModel(GL_SMOOTH);
-        light.enable();
-        ofEnableSeparateSpecularLight();
-    }
-    else
-    {
-        glShadeModel(GL_SMOOTH);
-        light.disable();
-        ofDisableSeparateSpecularLight();
-    }
-    
-    flipFlop = !flipFlop;
     
 }
 

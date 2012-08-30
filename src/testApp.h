@@ -26,10 +26,6 @@ public:
     ofTrueTypeFont socialMessageFont;
     string         socialMessageStoreFileLoc;
     
-    ofLight light;
-    
-    bool flipFlop;
-    
     // openFrameworks app methods
     void setup();
     void update();

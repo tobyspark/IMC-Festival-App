@@ -14,8 +14,10 @@
 class tbzSocialMessage
 {
     public:
-        tbzSocialMessage(string text, float latitude, float longitude);
+        tbzSocialMessage(string text, float latitude, float longitude, ofTrueTypeFont *font = NULL);
+        ~tbzSocialMessage();
         
+        void setupFBO();
         void draw();
     
         ofPoint geoLocation;
@@ -24,7 +26,13 @@ class tbzSocialMessage
     
     protected:
         string text;
-        ofPoint arrowTL, arrowTR, arrowB;
+        ofRectangle bounds;
+        
+        // GL resources don't copy on c++ object copy.
+        // See draw() for why this is a pointer.
+        ofFbo *fbo;
+    
+        // perhaps should have material.
 };
 
 #endif /* defined(__IMCFestivalApp__tbzSocialMessage__) */

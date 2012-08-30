@@ -66,6 +66,8 @@ protected:
     ofPoint     groundBottomLeft;
     ofPoint     groundBottomRight;
     
+    ofLight     light;
+    
 private:
     agg::trans_bilinear groundToModelTransform;
 };

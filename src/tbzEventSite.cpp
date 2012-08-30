@@ -139,7 +139,15 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     delete [] tRange;
     
     // We can tap on venues?
-    setIsTappable(true);    
+    setIsTappable(true);
+    
+    // Create our lights
+    ofSetSmoothLighting(true);
+    light.setSpecularColor(ofColor(255.f, 255.f, 255.f)); // White
+    light.setDiffuseColor( ofColor(255.f, 255.f, 200.f)); // A slight golden tone, sun!
+    light.setPosition(0, 0, 0); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number 
+    light.enable();
+    
 }
 
 void tbzEventSite::updateContent()
@@ -169,6 +177,10 @@ void tbzEventSite::updateContent()
     
     float damping = 0.1;
     elevationFactor += (elevationFactorTarget - elevationFactor) * damping;
+    
+    // TASK: Translate between graphical rendering for plan view and lit rendering for elevated
+    ofColor whiteIfPlanView((1.0f - elevationFactor) * 255);
+    light.setAmbientColor(whiteIfPlanView);
 }
 
 void tbzEventSite::drawContent()
@@ -201,6 +213,8 @@ void tbzEventSite::drawContent()
         
         // TASK: Draw model, coord space will be scaled
         ofPushMatrix();
+        ofPushStyle();
+        ofEnableLighting();
         {
             // Perform scale from centre of screen
             ofScale(scale, scale, scale);
@@ -221,6 +235,8 @@ void tbzEventSite::drawContent()
                 ofDrawBitmapString("BR: " + ofToString(groundBottomRight.x,2) + ", " + ofToString(groundBottomRight.y,2), modelBottomRight.x, modelBottomRight.y);
             }
         }
+        ofDisableLighting();
+        ofPopStyle();
         ofPopMatrix();
         
         // TASK: Draw what isn't model, coord space will not be scaled
