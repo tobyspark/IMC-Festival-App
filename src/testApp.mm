@@ -45,7 +45,7 @@ void testApp::setup(){
     // TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
     
-    #ifdef TARGET_OF_IPHONE
+    #if TARGET_OS_IPHONE
     // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
     socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + "socialMessageStore.xml";
     #endif
@@ -184,6 +184,21 @@ void testApp::deviceOrientationChanged(int newOrientation){
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
+    
+    if (flipFlop)
+    {
+        glShadeModel(GL_SMOOTH);
+        light.enable();
+        ofEnableSeparateSpecularLight();
+    }
+    else
+    {
+        glShadeModel(GL_SMOOTH);
+        light.disable();
+        ofDisableSeparateSpecularLight();
+    }
+    
+    flipFlop = !flipFlop;
     
 }
 

@@ -24,6 +24,8 @@ int main( ){
 
 #ifdef TARGET_OSX
 
+#include "ofAppGlutWindow.h"
+
 //--------------------------------------------------------------
 int main(){
 	ofAppGlutWindow window; // create a window
