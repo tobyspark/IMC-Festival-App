@@ -18,6 +18,11 @@
 		A662194C15E3B657003B8ACB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194615E3B657003B8ACB /* tinyxmlparser.cpp */; };
 		A662194D15E3B657003B8ACB /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194815E3B657003B8ACB /* ofxXmlSettings.cpp */; };
 		A6621A7815E6A71E003B8ACB /* tbzSocialMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */; };
+		A6ABE76D15F4CE9500D51B3C /* tbzVenue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */; };
+		A6ABE78315F4D68D00D51B3C /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77A15F4D68D00D51B3C /* ioapi.c */; };
+		A6ABE78415F4D68D00D51B3C /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77C15F4D68D00D51B3C /* unzip.c */; };
+		A6ABE78515F4D68D00D51B3C /* README in Resources */ = {isa = PBXBuildFile; fileRef = A6ABE77E15F4D68D00D51B3C /* README */; };
+		A6ABE78715F4D68D00D51B3C /* ofxUnZip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE78115F4D68D00D51B3C /* ofxUnZip.cpp */; };
 		A6B3153715D2E6D3002F427A /* ofxMSAInteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */; };
 		A6B3153915D2E6D3002F427A /* ofxMtActionsObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */; };
 		A6B3153D15D2E6D3002F427A /* ofxMtObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6B3152E15D2E6D3002F427A /* ofxMtObject.cpp */; };
@@ -103,6 +108,15 @@
 		A6621A7F15E6EBFA003B8ACB /* agg_trans_bilinear.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_trans_bilinear.h; path = _thirdParty/agg_trans_bilinear.h; sourceTree = "<group>"; };
 		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_simul_eq.h; path = _thirdParty/agg_simul_eq.h; sourceTree = "<group>"; };
 		A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tbzEventSiteSettingsXMLMaker.h; sourceTree = "<group>"; };
+		A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tbzVenue.cpp; sourceTree = "<group>"; };
+		A6ABE76C15F4CE9400D51B3C /* tbzVenue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tbzVenue.h; sourceTree = "<group>"; };
+		A6ABE77A15F4D68D00D51B3C /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
+		A6ABE77B15F4D68D00D51B3C /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
+		A6ABE77C15F4D68D00D51B3C /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
+		A6ABE77D15F4D68D00D51B3C /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
+		A6ABE77E15F4D68D00D51B3C /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		A6ABE78115F4D68D00D51B3C /* ofxUnZip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxUnZip.cpp; sourceTree = "<group>"; };
+		A6ABE78215F4D68D00D51B3C /* ofxUnZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUnZip.h; sourceTree = "<group>"; };
 		A6B3151C15D2E6D3002F427A /* ofxMSAInteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMSAInteractiveObject.cpp; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.cpp; sourceTree = "<group>"; };
 		A6B3151D15D2E6D3002F427A /* ofxMSAInteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxMSAInteractiveObject.h; path = ../../../../addons/ofxMSAInteractiveObject/src/ofxMSAInteractiveObject.h; sourceTree = "<group>"; };
 		A6B3152115D2E6D3002F427A /* ofxMtActionsObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxMtActionsObject.cpp; path = ../../../../addons/ofxMtActions/src/ofxMtActionsObject.cpp; sourceTree = "<group>"; };
@@ -279,6 +293,37 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		A6ABE77815F4D68D00D51B3C /* ofxUnZip */ = {
+			isa = PBXGroup;
+			children = (
+				A6ABE77915F4D68D00D51B3C /* lib */,
+				A6ABE77E15F4D68D00D51B3C /* README */,
+				A6ABE77F15F4D68D00D51B3C /* src */,
+			);
+			name = ofxUnZip;
+			path = ../../../addons/ofxUnZip;
+			sourceTree = "<group>";
+		};
+		A6ABE77915F4D68D00D51B3C /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				A6ABE77A15F4D68D00D51B3C /* ioapi.c */,
+				A6ABE77B15F4D68D00D51B3C /* ioapi.h */,
+				A6ABE77C15F4D68D00D51B3C /* unzip.c */,
+				A6ABE77D15F4D68D00D51B3C /* unzip.h */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		A6ABE77F15F4D68D00D51B3C /* src */ = {
+			isa = PBXGroup;
+			children = (
+				A6ABE78115F4D68D00D51B3C /* ofxUnZip.cpp */,
+				A6ABE78215F4D68D00D51B3C /* ofxUnZip.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		A6B3153E15D2E737002F427A /* addons here to keep dSYM happy */ = {
 			isa = PBXGroup;
 			children = (
@@ -311,6 +356,7 @@
 		BB16F26B0F2B646B00518274 /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				A6ABE77815F4D68D00D51B3C /* ofxUnZip */,
 				A662194115E3B657003B8ACB /* ofxXmlSettings */,
 				2c8f245acbe61e28646c17f20b185423 /* ofxAssimpModelLoader */,
 			);
@@ -359,9 +405,11 @@
 			isa = PBXGroup;
 			children = (
 				E4D8936B11527B74007E1F53 /* main.mm */,
-				E4D8936D11527B74007E1F53 /* testApp.mm */,
 				E4D8936C11527B74007E1F53 /* testApp.h */,
+				E4D8936D11527B74007E1F53 /* testApp.mm */,
 				A6B3153F15D2E89A002F427A /* tbzEventSite.h */,
+				A6ABE76C15F4CE9400D51B3C /* tbzVenue.h */,
+				A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */,
 				A6F37EB315DD55F100D819F6 /* tbzEventSite.cpp */,
 				A6621A7715E6A71D003B8ACB /* tbzSocialMessage.h */,
 				A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */,
@@ -489,6 +537,7 @@
 				BB24DDCA10DA781C00E9C588 /* ofxiphone-Info.plist in Resources */,
 				E41D3ED713B38FB500A75A5D /* Project.xcconfig in Resources */,
 				E41D3EE613B3906D00A75A5D /* CoreOF.xcconfig in Resources */,
+				A6ABE78515F4D68D00D51B3C /* README in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -528,6 +577,10 @@
 				A662194C15E3B657003B8ACB /* tinyxmlparser.cpp in Sources */,
 				A662194D15E3B657003B8ACB /* ofxXmlSettings.cpp in Sources */,
 				A6621A7815E6A71E003B8ACB /* tbzSocialMessage.cpp in Sources */,
+				A6ABE76D15F4CE9500D51B3C /* tbzVenue.cpp in Sources */,
+				A6ABE78315F4D68D00D51B3C /* ioapi.c in Sources */,
+				A6ABE78415F4D68D00D51B3C /* unzip.c in Sources */,
+				A6ABE78715F4D68D00D51B3C /* ofxUnZip.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

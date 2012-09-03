@@ -17,3 +17,430 @@
         <longitude>0° 1'41.31"W</longitude>
     </BottomRightCorner>
 </model>
+<venue>
+    <name>Laneway</name>
+    <stageKML>venueGeography/Laneway.kmz</stageKML>
+    <audienceKML>venueGeography/Laneway - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Two Jackals</name>
+    </slot>
+    <slot>
+        <time>12:30 </time>
+        <name> Sega Bodega DJ</name>
+    </slot>
+    <slot>
+        <time>12:55 </time>
+        <name> Here We Go Magic</name>
+    </slot>
+    <slot>
+        <time>13:25 </time>
+        <name> Deco Child DJ</name>
+    </slot>
+    <slot>
+        <time>13:50 </time>
+        <name> Blood Orange</name>
+    </slot>
+    <slot>
+        <time>14:30 </time>
+        <name> Dum Dum Girls DJ</name>
+    </slot>
+    <slot>
+        <time>15:00 </time>
+        <name> Errors</name>
+    </slot>
+    <slot>
+        <time>15:40 </time>
+        <name> Dum Dum Girls DJ</name>
+    </slot>
+    <slot>
+        <time>16:10 </time>
+        <name> Summer Camp</name>
+    </slot>
+    <slot>
+        <time>17:20 </time>
+        <name> Kindness</name>
+    </slot>
+    <slot>
+        <time>18:30 </time>
+        <name> Spector</name>
+    </slot>
+    <slot>
+        <time>19:40 </time>
+        <name> Sleigh Bells</name>
+    </slot>
+    <slot>
+        <time>20:50 </time>
+        <name> The Vaccines</name>
+    </slot>
+</venue>
+<venue>
+    <name>Eat Your Own Ears</name>
+    <stageKML>venueGeography/Eat Your Own Ears.kmz</stageKML>
+    <audienceKML>venueGeography/Eat Your Own Ears - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Eat Your Own Ears DJ</name>
+    </slot>
+    <slot>
+        <time>12:40 </time>
+        <name> Last Dinosaurs</name>
+    </slot>
+    <slot>
+        <time>13:10 </time>
+        <name> Eat Your Own Ears DJ</name>
+    </slot>
+    <slot>
+        <time>13:40 </time>
+        <name> Savages</name>
+    </slot>
+    <slot>
+        <time>14:10 </time>
+        <name> Eat Your Own Ears DJ</name>
+    </slot>
+    <slot>
+        <time>14:40 </time>
+        <name> Pond</name>
+    </slot>
+    <slot>
+        <time>15:10 </time>
+        <name> Eat Your Own Ears DJ</name>
+    </slot>
+    <slot>
+        <time>15:40 </time>
+        <name> Liars</name>
+    </slot>
+    <slot>
+        <time>16:40 </time>
+        <name> Justin Spear DJ</name>
+    </slot>
+    <slot>
+        <time>17:10 </time>
+        <name> Andrew Bird</name>
+    </slot>
+    <slot>
+        <time>18:10 </time>
+        <name> Justin Spear DJ</name>
+    </slot>
+    <slot>
+        <time>18:40 </time>
+        <name> Metronomy</name>
+    </slot>
+    <slot>
+        <time>19:40 </time>
+        <name> Huw Stephens DJ</name>
+    </slot>
+    <slot>
+        <time>20:20 </time>
+        <name> Beirut</name>
+    </slot>
+    <slot>
+        <time>21:20 </time>
+        <name> Huw Stephens DJ</name>
+    </slot>
+    <slot>
+        <time>21:50 </time>
+        <name> Franz Ferdinand</name>
+    </slot>
+</venue>
+<venue>
+    <name>Red Bull</name>
+    <stageKML>venueGeography/Red Bull.kmz</stageKML>
+    <audienceKML>venueGeography/Red Bull - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Kidkanevil</name>
+    </slot>
+    <slot>
+        <time>13:10 </time>
+        <name> Débruit</name>
+    </slot>
+    <slot>
+        <time>14:20 </time>
+        <name> Sunless ’97</name>
+    </slot>
+    <slot>
+        <time>15:30 </time>
+        <name> Blanck Mass</name>
+    </slot>
+    <slot>
+        <time>16:40 </time>
+        <name> Jessie Ware</name>
+    </slot>
+    <slot>
+        <time>17:50 </time>
+        <name> UMA</name>
+    </slot>
+    <slot>
+        <time>19:00 </time>
+        <name> Chairlift</name>
+    </slot>
+</venue>
+<venue>
+    <name>Shacklewell Arms</name>
+    <stageKML>venueGeography/Shacklewell Arms.kmz</stageKML>
+    <audienceKML>venueGeography/Shacklewell Arms - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Jig T DJ</name>
+    </slot>
+    <slot>
+        <time>12:20 </time>
+        <name> To Kill A King</name>
+    </slot>
+    <slot>
+        <time>12:45 </time>
+        <name> Bobby Tank DJ</name>
+    </slot>
+    <slot>
+        <time>13:05 </time>
+        <name> Friends</name>
+    </slot>
+    <slot>
+        <time>13:30 </time>
+        <name> Beach Creep DJ</name>
+    </slot>
+    <slot>
+        <time>13:50 </time>
+        <name> Citizens!</name>
+    </slot>
+    <slot>
+        <time>14:15 </time>
+        <name> Beach Creep DJ</name>
+    </slot>
+    <slot>
+        <time>14:35 </time>
+        <name> Sexbeat presents Crocodiles</name>
+    </slot>
+    <slot>
+        <time>15:00 </time>
+        <name> Amateur Best DJ</name>
+    </slot>
+    <slot>
+        <time>15:25 </time>
+        <name> Outfit</name>
+    </slot>
+    <slot>
+        <time>15:55 </time>
+        <name> Novella DJ</name>
+    </slot>
+    <slot>
+        <time>16:20 </time>
+        <name> Jeffrey Lewis &amp; The Junkyard</name>
+    </slot>
+    <slot>
+        <time>16:50 </time>
+        <name> Double Denim DJ</name>
+    </slot>
+    <slot>
+        <time>17:10 </time>
+        <name> Zulu Winter</name>
+    </slot>
+    <slot>
+        <time>17:40 </time>
+        <name> Sexbeat DJ</name>
+    </slot>
+    <slot>
+        <time>18:00 </time>
+        <name> When Saints Go Machine</name>
+    </slot>
+    <slot>
+        <time>18:30 </time>
+        <name> Jen Long DJ</name>
+    </slot>
+    <slot>
+        <time>18:50 </time>
+        <name> Theme Park</name>
+    </slot>
+    <slot>
+        <time>19:20 </time>
+        <name> Jen Long DJ</name>
+    </slot>
+    <slot>
+        <time>19:40 </time>
+        <name> Sexbeat presents THE MEN</name>
+    </slot>
+    <slot>
+        <time>20:10 </time>
+        <name> Jen Long DJ</name>
+    </slot>
+    <slot>
+        <time>20:30 </time>
+        <name> Toy</name>
+    </slot>
+    <slot>
+        <time>21:00 </time>
+        <name> Lanzarote DJ</name>
+    </slot>
+    <slot>
+        <time>21:20 </time>
+        <name> Austra</name>
+    </slot>
+    <slot>
+        <time>21:55 </time>
+        <name> Lanzarote DJ</name>
+    </slot>
+    <slot>
+        <time>22:20 </time>
+        <name> Baxter Dury</name>
+    </slot>
+</venue>
+<venue>
+    <name>Bugged Out</name>
+    <stageKML>venueGeography/Bugged Out.kmz</stageKML>
+    <audienceKML>venueGeography/Bugged Out - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Daniel Avery DJ</name>
+    </slot>
+    <slot>
+        <time>13:15 </time>
+        <name> Koreless Live</name>
+    </slot>
+    <slot>
+        <time>13:45 </time>
+        <name> The Internet Live</name>
+    </slot>
+    <slot>
+        <time>14:15 </time>
+        <name> Eats Everything DJ</name>
+    </slot>
+    <slot>
+        <time>15:15 </time>
+        <name> Rustie Live</name>
+    </slot>
+    <slot>
+        <time>16:00 </time>
+        <name> Blawan DJ</name>
+    </slot>
+    <slot>
+        <time>17:15 </time>
+        <name> Hudson Mohawke Live</name>
+    </slot>
+    <slot>
+        <time>18:00 </time>
+        <name> Julio Bashmore DJ</name>
+    </slot>
+    <slot>
+        <time>19:40 </time>
+        <name> SBTRKT Live</name>
+    </slot>
+    <slot>
+        <time>20:40 </time>
+        <name> Maya Jane Coles DJ</name>
+    </slot>
+    <slot>
+        <time>21:40 </time>
+        <name> Modeselektor</name>
+    </slot>
+</venue>
+<venue>
+    <name>Bleed</name>
+    <stageKML>venueGeography/Bleed.kmz</stageKML>
+    <audienceKML>venueGeography/Bleed - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Blackest Ever Black DJ</name>
+    </slot>
+    <slot>
+        <time>12:30 </time>
+        <name> Julia Holter</name>
+    </slot>
+    <slot>
+        <time>13:10 </time>
+        <name> Blackest Ever Black DJ</name>
+    </slot>
+    <slot>
+        <time>13:30 </time>
+        <name> Com Truise</name>
+    </slot>
+    <slot>
+        <time>14:15 </time>
+        <name> Paddy O.Neill (Liberation Technologies)</name>
+    </slot>
+    <slot>
+        <time>14:45 </time>
+        <name> Peaking Lights</name>
+    </slot>
+    <slot>
+        <time>15:30 </time>
+        <name> The Haxan Cloak DJ</name>
+    </slot>
+    <slot>
+        <time>16:00 </time>
+        <name> Fennesz</name>
+    </slot>
+    <slot>
+        <time>17:00 </time>
+        <name> Casper C</name>
+    </slot>
+    <slot>
+        <time>17:30 </time>
+        <name> Laurel Halo</name>
+    </slot>
+    <slot>
+        <time>18:30 </time>
+        <name> Casper C</name>
+    </slot>
+    <slot>
+        <time>19:00 </time>
+        <name> Kassem Mosse</name>
+    </slot>
+    <slot>
+        <time>20:00 </time>
+        <name> Zomby DJ</name>
+    </slot>
+</venue>
+<venue>
+    <name>Village Mentality</name>
+    <stageKML>venueGeography/Village Mentality.kmz</stageKML>
+    <audienceKML>venueGeography/Village Mentality - Audience.kmz</audienceKML>
+    <slot>
+        <time>12:00 </time>
+        <name> Revere</name>
+    </slot>
+    <slot>
+        <time>12:50 </time>
+        <name> Rocketnumbernine</name>
+    </slot>
+    <slot>
+        <time>13:50 </time>
+        <name> Papa M</name>
+    </slot>
+    <slot>
+        <time>14:20 </time>
+        <name> Tim Burgess DJ</name>
+    </slot>
+    <slot>
+        <time>14:45 </time>
+        <name> R. Stevie Moore</name>
+    </slot>
+    <slot>
+        <time>15:25 </time>
+        <name> Tim Burgess DJ</name>
+    </slot>
+    <slot>
+        <time>15:50 </time>
+        <name> Django Django</name>
+    </slot>
+    <slot>
+        <time>16:55 </time>
+        <name> Afrocubism</name>
+    </slot>
+    <slot>
+        <time>18:15 </time>
+        <name> Grimes</name>
+    </slot>
+    <slot>
+        <time>19:20 </time>
+        <name> Tortoise</name>
+    </slot>
+    <slot>
+        <time>20:45 </time>
+        <name> Gold Panda</name>
+    </slot>
+    <slot>
+        <time>21:50 </time>
+        <name> Mazzy Star</name>
+    </slot>
+</venue>

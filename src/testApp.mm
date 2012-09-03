@@ -14,6 +14,8 @@ void testApp::setup(){
     
     if (!success) ofLog(OF_LOG_WARNING, "Failed to load eventSiteSettings.xml");
     
+    // Use model / site data
+    
     string modelName = eventSiteSettings.getValue("modelName", "eventSiteModelDefault.dae");
     
     eventSiteSettings.pushTag("model");
@@ -26,6 +28,22 @@ void testApp::setup(){
         ofxLatLon geoBottomRight(   eventSiteSettings.getValue("bottomRightCorner:latitude", "51°32'1.96\"N"),
                                     eventSiteSettings.getValue("bottomRightCorner:longitude", "0° 1'41.31\"W"));
     eventSiteSettings.popTag();
+    
+    // Use venue / programme data
+    
+    venueFont.loadFont("Arial Narrow.ttf", 24, true, true);
+    
+    int venueCount = eventSiteSettings.getNumTags("venue");
+        
+    for (int i = venueCount-1; i >= 0; i--)
+    {
+        tbzVenue venue;
+        
+        venue.setupFromXML(eventSiteSettings, i);
+        venue.font = &venueFont;
+        
+        eventSite.addVenue(venue);
+    }
     
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
@@ -52,7 +70,7 @@ void testApp::setup(){
     
     #if TARGET_OS_IPHONE
     // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
-    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + "socialMessageStore.xml";
+    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + socialMessageStoreFileLoc;
     #endif
     
     success = socialMessageStore.loadFile(socialMessageStoreFileLoc);

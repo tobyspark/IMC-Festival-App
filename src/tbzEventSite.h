@@ -19,6 +19,7 @@
 #include "agg_trans_bilinear.h"
 
 #include "tbzSocialMessage.h"
+#include "tbzVenue.h"
 
 #define kTBZES_ViewElevationAngle 70
 #define kTBZES_MessageElevationHeight 20
@@ -33,6 +34,8 @@ public:
     
     void setup(string modelName, ofxLatLon modelTopLeft, ofxLatLon modelTopRight, ofxLatLon modelBottomLeft, ofxLatLon modelBottomRight);
     
+    void addVenue(tbzVenue venue);
+    
     // ofxMtActionsObject overrides
     
     bool actionTouchHitTest(float _x, float _y);
@@ -46,7 +49,8 @@ public:
     ofRectangle groundBounds;
     
     list<tbzSocialMessage> socialMessages;
-        
+    list<tbzVenue> venues;
+    
 protected:
 
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
@@ -67,7 +71,7 @@ protected:
     ofPoint     groundBottomRight;
     
     ofLight     light;
-    
+        
 private:
     agg::trans_bilinear groundToModelTransform;
 };

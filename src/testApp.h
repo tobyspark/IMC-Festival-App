@@ -26,6 +26,8 @@ public:
     ofTrueTypeFont socialMessageFont;
     string         socialMessageStoreFileLoc;
     
+    ofTrueTypeFont venueFont;
+    
     // openFrameworks app methods
     void setup();
     void update();

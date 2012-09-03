@@ -103,13 +103,6 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
     return success;
 }
 
-
-bool tbzEventSite::actionTouchHitTest(float _x, float _y)
-{
-    // We're ignoring the 2D rect inheritance, and spinning a 3D model using all the screen as gesture space.
-    return true;
-}
-
 void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight)
 {
     // Load model
@@ -148,6 +141,17 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     light.setPosition(0, 0, 0); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number 
     light.enable();
     
+}
+
+void tbzEventSite::addVenue(tbzVenue venue)
+{
+    venues.push_back(venue);
+}
+
+bool tbzEventSite::actionTouchHitTest(float _x, float _y)
+{
+    // We're ignoring the 2D rect inheritance, and spinning a 3D model using all the screen as gesture space.
+    return true;
 }
 
 void tbzEventSite::updateContent()
@@ -252,6 +256,17 @@ void tbzEventSite::drawContent()
                     ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                     ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
                     message->draw();
+                };
+            }
+            
+            list<tbzVenue>::iterator venue;
+            for (venue = venues.begin(); venue != venues.end(); venue++)
+            {
+                ofPushMatrix();
+                {
+                    ofPoint modelLocation = groundToModel(venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                    venue->draw();
                 };
             }
         }
