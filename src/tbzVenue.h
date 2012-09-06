@@ -29,18 +29,24 @@ class tbzVenue
         list<tbzVenueSlot>    slots;
         ofPoint         stageGeoLocation;
         ofPolyline      audienceGeoArea;
-        ofTrueTypeFont *font;
+        ofTrueTypeFont *fontTitle;
+        ofTrueTypeFont *fontBody;
     
         tbzVenueSlot    slotAtTime(tm time);
         
-        void            setupFBO();
-        void            draw();
-        
+        void            updateTagFBO();
+        void            drawTag();
+    
+        void            updateProgrammeFBO();
+        void            drawProgramme(float animPos = 1.0f);
+    
         void            setupFromXML(ofxXmlSettings &xml, int which = 0);
     
     protected:
-        ofRectangle     bounds;
-        ofFbo          *fbo;
+        ofRectangle     tagBounds;
+        ofFbo           tagFBO;
+    
+        ofFbo           programmeFBO;
     
         bool            stageGeoLocationFromKMZ(string filename);
         bool            audienceGeoAreaFromKMZ(string filename);

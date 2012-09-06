@@ -9,6 +9,8 @@ void testApp::setup(){
         
     bool success = false;
     
+    ofTrueTypeFont::setGlobalDpi(96);
+    
     //// TASK: Load our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
     
@@ -31,7 +33,8 @@ void testApp::setup(){
     
     // Use venue / programme data
     
-    venueFont.loadFont("Arial Narrow.ttf", 24, true, true);
+    venueFontTitle.loadFont("Arial Narrow.ttf", 24, true, true);
+    venueFontBody.loadFont("Arial Narrow.ttf", 16, true, true);
     
     int venueCount = eventSiteSettings.getNumTags("venue");
         
@@ -40,13 +43,14 @@ void testApp::setup(){
         tbzVenue venue;
         
         venue.setupFromXML(eventSiteSettings, i);
-        venue.font = &venueFont;
-        
+        venue.fontTitle = &venueFontTitle;
+        venue.fontBody  = &venueFontBody;
         eventSite.addVenue(venue);
     }
     
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
+    eventSite.origin = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
     
     //// TASK: Configure rendering
     
@@ -54,16 +58,13 @@ void testApp::setup(){
     ofSetVerticalSync(true);
 	ofSetFrameRate(60);
     
-    // we're rendering a true 3D scene, depth is by position not rendering order!
-    glEnable(GL_DEPTH_TEST);
-    
     //  we need GL_TEXTURE_2D for our models coords.
     ofDisableArbTex();
     
     // we need alpha blending as we have images with alpha in 3D space
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-    glAlphaFunc ( GL_GREATER, 0.5);
-    glEnable ( GL_ALPHA_TEST );
+//    glAlphaFunc ( GL_GREATER, 0.5);
+//    glEnable ( GL_ALPHA_TEST );
     
     //// TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
@@ -84,7 +85,6 @@ void testApp::setup(){
     int count = socialMessageStore.getNumTags("message");
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
-    socialMessageFont.setGlobalDpi(72);
     socialMessageFont.loadFont("Arial Narrow.ttf", 16, true, true);
 }
 
@@ -113,19 +113,34 @@ void testApp::draw()
 {
     ofBackground(50, 50, 50, 0);
 
+    bool debug3D = false;
+    
     // Draw 3D axes in centre of screen
-    ofPushMatrix();
-    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
-    ofColor(255,0,0);
-    ofLine(0, 0, 0, 100, 0, 0);
-    ofColor(0,255,0);
-    ofLine(0, 0, 0, 0, 100, 0);
-    ofColor(0,0,255);
-    ofLine(0, 0, 0, 0, 0, 100);
-    ofPopMatrix();
+    if (debug3D)
+    {
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+        ofColor(255,0,0);
+        ofLine(0, 0, 0, 100, 0, 0);
+        ofColor(0,255,0);
+        ofLine(0, 0, 0, 0, 100, 0);
+        ofColor(0,0,255);
+        ofLine(0, 0, 0, 0, 0, 100);
+        ofPopMatrix();
+    }
     
 	eventSite.render();
 
+    // Test to see if a venue is over eventSite origin
+    float searchRadius = ofGetWidth()*0.1f;
+    tbzVenue* nearestVenue = eventSite.nearestVenue(searchRadius);
+    
+    if (nearestVenue)
+    {
+        nearestVenue->drawProgramme();
+    }
+    
+    // Draw FPS
     ofSetColor(255, 255, 255, 255);
     //ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
     socialMessageFont.drawString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);

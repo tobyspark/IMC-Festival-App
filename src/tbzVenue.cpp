@@ -15,8 +15,7 @@
 
 tbzVenue::tbzVenue()
 {
-    font = NULL;
-    fbo = NULL;
+    fontTitle = NULL;
 }
 
 tbzVenueSlot    tbzVenue::slotAtTime(tm time)
@@ -25,18 +24,16 @@ tbzVenueSlot    tbzVenue::slotAtTime(tm time)
     return returnSlot;
 }
 
-void tbzVenue::setupFBO()
+void tbzVenue::updateTagFBO()
 {
-    if (font)
+    if (fontTitle)
     {
-        fbo = new ofFbo;
-        
         // Just a reminder: origin is top left, and this is an arrow pointing down.
         
         // Get bounds of text. This will have an offset origin to place the baseline of the font at desired point
-        ofRectangle textBounds = font->getStringBoundingBox(name, 0, 0);
+        ofRectangle textBounds = fontTitle->getStringBoundingBox(name, 0, 0);
         textBounds.x += kTBZVenue_Radius;
-        textBounds.y += kTBZVenue_Radius + textBounds.height + 20; // 10 is a magic number. I guess the bounds aren't reported correctly.
+        textBounds.y += kTBZVenue_Radius + textBounds.height + 20; // This is a magic number. I guess the bounds aren't reported correctly.
         
         // Outline the text bounds with our round rect corner radius
         ofRectangle backBounds = textBounds;
@@ -45,26 +42,31 @@ void tbzVenue::setupFBO()
         backBounds.x        = 0;
         backBounds.y        = 0;
         
-        bounds.width        = backBounds.width;
-        bounds.height       = backBounds.height + kTBZVenue_ArrowSize;
+        tagBounds.width        = backBounds.width;
+        tagBounds.height       = backBounds.height + kTBZVenue_ArrowSize;
         
-        float centreX = bounds.width / 2.0f;
+        float centreX = tagBounds.width / 2.0f;
         ofPoint arrowTL(centreX - kTBZVenue_ArrowSize/2.0f, backBounds.height);
         ofPoint arrowTR(centreX + kTBZVenue_ArrowSize/2.0f, backBounds.height);
         ofPoint arrowB(centreX, backBounds.height + kTBZVenue_ArrowSize * sin(ofDegToRad(60.0f)));
         
         // Create the empty image to draw into
         ofFbo::Settings s;
-        s.width             = bounds.width;
-        s.height            = bounds.height;
+        s.width             = tagBounds.width;
+        s.height            = tagBounds.height;
         s.internalformat    = GL_RGBA;
         s.useDepth          = false;
         
-        fbo->allocate(s);
+        // Create the correctly sized FBO if neccessary
+        if (!tagFBO.isAllocated() || tagFBO.getWidth() != s.width || tagFBO.getHeight() != s.height)
+        {
+            tagFBO.setDefaultTextureIndex(0); // oF bug needs this as fix( http://forum.openframeworks.cc/index.php?topic=10536.0 )
+            tagFBO.allocate(s);
+        }
         
         // Draw into image
         ofPushStyle();
-        fbo->begin();
+        tagFBO.begin();
         // Clear the image
         ofClear(255,255,255, 0);
         
@@ -75,38 +77,143 @@ void tbzVenue::setupFBO()
         
         // Draw text
         ofSetColor(255);
-        font->drawString(name, textBounds.x, textBounds.y);
-        fbo->end();
+        fontTitle->drawString(name, textBounds.x, textBounds.y);
+        tagFBO.end();
         ofPopStyle();
         
         // We want to draw centered horizontally and aligned to bottom
-        bounds.x            = -centreX;
-        bounds.y            = -bounds.height;
+        tagFBO.setAnchorPoint(centreX, tagBounds.height);
     }
     else
     {
-        ofLog(OF_LOG_WARNING, "TBZSocialMessage: Setup: Font not allocated");
+        ofLog(OF_LOG_WARNING, "TBZSocialMessage: Setup: fontTitle not allocated");
     }
     
 }
 
-void tbzVenue::draw()
+void tbzVenue::drawTag()
 {
-    ofPushMatrix();
-    
-    ofRotate(-90, 1, 0, 0);
-    
-    if (font)
+    if (fontTitle)
     {
-        if (!fbo) setupFBO();
-        fbo->draw(bounds.x, bounds.y);
+        if (!tagFBO.isAllocated()) updateTagFBO();
+        tagFBO.draw(0, 0);
     }
     else
     {
         ofDrawBitmapString(name, 0, 0);
     }
+}
+
+void tbzVenue::updateProgrammeFBO()
+{
+    if (fontTitle && fontBody)
+    {
+        // Create the empty image to draw into
+        ofFbo::Settings s;
+        s.width             = ofGetWidth();
+        s.height            = ofGetHeight();
+        s.internalformat    = GL_RGBA;
+        s.useDepth          = false;
+        
+        // Create the correctly sized FBO if neccessary
+        if (!programmeFBO.isAllocated())
+        {
+            programmeFBO.setDefaultTextureIndex(0); // oF bug needs this as fix( http://forum.openframeworks.cc/index.php?topic=10536.0 )
+            programmeFBO.allocate(s);
+        }
+        
+        // Draw into image
+        ofPushStyle();
+        programmeFBO.begin();
+        {
+            // Clear the image
+            ofClear(255, 255, 255, 0); // Clearing with white to antialias onto background colour
+        
+            // TASK: Draw background fading in over model
+            // Perhaps loading a PNG would be more flexible, but this is fast if we're just doing a simple gradient and solid
+            ofColor whiteOpaque(255, 255);
+            ofColor whiteClear(whiteOpaque, 0);
+            float maxX = ofGetWidth();
+            float maxY = ofGetHeight();
+            float midX = maxX * 0.2f;
+            
+            ofMesh backgroundFillMesh;
+            
+            backgroundFillMesh.addVertex(ofVec3f(0,0));
+            backgroundFillMesh.addColor(whiteClear);
+            
+            backgroundFillMesh.addVertex(ofVec3f(0,maxY));
+            backgroundFillMesh.addColor(whiteClear);
+            
+            backgroundFillMesh.addVertex(ofVec3f(midX, 0));
+            backgroundFillMesh.addColor(whiteOpaque);
+            
+            backgroundFillMesh.addVertex(ofVec3f(midX, maxY));
+            backgroundFillMesh.addColor(whiteOpaque);
+            
+            backgroundFillMesh.addVertex(ofVec3f(maxX,0));
+            backgroundFillMesh.addColor(whiteOpaque);
+            
+            backgroundFillMesh.addVertex(ofVec3f(maxX, maxY));
+            backgroundFillMesh.addColor(whiteOpaque);
+            
+            ofVbo backgroundFillVBO;
+            backgroundFillVBO.setMesh(backgroundFillMesh, GL_STATIC_DRAW);
+            
+            backgroundFillVBO.draw(GL_TRIANGLE_STRIP, 0, 6);
+            
+            // TASK: Draw Text
+            
+            int lineSpace = 10;
+            int yPos = 0;
+            int xPos = midX + lineSpace;
+            
+            // Title
+            ofSetColor(0, 0, 0, 255);
+            yPos += 10 + fontTitle->getSize();
+            fontTitle->drawString(name, xPos, yPos);
+            
+            // Slots
+            list<tbzVenueSlot>::iterator slot;
+            for (slot = slots.begin(); slot != slots.end(); slot++)
+            {
+                //char slotTime[5];
+                //strftime(slotTime, 5, "%H:%M", &slot->starts);
+                
+                stringstream slotText;
+                slotText << setw(2) << setfill('0') << slot->starts.tm_hour << ":" << setw(2) << setfill('0') << slot->starts.tm_min << " - " << slot->name;
+                
+                yPos += lineSpace + fontBody->getSize();
+                
+                fontBody->drawString(slotText.str(), xPos, yPos);
+            }
+        }
+        programmeFBO.end();
+        ofPopStyle();
+    }
+    else
+    {
+        ofLog(OF_LOG_WARNING, "TBZVenue: updateProgrammeFBO: fontTitle not allocated");
+    }
     
-    ofPopMatrix();
+    
+    
+
+    
+}
+
+void tbzVenue::drawProgramme(float animPos)
+{
+    if (fontTitle && fontBody)
+    {
+        if (!programmeFBO.isAllocated()) updateProgrammeFBO();
+        ofSetColor(255, 255);
+        programmeFBO.draw(0,0);
+    }
+    else
+    {
+        ofDrawBitmapString(name, 0, 0);
+    }
 }
 
 void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
@@ -197,23 +304,23 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
                 string tempString;
                 
                 getline(timeString, tempString, ':');
-                stringstream minuteString(tempString);
-                int minutes;
-                minuteString >> minutes;
-                
-                getline(timeString, tempString);
                 stringstream hourString(tempString);
                 int hours;
                 hourString >> hours;
-                
+
+                getline(timeString, tempString);
+                stringstream minuteString(tempString);
+                int minutes;
+                minuteString >> minutes;
+            
                 newSlot.starts.tm_hour = hours;
                 newSlot.starts.tm_min = minutes;
                 
                 // Slot end time
                 // TODO: check for remaining time line, ie 12:00 - 12:45
                 // Else, give non-time
-                newSlot.starts.tm_hour = -1;
-                newSlot.starts.tm_min = -1;
+                newSlot.ends.tm_hour = -1;
+                newSlot.ends.tm_min = -1;
             
                 slots.push_front(newSlot);
             xml.popTag();

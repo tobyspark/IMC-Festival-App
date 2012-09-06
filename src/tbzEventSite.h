@@ -36,6 +36,8 @@ public:
     
     void addVenue(tbzVenue venue);
     
+    tbzVenue* nearestVenue(float &distance);
+    
     // ofxMtActionsObject overrides
     
     bool actionTouchHitTest(float _x, float _y);
@@ -46,6 +48,7 @@ public:
     
     // Class properties
     
+    ofPoint     origin;
     ofRectangle groundBounds;
     
     list<tbzSocialMessage> socialMessages;

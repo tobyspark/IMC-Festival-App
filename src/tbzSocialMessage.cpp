@@ -85,10 +85,6 @@ void tbzSocialMessage::setupFBO()
 }
 void tbzSocialMessage::draw()
 {
-    ofPushMatrix();
-    
-    ofRotate(-90, 1, 0, 0);
-        
     if (font)
     {
         if (!fbo) setupFBO();
@@ -98,8 +94,6 @@ void tbzSocialMessage::draw()
     {
         ofDrawBitmapString(text, 0, 0);
     }
-    
-    ofPopMatrix();
 }
 
 tbzSocialMessage::~tbzSocialMessage()

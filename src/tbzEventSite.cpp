@@ -108,9 +108,6 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     // Load model
     loadModel(modelName, 1, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
-    // Set position
-    setPos(ofGetWidth()/2, ofGetHeight()/2);
-    
     // Set size - given workings of MSAInteractiveObject, we aren't drawing and scaling a rect, but are instead use width for a scale variable
     setSize(1, 1);
     
@@ -148,6 +145,31 @@ void tbzEventSite::addVenue(tbzVenue venue)
     venues.push_back(venue);
 }
 
+tbzVenue* tbzEventSite::nearestVenue(float &distance)
+{
+    tbzVenue*   venuePointer = NULL;
+    
+    list<tbzVenue>::iterator venue;
+    for (venue = venues.begin(); venue != venues.end(); venue++)
+    {
+        ofPoint venueModelPoint = groundToModel(venue->stageGeoLocation);
+        venueModelPoint *= width; // width is co-opted for our model scale var
+        
+        float venueDistance = venueModelPoint.distance(ofVec3f(-x,-y));
+        
+        if (venueDistance < distance)
+        {
+            venuePointer = &(*venue);
+            distance = venueDistance;
+        }
+    }
+    
+    //printf("x: %f, y: %f, dist: %f, %s", x, y, distance, venuePointer->name.c_str());
+    
+    return venuePointer;
+}
+
+
 bool tbzEventSite::actionTouchHitTest(float _x, float _y)
 {
     // We're ignoring the 2D rect inheritance, and spinning a 3D model using all the screen as gesture space.
@@ -160,8 +182,8 @@ void tbzEventSite::updateContent()
     
     // TASK: Bound Y such that the model cannot leave the centreline of screen
     // This ensures our elevation view should stay centered on a part of the model
-    y = min(y, ofGetHeight()/2 - modelTopLeft.y*scale);
-    y = max(y, ofGetHeight()/2 - modelBottomLeft.y*scale);
+    y = max(y, modelTopLeft.y*scale);
+    y = min(y, modelBottomLeft.y*scale);
     
 //    // TASK: Bound x to within screen given scale factor
 //    // if scale = 1, bounds are screenwidth/2,screenwidth/2
@@ -194,8 +216,14 @@ void tbzEventSite::drawContent()
     // Get scale for our eventSite
     float scale = width;
     
+    // we're rendering a true 3D scene, depth is by position not rendering order!
+    glEnable(GL_DEPTH_TEST);
+    
     ofPushMatrix();
     {
+        // TASK: Translate to origin
+        ofTranslate(origin);
+        
         // TASK: Rotate model for viewing elevation
         // We want to maintain the current viewing point of the model and change elevation from plan to a view looking across model from above head height.
         // elevationFactor of 0 is no elevation, ie. stay in plan view
@@ -206,14 +234,14 @@ void tbzEventSite::drawContent()
         
         // First translate vertically to where we want model focus to sit on the screen
         // ie. middle but with a bit more room for 'sky'
-        ofTranslate(0, elevationFactor*(-y + ofGetHeight()*0.6));
+        ofTranslate(0, elevationFactor*(-y + ofGetHeight()*0.1));
         
         // Now rotate coord system
         float elevationAngle = elevationFactor * kTBZES_ViewElevationAngle;
         ofRotate(elevationAngle, 1, 0, 0);
         
         // Now we've rotated, shift back to yPos, which is actually in/out of screen since rotation
-        ofTranslate(0, elevationFactor * (y - ofGetHeight()/2));
+        ofTranslate(0, elevationFactor * y);
         
         // TASK: Draw model, coord space will be scaled
         ofPushMatrix();
@@ -255,6 +283,8 @@ void tbzEventSite::drawContent()
                 {
                     ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                     ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                    ofRotate(-90, 1, 0, 0);
+                    
                     message->draw();
                 };
             }
@@ -266,13 +296,17 @@ void tbzEventSite::drawContent()
                 {
                     ofPoint modelLocation = groundToModel(venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                     ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
-                    venue->draw();
+                    ofRotate(-90, 1, 0, 0);
+                    
+                    venue->drawTag();
                 };
             }
         }
         ofPopMatrix();
     }
     ofPopMatrix();
+    
+    glDisable(GL_DEPTH_TEST);
     
     if (debug3D)
     {
