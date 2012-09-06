@@ -41,6 +41,7 @@ class tbzVenue
         void            drawProgramme(float animPos = 1.0f);
     
         void            setupFromXML(ofxXmlSettings &xml, int which = 0);
+        void            setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which = 0);
     
     protected:
         ofRectangle     tagBounds;

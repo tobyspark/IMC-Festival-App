@@ -9,7 +9,16 @@ void testApp::setup(){
         
     bool success = false;
     
+    //// TASK: Make fonts right
+    // The iOS font example has 72 dpi set, but thats fugly in this app.
     ofTrueTypeFont::setGlobalDpi(96);
+    
+    // TASK: Set base directory
+    // iOS - this is done for us.
+    // OSX - we are bundling the data dir within the app as an extra build phase
+    #ifdef TARGET_OSX
+        ofSetDataPathRoot("../Resources/");
+    #endif
     
     //// TASK: Load our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
@@ -42,10 +51,19 @@ void testApp::setup(){
     {
         tbzVenue venue;
         
-        venue.setupFromXML(eventSiteSettings, i);
+        bool xmlChanged = false;
+        venue.setupFromXML(eventSiteSettings, xmlChanged, i);
         venue.fontTitle = &venueFontTitle;
         venue.fontBody  = &venueFontBody;
         eventSite.addVenue(venue);
+        
+        if (xmlChanged)
+        {
+            bool ok = eventSiteSettings.saveFile();
+            
+            if (ok) ofLog(OF_LOG_NOTICE, "Added parsed KML data to eventSiteSettings.xml");
+            else    ofLog(OF_LOG_WARNING, "Failed to save eventSiteSettings.xml with parsed KML data");
+        }
     }
     
     // Load our event site 3D model in.

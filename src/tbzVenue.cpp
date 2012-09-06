@@ -218,6 +218,12 @@ void tbzVenue::drawProgramme(float animPos)
 
 void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
 {
+    bool ignore;
+    setupFromXML(xml, ignore, which);
+}
+
+void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
+{
     /*
      
      XML we're expecting is in the form
@@ -239,6 +245,8 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
      </venue>
      */
     
+    xmlChanged = false;
+    
     if (xml.pushTag("venue", which))
     {
         name = xml.getValue("name", "A Venue");
@@ -250,10 +258,25 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
             stageGeoLocation.x = xml.getValue("stageCenter:longitude", 0.0f);
             stageGeoLocation.y = xml.getValue("stageCenter:latitude", 0.0f);
         }
+        // We're only going to process KML on OSX, on iOS we need fast startup and so will use the parsed info put back into the XML
+        #ifdef TARGET_OSX
         else if (xml.tagExists("stageKML"))
         {
-            stageGeoLocationFromKMZ(xml.getValue("stageKML", "no filename could be read from XML"));
+            bool ok = false;
+            ok = stageGeoLocationFromKMZ(xml.getValue("stageKML", "no filename could be read from XML"));
+            
+            if (ok)
+            {
+                xml.addTag("stageCenter");
+                xml.pushTag("stageCenter");
+                    xml.addValue("longitude", stageGeoLocation.x);
+                    xml.addValue("latitude", stageGeoLocation.y);
+                xml.popTag();
+                
+                xmlChanged = true;
+            }
         }
+        #endif
         else
         {
             ofLog(OF_LOG_WARNING, "Failed to locate venue: " + name);
@@ -279,10 +302,32 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, int which)
                 audienceGeoArea.close();
             xml.popTag();
         }
+        // We're only going to process KML on OSX, on iOS we need fast startup and so will use the parsed info put back into the XML
+        #ifdef TARGET_OSX
         else if (xml.tagExists("audienceKML"))
         {
-            audienceGeoAreaFromKMZ(xml.getValue("audienceKML", "no filename could be read from XML"));
+            bool ok = false;
+            ok = audienceGeoAreaFromKMZ(xml.getValue("audienceKML", "no filename could be read from XML"));
+
+            if (ok)
+            {
+                xml.addTag("audienceArea");
+                xml.pushTag("audienceArea");
+                    vector<ofPoint> vertices = audienceGeoArea.getVertices();
+                    for (int i = 0; i < vertices.size(); i++)
+                    {
+                        xml.addTag("vertex");
+                        xml.pushTag("vertex", i);
+                            xml.addValue("x", vertices[i].x);
+                            xml.addValue("y", vertices[i].y);
+                        xml.popTag();
+                    }
+                xml.popTag();
+                
+                xmlChanged = true;
+            }
         }
+        #endif
         else
         {
             ofLog(OF_LOG_WARNING, "Failed to plot venue audience area: " + name);
