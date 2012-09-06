@@ -133,11 +133,21 @@ void testApp::draw()
 
     // Test to see if a venue is over eventSite origin
     float searchRadius = ofGetWidth()*0.1f;
-    tbzVenue* nearestVenue = eventSite.nearestVenue(searchRadius);
+    float radius = searchRadius;
+    tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
     
     if (nearestVenue)
     {
-        nearestVenue->drawProgramme();
+        // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
+        float hitRadius = searchRadius * 0.4f;
+        
+        float animPos;
+        if (radius > searchRadius) animPos = 0;
+        if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
+        else animPos = 1;
+        
+        printf("animPos: %f", animPos);
+        nearestVenue->drawProgramme(animPos);
     }
     
     // Draw FPS

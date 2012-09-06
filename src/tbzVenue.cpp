@@ -207,7 +207,7 @@ void tbzVenue::drawProgramme(float animPos)
     if (fontTitle && fontBody)
     {
         if (!programmeFBO.isAllocated()) updateProgrammeFBO();
-        ofSetColor(255, 255);
+        ofSetColor(255, 255*animPos);
         programmeFBO.draw(0,0);
     }
     else
