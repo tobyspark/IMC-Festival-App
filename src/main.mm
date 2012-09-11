@@ -16,7 +16,7 @@ int main( ){
     
     ofSetupOpenGL(iOSWindow, 480, 320, OF_FULLSCREEN);
     
-	ofRunApp( new testApp());
+	ofRunApp( new imcFestivalApp());
 }
 
 #endif

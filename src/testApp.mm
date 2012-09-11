@@ -1,8 +1,33 @@
 #include "testApp.h"
 
+void imcFestivalApp::updateSocialMessagesDisplayed()
+{
+    // TODO: Base on time, in the meantime...
+    
+    // TASK: Cycle through social messages
+    int indexToDisplay = ofGetFrameNum() % socialMessageStore.getNumTags("message");
+    
+    socialMessageStore.pushTag("message", indexToDisplay);
+    {
+        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f),
+                                       &socialMessageFont);
+        eventSite.socialMessages.push_front(socialMessage);
+    }
+    socialMessageStore.popTag();
+    
+    if (eventSite.socialMessages.size() > 10)
+    {
+        eventSite.socialMessages.pop_back();
+    }
+}
+
+void imcFestivalApp::updateSocialMessageStore()
+{
+    // TODO: Poll twitter
+}
 
 //--------------------------------------------------------------
-void testApp::setup(){
+void imcFestivalApp::setup(){
     ofSetLogLevel(OF_LOG_VERBOSE);
     
     #include "tbzPlatformDefineTests.h"
@@ -43,7 +68,7 @@ void testApp::setup(){
     // Use venue / programme data
     
     venueFontTitle.loadFont("Arial Narrow.ttf", 24, true, true);
-    venueFontBody.loadFont("Arial Narrow.ttf", 16, true, true);
+    venueFontBody.loadFont("Arial Narrow.ttf", 12, true, true);
     
     int venueCount = eventSiteSettings.getNumTags("venue");
         
@@ -81,8 +106,8 @@ void testApp::setup(){
     
     // we need alpha blending as we have images with alpha in 3D space
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-//    glAlphaFunc ( GL_GREATER, 0.5);
-//    glEnable ( GL_ALPHA_TEST );
+    glAlphaFunc ( GL_GREATER, 0.1);
+    glEnable ( GL_ALPHA_TEST );
     
     //// TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     socialMessageStoreFileLoc = "socialMessageStore.xml";
@@ -107,27 +132,81 @@ void testApp::setup(){
 }
 
 //--------------------------------------------------------------
-void testApp::update()
+void imcFestivalApp::update()
 {
-    // TASK: Cycle through social messages
-    int indexToDisplay = ofGetFrameNum() % socialMessageStore.getNumTags("message");
-
-    socialMessageStore.pushTag("message", indexToDisplay);
-    {
-        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f),
-            &socialMessageFont);
-        eventSite.socialMessages.push_front(socialMessage);
-    }
-    socialMessageStore.popTag();
+    /* App states
+     *
+     * Idling; displaying event site
+     *  - Display venue name tags
+     *  - Display people with name tags
+     *  - Display social messages
+     *
+     * Idling; displaying focussed venue
+     *  - Display venue tag with full programme
+     *  - Event site repositioned if neccessary so tag fits screen
+     *
+     * Idling; displaying focussed person
+     *  - Display person + friends with name tags
+     *  - Display social messages from friends
+     *
+     * User is navigating event site
+     *  - Venue tag pops up on being centered on screen, it is focussed
+     *  - Person tag pops up being centered, it is focussed
+     *  - Can't have both, one is always nearer
+     */
     
-    if (eventSite.socialMessages.size() > 10)
+    tbzEventSite::ViewState state = eventSite.viewState();
+    
+    if (state == tbzEventSite::planView || state == tbzEventSite::transitioningView)
     {
-        eventSite.socialMessages.pop_back();
+        // Test to see if a venue is over eventSite origin
+        float searchRadius = ofGetWidth()*0.2f;
+        float radius = searchRadius;
+        tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
+        
+        if (nearestVenue)
+        {
+            // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
+            float hitRadius = searchRadius * 0.4f;
+            
+            float animPos;
+            if (radius > searchRadius) animPos = 0;
+            if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
+            else animPos = 1;
+            
+            if (nearestVenue != venueFocussed)
+            {
+                if (venueFocussed != NULL) venueFocussed->setTagTextToNothing();
+                
+                venueFocussed = nearestVenue;
+                venueFocussed->setTextLinesAnimPos(eventSite.elevationFactor);
+                venueFocussed->setTagTextToNowAndNext();
+            }
+            
+            venueFocussed->setTextLinesAnimPos(animPos);
+        }
+        else if (venueFocussed != NULL)
+        {
+            venueFocussed->setTagTextToNothing();
+            venueFocussed = NULL;
+        }
     }
+
+    if (state == tbzEventSite::transitioningView || state == tbzEventSite::sideElevationView)
+    {
+        // TODO: Transition in only, ie. one shot. currently redrawing fbo every frame
+        // ...and tomorrow, GPS etc.
+        if (venueFocussed)
+        {
+            venueFocussed->setTextLinesAnimPos(eventSite.elevationFactor);
+            venueFocussed->setTagTextToProgramme();
+        }
+    }
+    
 }
 
 //--------------------------------------------------------------
-void testApp::draw()
+void imcFestivalApp::draw()
 {
     ofBackground(50, 50, 50, 0);
 
@@ -149,25 +228,6 @@ void testApp::draw()
     
 	eventSite.render();
 
-    // Test to see if a venue is over eventSite origin
-    float searchRadius = ofGetWidth()*0.1f;
-    float radius = searchRadius;
-    tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
-    
-    if (nearestVenue)
-    {
-        // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
-        float hitRadius = searchRadius * 0.4f;
-        
-        float animPos;
-        if (radius > searchRadius) animPos = 0;
-        if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
-        else animPos = 1;
-        
-        printf("animPos: %f", animPos);
-        nearestVenue->drawProgramme(animPos);
-    }
-    
     // Draw FPS
     ofSetColor(255, 255, 255, 255);
     //ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
@@ -176,57 +236,57 @@ void testApp::draw()
 }
 
 //--------------------------------------------------------------
-void testApp::exit(){
+void imcFestivalApp::exit(){
     
 }
 
 #if TARGET_OS_IPHONE
 
 //--------------------------------------------------------------
-void testApp::touchDown(ofTouchEventArgs & touch)
+void imcFestivalApp::touchDown(ofTouchEventArgs & touch)
 {
 	eventSite.actionTouchDown(touch.x, touch.y, touch.id);
 }
 
 //--------------------------------------------------------------
-void testApp::touchMoved(ofTouchEventArgs & touch)
+void imcFestivalApp::touchMoved(ofTouchEventArgs & touch)
 {
     eventSite.actionTouchMoved(touch.x, touch.y, touch.id);
 }
 
 //--------------------------------------------------------------
-void testApp::touchUp(ofTouchEventArgs & touch)
+void imcFestivalApp::touchUp(ofTouchEventArgs & touch)
 {
     eventSite.actionTouchUp(touch.x, touch.y, touch.id);
 }
 
 //--------------------------------------------------------------
-void testApp::touchDoubleTap(ofTouchEventArgs & touch){
+void imcFestivalApp::touchDoubleTap(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void testApp::touchCancelled(ofTouchEventArgs & touch){
+void imcFestivalApp::touchCancelled(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void testApp::lostFocus(){
+void imcFestivalApp::lostFocus(){
     
 }
 
 //--------------------------------------------------------------
-void testApp::gotFocus(){
+void imcFestivalApp::gotFocus(){
     
 }
 
 //--------------------------------------------------------------
-void testApp::gotMemoryWarning(){
+void imcFestivalApp::gotMemoryWarning(){
     
 }
 
 //--------------------------------------------------------------
-void testApp::deviceOrientationChanged(int newOrientation){
+void imcFestivalApp::deviceOrientationChanged(int newOrientation){
     
 }
 
@@ -235,56 +295,56 @@ void testApp::deviceOrientationChanged(int newOrientation){
 #ifdef TARGET_OSX
 
 //--------------------------------------------------------------
-void testApp::keyPressed(int key){
+void imcFestivalApp::keyPressed(int key){
     
 }
 
 //--------------------------------------------------------------
-void testApp::keyReleased(int key){
+void imcFestivalApp::keyReleased(int key){
     
 }
 
 //--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y){
+void imcFestivalApp::mouseMoved(int x, int y){
     
 }
 
 //--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button)
+void imcFestivalApp::mouseDragged(int x, int y, int button)
 {
     eventSite.actionTouchMoved(x, y, 0);
 }
 
 //--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button)
+void imcFestivalApp::mousePressed(int x, int y, int button)
 {
     eventSite.actionTouchDown(x, y, 0);
 }
 
 //--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button)
+void imcFestivalApp::mouseReleased(int x, int y, int button)
 {
     eventSite.actionTouchUp(x, y, 0);
 }
 
 //--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
+void imcFestivalApp::windowResized(int w, int h){
     
 }
 
 //--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
+void imcFestivalApp::gotMessage(ofMessage msg){
     
 }
 
 //--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){
+void imcFestivalApp::dragEvent(ofDragInfo dragInfo){
     
 }
 
 #endif
 
-void testApp::loadAndParseTwitterTestData()
+void imcFestivalApp::loadAndParseTwitterTestData()
 {
     // TASK: Read in Twitter Test Data from XML and if geolocated within eventSite add it to our message store
     ofLog(OF_LOG_VERBOSE, "Loading in twitter test data from XML dump");

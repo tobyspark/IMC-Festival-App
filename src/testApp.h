@@ -11,13 +11,16 @@
 #include "tbzEventSite.h"
 
 #if TARGET_OS_IPHONE
-class testApp : public ofxiPhoneApp
+class imcFestivalApp : public ofxiPhoneApp
 #endif
 #ifdef TARGET_OSX
-class testApp : public ofBaseApp
+class imcFestivalApp : public ofBaseApp
 #endif
 {
 public:
+    
+    void updateSocialMessagesDisplayed();
+    void updateSocialMessageStore();
     
     tbzEventSite eventSite;
     ofxXmlSettings eventSiteSettings;
@@ -29,6 +32,8 @@ public:
     ofTrueTypeFont venueFontTitle;
     ofTrueTypeFont venueFontBody;
     
+    tbzVenue*      venueFocussed;
+        
     // openFrameworks app methods
     void setup();
     void update();

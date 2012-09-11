@@ -10,6 +10,7 @@
 
 #define kTBZSocialMessage_Radius 5
 #define kTBZSocialMessage_ArrowSize 10 // this is side length of arrow and height bubble is raised
+#define kTBZSocialMessage_AnimInDistance 500
 
 tbzSocialMessage::tbzSocialMessage(string _text, float _latitude, float _longitude, ofTrueTypeFont *_font)
 {
@@ -83,12 +84,23 @@ void tbzSocialMessage::setupFBO()
     }
     
 }
-void tbzSocialMessage::draw()
+void tbzSocialMessage::draw(float animPos)
 {
     if (font)
     {
-        if (!fbo) setupFBO();
-        fbo->draw(bounds.x, bounds.y);
+        if (animPos > 0.01f)
+        {
+            if (!fbo) setupFBO();
+            ofPushStyle();
+                
+                ofColor fadeInAlpha(255, animPos*255.0f);
+                float   animInPos = (1.0f-animPos)*kTBZSocialMessage_AnimInDistance;
+            
+                ofSetColor(fadeInAlpha);
+                fbo->draw(bounds.x, bounds.y - animInPos);
+
+            ofPopStyle();
+        }
     }
     else
     {

@@ -169,6 +169,16 @@ tbzVenue* tbzEventSite::nearestVenue(float &distance)
     return venuePointer;
 }
 
+tbzEventSite::ViewState tbzEventSite::viewState()
+{
+    ViewState state = planView;
+    
+    if (elevationFactor < 0.001f)   state = planView;
+    else if (elevationFactor < 0.999f)   state = transitioningView;
+    else                            state = sideElevationView;
+    
+    return state;
+}
 
 bool tbzEventSite::actionTouchHitTest(float _x, float _y)
 {
@@ -211,7 +221,7 @@ void tbzEventSite::updateContent()
 
 void tbzEventSite::drawContent()
 {
-    bool debug3D = true;
+    bool debug3D = false;
     
     // Get scale for our eventSite
     float scale = width;
@@ -276,31 +286,35 @@ void tbzEventSite::drawContent()
         {
             // CAN I PUSH THE MATRIX AND APPLY TRANS_PERSPECTIVE DERIVED MATRIX SO THAT GEOCOORDS WORK?
             
-            list<tbzSocialMessage>::iterator message;
-            for (message = socialMessages.begin(); message != socialMessages.end(); message++)
+            if (elevationFactor > 0.01f)
             {
-                ofPushMatrix();
+                list<tbzSocialMessage>::iterator message;
+                for (message = socialMessages.begin(); message != socialMessages.end(); message++)
                 {
-                    ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
-                    ofRotate(-90, 1, 0, 0);
-                    
-                    message->draw();
-                };
+                    ofPushMatrix();
+                    {
+                        ofPoint modelLocation = groundToModel(message->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                        ofRotate(-90, 1, 0, 0);
+                        
+                        message->draw(elevationFactor);
+                    };
+                }
             }
             
-            list<tbzVenue>::iterator venue;
-            for (venue = venues.begin(); venue != venues.end(); venue++)
-            {
-                ofPushMatrix();
+                list<tbzVenue>::iterator venue;
+                for (venue = venues.begin(); venue != venues.end(); venue++)
                 {
-                    ofPoint modelLocation = groundToModel(venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
-                    ofRotate(-90, 1, 0, 0);
-                    
-                    venue->drawTag();
-                };
-            }
+                    ofPushMatrix();
+                    {
+                        ofPoint modelLocation = groundToModel(venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                        //ofRotate(-90, 1, 0, 0);
+                        ofRotate(-elevationAngle, 1, 0, 0);
+                        
+                        venue->drawTag();
+                    };
+                }
         }
         ofPopMatrix();
     }

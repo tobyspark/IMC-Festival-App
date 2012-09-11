@@ -12,6 +12,7 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 #include <list>
+#include <vector>
 
 struct tbzVenueSlot
 {
@@ -32,10 +33,14 @@ class tbzVenue
         ofTrueTypeFont *fontTitle;
         ofTrueTypeFont *fontBody;
     
-        tbzVenueSlot    slotAtTime(tm time);
+        list<tbzVenueSlot>::iterator    slotAtTime(tm time);
         
         void            updateTagFBO();
-        void            drawTag();
+        void            drawTag(float animPos = 1.0f);
+        void            setTagTextToNowAndNext();
+        void            setTagTextToProgramme();
+        void            setTagTextToNothing();
+        void            setTextLinesAnimPos(float animPos);
     
         void            updateProgrammeFBO();
         void            drawProgramme(float animPos = 1.0f);
@@ -44,13 +49,16 @@ class tbzVenue
         void            setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which = 0);
     
     protected:
-        ofRectangle     tagBounds;
         ofFbo           tagFBO;
+        float           textLinesAnimPos;
+        vector<string>  tagTextLines;
     
         ofFbo           programmeFBO;
     
         bool            stageGeoLocationFromKMZ(string filename);
         bool            audienceGeoAreaFromKMZ(string filename);
+    
+        string          slotTextForSlot(tbzVenueSlot &slot);
 };
 
 

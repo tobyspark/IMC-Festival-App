@@ -38,6 +38,9 @@ public:
     
     tbzVenue* nearestVenue(float &distance);
     
+    enum ViewState { planView, transitioningView, sideElevationView };
+    ViewState   viewState();
+    
     // ofxMtActionsObject overrides
     
     bool actionTouchHitTest(float _x, float _y);
@@ -54,12 +57,14 @@ public:
     list<tbzSocialMessage> socialMessages;
     list<tbzVenue> venues;
     
+    float       elevationFactor;
+    
 protected:
 
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
 
     ofxAssimpModelLoader siteModel;
-    float       elevationFactor;
+    //float       elevationFactor;
     float       elevationFactorTarget;
     
     ofPoint     groundToModel(const ofPoint &groundPoint);

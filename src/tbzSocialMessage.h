@@ -18,7 +18,7 @@ class tbzSocialMessage
         ~tbzSocialMessage();
         
         void setupFBO();
-        void draw();
+        void draw(float animPos = 1.0f);
     
         ofPoint geoLocation;
     
