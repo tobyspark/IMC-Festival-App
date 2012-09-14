@@ -169,15 +169,9 @@ tbzVenue* tbzEventSite::nearestVenue(float &distance)
     return venuePointer;
 }
 
-tbzEventSite::ViewState tbzEventSite::viewState()
+tbzEventSite::ViewState tbzEventSite::getViewState()
 {
-    ViewState state = planView;
-    
-    if (elevationFactor < 0.001f)   state = planView;
-    else if (elevationFactor < 0.999f)   state = transitioningView;
-    else                            state = sideElevationView;
-    
-    return state;
+    return viewState;
 }
 
 bool tbzEventSite::actionTouchHitTest(float _x, float _y)
@@ -190,18 +184,22 @@ void tbzEventSite::updateContent()
 {
     float scale = width;
     
-    // TASK: Bound Y such that the model cannot leave the centreline of screen
+    //// TASK: Respond to interaction: clamp position of model so it can't be dragged offscreen etc.
+    
+    // Bound Y such that the model cannot leave the centreline of screen
     // This ensures our elevation view should stay centered on a part of the model
     y = max(y, modelTopLeft.y*scale);
     y = min(y, modelBottomLeft.y*scale);
     
-//    // TASK: Bound x to within screen given scale factor
+//    // Bound x to within screen given scale factor
 //    // if scale = 1, bounds are screenwidth/2,screenwidth/2
 //    // if scale = 2, bounds are 0, screenwidth
 //    x = max(x, ofGetWidth() - scale*ofGetWidth()/2);
 //    x = min(x, scale*ofGetWidth()/2);
     
-    // TASK: If we're dragging, elevate to plan view.
+    //// TASK: Respond to interaction: if we're dragging, elevate to plan view.
+    
+    // Determine actual (damped) and desired elevation factor, 0 = plan view, 1 = side elevation
     if (state == FIXE)
     {
         elevationFactorTarget = 1.0f;
@@ -211,10 +209,26 @@ void tbzEventSite::updateContent()
         elevationFactorTarget = 0.0f;
     }
     
-    float damping = 0.1;
-    elevationFactor += (elevationFactorTarget - elevationFactor) * damping;
+    float elevationDifference = elevationFactorTarget - elevationFactor;
+    elevationFactor += elevationDifference * kTBZES_Damping;
     
-    // TASK: Translate between graphical rendering for plan view and lit rendering for elevated
+    // Determine state from elevation factor
+    if (elevationFactor < 0.001f)           viewState = planView;
+    else if (elevationFactor < 0.999f)
+    {
+        if (elevationDifference > 0)        viewState = transitioningToElevationView;
+        if (elevationDifference < 0)        viewState = transitioningToPlanView;
+    }
+    else                                    viewState = sideElevationView;
+
+    //// TASK: Update venues, this tasks their animation etc.
+    list<tbzVenue>::iterator venue;
+    for (venue = venues.begin(); venue != venues.end(); venue++)
+    {
+        venue->update();
+    }
+    
+    //// TASK: Translate between graphical rendering for plan view and lit rendering for elevated
     ofColor whiteIfPlanView((1.0f - elevationFactor) * 255);
     light.setAmbientColor(whiteIfPlanView);
 }

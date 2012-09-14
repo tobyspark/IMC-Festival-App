@@ -12,31 +12,93 @@
 
 #define kTBZVenue_Radius 5
 #define kTBZVenue_ArrowSize 10 // this is side length of arrow and height bubble is raised
-#define kTBZVenue_LineSpacing 5
 #define kTBZVenue_AnimInDistance 150
+#define kTBZVenue_Damping 0.1f
+
+
+int tbzVenueSlot::minutesFromDayStart(tm time)
+{
+    // TASK: generate some form of absolute time that we can compare against
+    // We're assuming that say a 5am slot is late-night and say an 8am slot is beginning of the day early.
+    
+    int dayStartHour = 7;
+    int hours = time.tm_hour - dayStartHour;
+    if (hours < 0) hours += 24;
+    
+    return (hours * 60) + time.tm_min;
+}
+
+bool tbzVenueSlot::operator < (tbzVenueSlot comp)
+{
+    // TASK: used to sort the list of venue slots, does this by start time
+    return minutesFromDayStart(starts) < minutesFromDayStart(comp.starts) ? true : false;
+}
+
+
 
 tbzVenue::tbzVenue()
 {
     fontTitle = NULL;
+    fontBody = NULL;
+    
+    setTagTextType(nothing);
 }
 
-int minutesFromDayStart(int hours, int minutes)
+void tbzVenue::update()
 {
-    int dayStartHour = 7;
-    return ((hours + dayStartHour) % 24) * 60 + minutes;
+    // TASK: Animate tag as appropriate, set by content
+    
+    float difference;
+    bool update = false;
+    
+    difference = tagTextHeightTarget-tagTextHeight;
+    if (fabs(difference) > 0.001)
+    {
+        tagTextHeight += (tagTextHeightTarget - tagTextHeight) * kTBZVenue_Damping;
+        
+        difference = tagTextHeightTarget-tagTextHeight;
+        if (fabs(difference) < 0.001) 
+        {
+            tagTextHeight = tagTextHeightTarget;
+        }
+        
+        update = true;
+    }
+    
+    difference = tagTextWidthTarget-tagTextWidth;
+    if (fabs(difference) > 0.001)
+    {
+        tagTextWidth += (tagTextWidthTarget - tagTextWidth) * kTBZVenue_Damping;
+        
+        difference = tagTextWidthTarget-tagTextWidth;
+        if (fabs(difference) < 0.001) 
+        {
+            tagTextWidth = tagTextWidthTarget;
+        }
+        
+        update = true;
+    }
+    
+    if (update) 
+    {
+        updateTagFBO();
+    }
 }
 
 list<tbzVenueSlot>::iterator tbzVenue::slotAtTime(tm time)
 {
     list<tbzVenueSlot>::iterator returnSlot = slots.end();
     
-    int searchTime = minutesFromDayStart(ofGetHours(), ofGetMinutes());
+    tm now;
+    now.tm_hour = ofGetHours();
+    now.tm_min = ofGetMinutes();
+    int searchTime = tbzVenueSlot::minutesFromDayStart(now);
     
     list<tbzVenueSlot>::iterator slot;
     for (slot = slots.begin(); slot != slots.end(); slot++)
     {
-        int startTime = minutesFromDayStart(slot->starts.tm_hour, slot->starts.tm_min);
-
+        int startTime = tbzVenueSlot::minutesFromDayStart(slot->starts);
+        
         // We've found it: we've just passed it, it's what we got last time
         if (returnSlot != slots.end() && startTime > searchTime) break;
         
@@ -48,81 +110,128 @@ list<tbzVenueSlot>::iterator tbzVenue::slotAtTime(tm time)
             if (slot->ends.tm_hour != -1)
             {
                 // ...and we're within in, we've found it.
-                if (searchTime < minutesFromDayStart(slot->ends.tm_hour, slot->ends.tm_min)) break;
+                if (searchTime < tbzVenueSlot::minutesFromDayStart(slot->ends)) break;
             }
         }
     }
-
+    
     if (returnSlot == slots.end())
     {
         // We haven't found a time
         ofLog(OF_LOG_WARNING, "slotAtTime not found for venue " + name + " at time " + ofToString(time.tm_hour) + ":" + ofToString(time.tm_min));
-        return slots.begin();
     }
     
     return returnSlot;
 }
 
-void tbzVenue::updateTagFBO()
+list<tbzVenueSlot>::iterator tbzVenue::slotAfterTime(tm time)
+{
+    list<tbzVenueSlot>::iterator returnSlot = slots.end();
+    
+    tm now;
+    now.tm_hour = ofGetHours();
+    now.tm_min = ofGetMinutes();
+    int searchTime = tbzVenueSlot::minutesFromDayStart(now);
+    
+    list<tbzVenueSlot>::iterator slot;
+    for (slot = slots.begin(); slot != slots.end(); slot++)
+    {
+        int startTime = tbzVenueSlot::minutesFromDayStart(slot->starts);
+        
+        if (startTime > searchTime)
+        {
+            returnSlot = slot;
+            break;
+        }
+    }
+    
+    if (returnSlot == slots.end())
+    {
+        // We haven't found a time
+        ofLog(OF_LOG_WARNING, "slotAfterTime not found for venue " + name + " at time " + ofToString(time.tm_hour) + ":" + ofToString(time.tm_min));
+    }
+    
+    return returnSlot;
+}
+
+void tbzVenue::updateTagFBO(bool resize)
 {
     if (fontTitle)
     {
         // Just a reminder: origin is top left, and this is an arrow pointing down.
         
-        // Get bounds of text. This will have an offset origin to place the baseline of the font at desired point
-        ofRectangle textBounds = fontTitle->getStringBoundingBox(name, 0, 0);
-        textBounds.x += kTBZVenue_Radius;
-        textBounds.y += kTBZVenue_Radius + textBounds.height + 20; // This is a magic number. I guess the bounds aren't reported correctly.
-        
-        // Add to bounds for however many subtitle / info lines
-        int tagTextLinesHeight = 0;
-        if (textLinesAnimPos > 0 && tagTextLines.size() > 0)
+        if (!tagFBO.isAllocated() || resize)
         {
-            // Vertically
-            tagTextLinesHeight = tagTextLines.size() * fontBody->getLineHeight();
-            tagTextLinesHeight += tagTextLines.size() > 1 ? (tagTextLines.size() - 1) * kTBZVenue_LineSpacing : 0;
-            textBounds.height += tagTextLinesHeight;
-            
-            // Horiztonally
-            vector<string>::iterator longestLine = tagTextLines.begin();
-            vector<string>::iterator line;
-            for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
+            // TASK: Determine tagTextTarget sizes given however many subtitle / info lines
+            if (tagTextLines.size() > 0)
             {
-                if (line->length() > longestLine->length()) longestLine = line;
+                // Vertically
+                tagTextHeightTarget = tagTextLines.size() * fontBody->getLineHeight();
+                
+                // Horiztonally
+                tagTextWidthTarget = fontTitle->stringWidth(name);
+                vector<string>::iterator line;
+                for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
+                {
+                    tagTextWidthTarget = max(tagTextWidthTarget, fontBody->stringWidth(*line));
+                }
             }
-            ofRectangle longestLineBounds = fontBody->getStringBoundingBox(*longestLine, 0, 0);
-            if (textBounds.width < longestLineBounds.width) textBounds.width = longestLineBounds.width;
+            else
+            {
+                tagTextHeightTarget = 0;
+                tagTextWidthTarget = fontTitle->stringWidth(name);
+            }
         }
-
-        // Outline the text bounds with our round rect corner radius
-        ofRectangle backBounds = textBounds;
-        backBounds.width    += kTBZVenue_Radius*2.0f;
-        backBounds.height   += kTBZVenue_Radius*2.0f;
-        backBounds.x        = 0;
-        backBounds.y        = 0;
         
+        // backBounds is the rect of the bubble only, ie. text with border
+        ofRectangle backBounds;
+        backBounds.width    = tagTextWidth + kTBZVenue_Radius*2.0f;
+        backBounds.height   = fontTitle->getLineHeight() + tagTextHeight + kTBZVenue_Radius*2.0f;
+        
+        // tagBounds is the rect of the whole tag, ie. backBounds plus the caption arrow
         ofRectangle tagBounds;
-        tagBounds.width        = backBounds.width;
-        tagBounds.height       = backBounds.height + kTBZVenue_ArrowSize;
+        tagBounds           = backBounds;
+        tagBounds.height   += kTBZVenue_ArrowSize;
         
-        float centreX = tagBounds.width / 2.0f;
-        ofPoint arrowTL(centreX - kTBZVenue_ArrowSize/2.0f, backBounds.height);
-        ofPoint arrowTR(centreX + kTBZVenue_ArrowSize/2.0f, backBounds.height);
-        ofPoint arrowB(centreX, backBounds.height + kTBZVenue_ArrowSize * sin(ofDegToRad(60.0f)));
+        ofRectangle tagTargetBounds;
+        tagTargetBounds.width   = tagTextWidthTarget + kTBZVenue_Radius*2.0f;
+        tagTargetBounds.height  = fontTitle->getLineHeight() + tagTextHeightTarget + kTBZVenue_Radius*2.0f + kTBZVenue_ArrowSize;
         
-        // Create the empty image to draw into
-        ofFbo::Settings s;
-        s.width             = tagBounds.width;
-        s.height            = tagBounds.height;
-        s.internalformat    = GL_RGBA;
-        s.useDepth          = false;
-        
-        // Create the correctly sized FBO if neccessary
-        if (!tagFBO.isAllocated() || tagFBO.getWidth() != s.width || tagFBO.getHeight() != s.height)
+        // Create the empty image to draw into if neccessary
+        if (!tagFBO.isAllocated() ||
+            (resize && tagTargetBounds.height > tagFBO.getHeight()) || // We're getting bigger
+            (tagBounds.height != tagFBO.getHeight() && tagTextHeight == tagTextHeightTarget)) // Having got smaller, we've finished animating down.
         {
+            ofFbo::Settings s;
+            s.width             = min((int)tagTargetBounds.width, ofGetWidth());
+            s.height            = min((int)tagTargetBounds.height, ofGetHeight());
+            s.internalformat    = GL_RGBA;
+            s.useDepth          = false;
+            
             tagFBO.setDefaultTextureIndex(0); // oF bug needs this as fix( http://forum.openframeworks.cc/index.php?topic=10536.0 )
             tagFBO.allocate(s);
+            
+            // We want to draw centered horizontally and aligned to bottom
+            tagFBO.setAnchorPoint(s.width/2, s.height);
         }
+        
+        tagBounds.x     = (tagFBO.getWidth() - tagBounds.width) / 2.0f; // Center horizontally
+        tagBounds.y     = tagFBO.getHeight() - tagBounds.height;        // Place at bottom
+        
+        backBounds.x        = tagBounds.x;
+        backBounds.y        = tagBounds.y;
+        
+        ofPoint textOrigin;
+        textOrigin.x        = backBounds.x + kTBZVenue_Radius;
+        //textOrigin.y        = backBounds.y + kTBZVenue_Radius + fontTitle->getLineHeight(); 
+        textOrigin.y        = backBounds.y + kTBZVenue_Radius + fontTitle->stringHeight(name);
+        
+        
+        float centreX = tagFBO.getWidth() / 2.0f;
+        float backBottom = backBounds.y + backBounds.height;
+        ofPoint arrowTL(centreX - kTBZVenue_ArrowSize/2.0f, backBottom);
+        ofPoint arrowTR(centreX + kTBZVenue_ArrowSize/2.0f, backBottom);
+        ofPoint arrowB(centreX, backBottom + kTBZVenue_ArrowSize * sin(ofDegToRad(60.0f)));
         
         // Draw into image
         ofPushStyle();
@@ -131,50 +240,44 @@ void tbzVenue::updateTagFBO()
             // Clear the image
             ofClear(255,255,255, 0);
             
-            // Get our animation offset.
-            float topOffset = (1.0f-textLinesAnimPos)*tagTextLinesHeight;
-            
             // Draw container shape
             ofSetColor(255,0,0);
-            backBounds.y += topOffset;
-            backBounds.height -= topOffset;
-                        
             ofRectRounded(backBounds, kTBZVenue_Radius);
             ofTriangle(arrowTL, arrowTR, arrowB);
             
             // Draw text
             ofSetColor(255);
-            textBounds.y += topOffset;
-            fontTitle->drawString(name, textBounds.x, textBounds.y);
+            
+            fontTitle->drawString(name, textOrigin.x, textOrigin.y);
             
             vector<string>::iterator line;
             for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
             {
-                if (textBounds.y > tagBounds.height - fontBody->getLineHeight() - kTBZVenue_ArrowSize - kTBZVenue_Radius) break;
+                if (textOrigin.y > backBottom - fontBody->getLineHeight()) break;
                 
-                textBounds.y += fontBody->getLineHeight();
-                textBounds.y += kTBZVenue_LineSpacing;
+                textOrigin.y += fontBody->getLineHeight();
                 
-                fontBody->drawString(*line, textBounds.x, textBounds.y);
+                float lineWidth = fontBody->stringWidth(*line);
+                float availableWidth = tagTextWidth + kTBZVenue_Radius;
+                if (lineWidth > availableWidth)
+                {
+                    int charsToDraw = line->length() * (tagTextWidth / lineWidth);
+                    fontBody->drawString(line->substr(0,charsToDraw), textOrigin.x, textOrigin.y);
+                }
+                else
+                {
+                    fontBody->drawString(*line, textOrigin.x, textOrigin.y);
+                }
             }
         }
         tagFBO.end();
         ofPopStyle();
-        
-        // We want to draw centered horizontally and aligned to bottom
-        tagFBO.setAnchorPoint(centreX, tagBounds.height);
     }
     else
     {
         ofLog(OF_LOG_WARNING, "TBZSocialMessage: Setup: fontTitle not allocated");
     }
     
-}
-
-void tbzVenue::setTextLinesAnimPos(float animPos)
-{
-    textLinesAnimPos = animPos;
-    updateTagFBO();
 }
 
 void tbzVenue::drawTag(float animPos)
@@ -201,48 +304,55 @@ void tbzVenue::drawTag(float animPos)
     }
 }
 
-void tbzVenue::setTagTextToNowAndNext()
+void tbzVenue::setTagTextType(TagTextType type)
 {
-    tagTextLines.clear();
-    
-    // TODO: use app's navigation of time not actual time
-    
-    time_t rawtime;
-    tm* now;
-    
-    time (&rawtime);
-    now = localtime(&rawtime);
-    
-    list<tbzVenueSlot>::iterator nowSlot = slotAtTime(*now);
-    
-    tagTextLines.push_back("Now: " + nowSlot->name);
-    if (nowSlot != --slots.end())
+    if (tagTextType != type)
     {
-        list<tbzVenueSlot>::iterator nextSlot = ++nowSlot;
-        tagTextLines.push_back("Next: " + nextSlot->name);
+        tagTextType = type;
+        
+        tagTextLines.clear();
+        
+        if (type == nowAndNext)
+        {
+            time_t rawtime;
+            tm* now;
+            
+            time (&rawtime);
+            now = localtime(&rawtime);
+            
+            list<tbzVenueSlot>::iterator nowSlot = slotAtTime(*now);
+            if (nowSlot != slots.end())
+            {
+                tagTextLines.push_back("Now: " + nowSlot->name);
+            }
+            
+            list<tbzVenueSlot>::iterator nextSlot = slotAfterTime(*now);
+            if (nextSlot != slots.end())
+            {
+                tagTextLines.push_back("Next: " + nextSlot->name);
+            }
+        }
+        else if (type == programme)
+        {
+            list<tbzVenueSlot>::iterator slot;
+            for (slot = slots.begin(); slot != slots.end(); slot++)
+            {
+                tagTextLines.push_back(slotTextForSlot(*slot));
+            }
+        }
+        else
+        {
+            tagTextType = nothing;
+        }
+        
+        // Resize and redraw FBO
+        updateTagFBO(true);
     }
-    
-    updateTagFBO();
 }
 
-void tbzVenue::setTagTextToProgramme()
+tbzVenue::TagTextType tbzVenue::tbzVenue::getTagTextType()
 {
-    tagTextLines.clear();
-    
-    list<tbzVenueSlot>::iterator slot;
-    for (slot = slots.begin(); slot != slots.end(); slot++)
-    {
-        tagTextLines.push_back(slotTextForSlot(*slot));
-    }
-    
-    updateTagFBO();
-}
-
-void tbzVenue::setTagTextToNothing()
-{
-    tagTextLines.clear();
-    
-    updateTagFBO();
+    return tagTextType;
 }
 
 void tbzVenue::updateProgrammeFBO()
@@ -306,7 +416,7 @@ void tbzVenue::updateProgrammeFBO()
             // TASK: Draw Text
             
             int yPos = 0;
-            int xPos = midX + kTBZVenue_LineSpacing;
+            int xPos = midX + kTBZVenue_Radius;
             
             // Title
             ofSetColor(0, 0, 0, 255);
@@ -317,7 +427,7 @@ void tbzVenue::updateProgrammeFBO()
             list<tbzVenueSlot>::iterator slot;
             for (slot = slots.begin(); slot != slots.end(); slot++)
             {
-                yPos += kTBZVenue_LineSpacing + fontBody->getSize();
+                yPos += fontBody->getLineHeight();
                 
                 fontBody->drawString(slotTextForSlot(*slot), xPos, yPos);
             }
@@ -513,7 +623,9 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
         xml.popTag();
     }
     
-    setTagTextToNowAndNext();
+    slots.sort();
+    
+    setTagTextType(nothing);
     
     ofLog(OF_LOG_VERBOSE, "Venue setup: " + name + " with " + ofToString(slots.size()) + " slots");
     ofLog(OF_LOG_VERBOSE, "Location: " + ofToString(stageGeoLocation.x) + ", " + ofToString(stageGeoLocation.y));
@@ -569,8 +681,6 @@ bool tbzVenue::stageGeoLocationFromKMZ(string filename)
                 
                 xString >> stageGeoLocation.x;
                 yString >> stageGeoLocation.y;
-                
-                // TODO: Write parsed data back to eventSettings.xml
             }
         }
         ofFile::removeFile(docFileLocation);
@@ -640,8 +750,6 @@ bool tbzVenue::audienceGeoAreaFromKMZ(string filename)
                 }
                 
                 audienceGeoArea.close();
-                
-                // TODO: Write parsed data back to eventSettings.xml
             }
         }
         ofFile::removeFile(docFileLocation);

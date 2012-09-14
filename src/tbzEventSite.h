@@ -23,6 +23,7 @@
 
 #define kTBZES_ViewElevationAngle 70
 #define kTBZES_MessageElevationHeight 20
+#define kTBZES_Damping 0.1
 
 class tbzEventSite : public ofxMtActionsObject
 {
@@ -38,8 +39,8 @@ public:
     
     tbzVenue* nearestVenue(float &distance);
     
-    enum ViewState { planView, transitioningView, sideElevationView };
-    ViewState   viewState();
+    enum ViewState { planView, transitioningToPlanView, sideElevationView, transitioningToElevationView };
+    ViewState   getViewState();
     
     // ofxMtActionsObject overrides
     
@@ -63,6 +64,8 @@ protected:
 
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
 
+    ViewState   viewState;
+    
     ofxAssimpModelLoader siteModel;
     //float       elevationFactor;
     float       elevationFactorTarget;

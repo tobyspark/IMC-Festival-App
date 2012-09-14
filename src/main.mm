@@ -1,6 +1,29 @@
 #include "ofMain.h"
 #include "testApp.h"
 
+/*
+ TODO:
+ 
+ 
+ 
+ 
+ BUGS:
+    
+ 
+ 
+ 
+ NOTES:
+    "ofxFBOTexture with Fonts showing as a white box" - http://forum.openframeworks.cc/index.php?topic=3805.0
+ 
+ 
+ 
+ 
+ 
+ 
+ */
+
+
+
 #if TARGET_OS_IPHONE
 
 //========================================================================
@@ -31,7 +54,7 @@ int main(){
 	ofAppGlutWindow window; // create a window
 	// set width, height, mode (OF_WINDOW or OF_FULLSCREEN)
 	ofSetupOpenGL(&window, 1024, 768, OF_WINDOW);
-	ofRunApp(new testApp()); // start the app
+	ofRunApp(new imcFestivalApp()); // start the app
 }
 
 #endif

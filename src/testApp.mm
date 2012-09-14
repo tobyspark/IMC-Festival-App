@@ -28,7 +28,7 @@ void imcFestivalApp::updateSocialMessageStore()
 
 //--------------------------------------------------------------
 void imcFestivalApp::setup(){
-    ofSetLogLevel(OF_LOG_VERBOSE);
+    ofSetLogLevel(OF_LOG_WARNING);
     
     #include "tbzPlatformDefineTests.h"
         
@@ -67,7 +67,7 @@ void imcFestivalApp::setup(){
     
     // Use venue / programme data
     
-    venueFontTitle.loadFont("Arial Narrow.ttf", 24, true, true);
+    venueFontTitle.loadFont("Arial Narrow.ttf", 18, true, true);
     venueFontBody.loadFont("Arial Narrow.ttf", 12, true, true);
     
     int venueCount = eventSiteSettings.getNumTags("venue");
@@ -155,17 +155,19 @@ void imcFestivalApp::update()
      *  - Can't have both, one is always nearer
      */
     
-    tbzEventSite::ViewState state = eventSite.viewState();
+    tbzEventSite::ViewState state = eventSite.getViewState();
     
-    if (state == tbzEventSite::planView || state == tbzEventSite::transitioningView)
+    if (state == tbzEventSite::planView || state == tbzEventSite::transitioningToPlanView)
     {
         // Test to see if a venue is over eventSite origin
         float searchRadius = ofGetWidth()*0.2f;
         float radius = searchRadius;
         tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
         
+        // If we have a venue within range, "focus" on it
         if (nearestVenue)
         {
+            /* Vestigal 'rollover' animation position calculation
             // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
             float hitRadius = searchRadius * 0.4f;
             
@@ -173,33 +175,34 @@ void imcFestivalApp::update()
             if (radius > searchRadius) animPos = 0;
             if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
             else animPos = 1;
+            */
             
+            // We have a new venue
             if (nearestVenue != venueFocussed)
             {
-                if (venueFocussed != NULL) venueFocussed->setTagTextToNothing();
+                // Deselect old venue
+                if (venueFocussed != NULL) venueFocussed->setTagTextType(tbzVenue::nothing);
                 
+                // Select new
                 venueFocussed = nearestVenue;
-                venueFocussed->setTextLinesAnimPos(eventSite.elevationFactor);
-                venueFocussed->setTagTextToNowAndNext();
             }
             
-            venueFocussed->setTextLinesAnimPos(animPos);
+            // Ensure selected venue is showing now and next
+            venueFocussed->setTagTextType(tbzVenue::nowAndNext);
         }
+        // If we don't, but one is still focussed, deselect
         else if (venueFocussed != NULL)
         {
-            venueFocussed->setTagTextToNothing();
+            venueFocussed->setTagTextType(tbzVenue::nothing);
             venueFocussed = NULL;
         }
     }
 
-    if (state == tbzEventSite::transitioningView || state == tbzEventSite::sideElevationView)
+    if (state == tbzEventSite::sideElevationView || state == tbzEventSite::transitioningToElevationView)
     {
-        // TODO: Transition in only, ie. one shot. currently redrawing fbo every frame
-        // ...and tomorrow, GPS etc.
         if (venueFocussed)
         {
-            venueFocussed->setTextLinesAnimPos(eventSite.elevationFactor);
-            venueFocussed->setTagTextToProgramme();
+            venueFocussed->setTagTextType(tbzVenue::programme);
         }
     }
     

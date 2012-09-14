@@ -14,11 +14,17 @@
 #include <list>
 #include <vector>
 
-struct tbzVenueSlot
+class tbzVenueSlot
 {
-    string  name;
-    tm      starts;
-    tm      ends;
+    public:
+        string  name;
+        tm      starts;
+        tm      ends;
+    
+        static int minutesFromDayStart(tm time);
+    
+        bool operator < (tbzVenueSlot);
+
 };
 
 class tbzVenue
@@ -34,25 +40,31 @@ class tbzVenue
         ofTrueTypeFont *fontBody;
     
         list<tbzVenueSlot>::iterator    slotAtTime(tm time);
-        
-        void            updateTagFBO();
-        void            drawTag(float animPos = 1.0f);
-        void            setTagTextToNowAndNext();
-        void            setTagTextToProgramme();
-        void            setTagTextToNothing();
-        void            setTextLinesAnimPos(float animPos);
+        list<tbzVenueSlot>::iterator    slotAfterTime(tm time);
     
-        void            updateProgrammeFBO();
+        void            update();
+    
+        void            drawTag(float animPos = 1.0f);
+        enum            TagTextType {nowAndNext, programme, nothing};
+        void            setTagTextType(TagTextType type = nothing);
+        TagTextType     getTagTextType();
+    
         void            drawProgramme(float animPos = 1.0f);
     
         void            setupFromXML(ofxXmlSettings &xml, int which = 0);
         void            setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which = 0);
     
     protected:
+        void            updateTagFBO(bool resize = false);
         ofFbo           tagFBO;
-        float           textLinesAnimPos;
         vector<string>  tagTextLines;
+        TagTextType     tagTextType;
+        float           tagTextHeight;
+        float           tagTextHeightTarget;
+        float           tagTextWidth;
+        float           tagTextWidthTarget;
     
+        void            updateProgrammeFBO();
         ofFbo           programmeFBO;
     
         bool            stageGeoLocationFromKMZ(string filename);
