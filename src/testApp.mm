@@ -5,6 +5,8 @@ void imcFestivalApp::updateSocialMessagesDisplayed()
     // TODO: Base on time, in the meantime...
     
     // TASK: Cycle through social messages
+    if (socialMessageStore.getNumTags("message") == 0) return;
+    
     int indexToDisplay = ofGetFrameNum() % socialMessageStore.getNumTags("message");
     
     socialMessageStore.pushTag("message", indexToDisplay);
@@ -19,11 +21,6 @@ void imcFestivalApp::updateSocialMessagesDisplayed()
     {
         eventSite.socialMessages.pop_back();
     }
-}
-
-void imcFestivalApp::updateSocialMessageStore()
-{
-    // TODO: Poll twitter
 }
 
 //--------------------------------------------------------------
@@ -117,41 +114,28 @@ void imcFestivalApp::setup(){
     socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + socialMessageStoreFileLoc;
     #endif
     
-    success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
-    
-    if (!success)
-    {
-        ofLog(OF_LOG_WARNING, "No existing social message store found");
-        loadAndParseTwitterTestData();
-    }
-    
-    int count = socialMessageStore.getNumTags("message");
-    ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
+//    success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
+//    
+//    if (!success)
+//    {
+//        ofLog(OF_LOG_WARNING, "No existing social message store found");
+//        loadAndParseTwitterTestData();
+//    }
+//    
+//    int count = socialMessageStore.getNumTags("message");
+//    ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
     socialMessageFont.loadFont("Arial Narrow.ttf", 16, true, true);
     
     
     //// TASK: Startup Twitter
-//    twitter.setup(false, false);
-//    twitter.setSearchDelegate(this);
-//    twitter.startTwitterQuery("from:tobyspark");
+    twitter.connect(eventSiteSettings.getValue("twitterSeachTerms", "from:@QMUL"), 60);
 }
-
-//void imcFestivalApp::searchResult(vector<Tweet> results, int queryIdentifier)
-//{
-//    
-//    for (vector<Tweet>::iterator tweet = results.begin(); tweet != results.end(); tweet++)
-//    {
-//        printf(tweet->print().c_str());
-//    }
-//    
-//    twitter.repeatTwitterQuery();
-//}
 
 //--------------------------------------------------------------
 void imcFestivalApp::update()
 {
-    /* App states
+    /* TASK: Act on app State
      *
      * Idling; displaying event site
      *  - Display venue name tags
@@ -227,12 +211,31 @@ void imcFestivalApp::update()
         }
     }
     
+    /* TASK: Ingest any new social messages
+     * 
+     *
+     *
+     */
     
     while(twitter.hasNewTweets()) {
 		ofxTweet t = twitter.getNextTweet();
 		cout << "text:" << t.getText() << endl;
 		cout << "avatar:" << t.getAvatar() << endl;
 		cout << "---" << endl;
+        
+        socialMessageStore.addTag("message");
+        socialMessageStore.pushTag("message", socialMessageStore.getNumTags("message") - 1);
+        {
+            // Note: Twitter IDs can exceed max int size, so keep IDs as strings.
+            socialMessageStore.setValue("text", t.getText());
+            socialMessageStore.setValue("latitude", eventSite.groundBounds.getCenter().y);
+            socialMessageStore.setValue("longitude", eventSite.groundBounds.getCenter().x);
+            socialMessageStore.setValue("twitter:id", t.getID());
+            socialMessageStore.setValue("twitter:userid", t.getUserID());
+//            socialMessageStore.setValue("twitter:in_reply_to_status_id", t.//TODO);
+//            socialMessageStore.setValue("twitter:in_reply_to_user_id", t.//TODO);
+        }
+        socialMessageStore.popTag();
 	}
 }
 

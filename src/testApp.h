@@ -12,7 +12,7 @@
 #include "tbzEventSite.h"
 
 #if TARGET_OS_IPHONE
-class imcFestivalApp : public ofxiPhoneApp , public TwitterDelegate
+class imcFestivalApp : public ofxiPhoneApp
 #endif
 #ifdef TARGET_OSX
 class imcFestivalApp : public ofBaseApp
@@ -35,8 +35,7 @@ public:
     
     tbzVenue*      venueFocussed;
     
-    ofxTwitter     twitter;
-    //void           searchResult(vector<Tweet> results, int queryIdentifier);
+    ofxTwitterSearch     twitter;
     
     // openFrameworks app methods
     void setup();
