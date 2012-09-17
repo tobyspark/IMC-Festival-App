@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
+#include "ofxTwitter.h"
 
 #if TARGET_OS_IPHONE
 #include "ofxiPhone.h"
@@ -11,7 +12,7 @@
 #include "tbzEventSite.h"
 
 #if TARGET_OS_IPHONE
-class imcFestivalApp : public ofxiPhoneApp
+class imcFestivalApp : public ofxiPhoneApp , public TwitterDelegate
 #endif
 #ifdef TARGET_OSX
 class imcFestivalApp : public ofBaseApp
@@ -33,7 +34,10 @@ public:
     ofTrueTypeFont venueFontBody;
     
     tbzVenue*      venueFocussed;
-        
+    
+    ofxTwitter     twitter;
+    //void           searchResult(vector<Tweet> results, int queryIdentifier);
+    
     // openFrameworks app methods
     void setup();
     void update();

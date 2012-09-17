@@ -129,7 +129,24 @@ void imcFestivalApp::setup(){
     ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     
     socialMessageFont.loadFont("Arial Narrow.ttf", 16, true, true);
+    
+    
+    //// TASK: Startup Twitter
+//    twitter.setup(false, false);
+//    twitter.setSearchDelegate(this);
+//    twitter.startTwitterQuery("from:tobyspark");
 }
+
+//void imcFestivalApp::searchResult(vector<Tweet> results, int queryIdentifier)
+//{
+//    
+//    for (vector<Tweet>::iterator tweet = results.begin(); tweet != results.end(); tweet++)
+//    {
+//        printf(tweet->print().c_str());
+//    }
+//    
+//    twitter.repeatTwitterQuery();
+//}
 
 //--------------------------------------------------------------
 void imcFestivalApp::update()
@@ -204,8 +221,19 @@ void imcFestivalApp::update()
         {
             venueFocussed->setTagTextType(tbzVenue::programme);
         }
+        else
+        {
+            updateSocialMessagesDisplayed();
+        }
     }
     
+    
+    while(twitter.hasNewTweets()) {
+		ofxTweet t = twitter.getNextTweet();
+		cout << "text:" << t.getText() << endl;
+		cout << "avatar:" << t.getAvatar() << endl;
+		cout << "---" << endl;
+	}
 }
 
 //--------------------------------------------------------------
