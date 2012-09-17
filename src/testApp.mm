@@ -11,8 +11,10 @@ void imcFestivalApp::updateSocialMessagesDisplayed()
     
     socialMessageStore.pushTag("message", indexToDisplay);
     {
-        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f),
-                                       &socialMessageFont);
+        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
+        socialMessage.tag.fontTitle = &socialMessageFont;
+        socialMessage.tag.fontBody = &socialMessageFont;
+        //socialMessage.tag.snapToTargetSize(); // FIXME: crash, buggy ofxFBO!
         eventSite.socialMessages.push_front(socialMessage);
     }
     socialMessageStore.popTag();
@@ -75,8 +77,9 @@ void imcFestivalApp::setup(){
         
         bool xmlChanged = false;
         venue.setupFromXML(eventSiteSettings, xmlChanged, i);
-        venue.fontTitle = &venueFontTitle;
-        venue.fontBody  = &venueFontBody;
+        venue.tag.fontTitle = &venueFontTitle;
+        venue.tag.fontBody  = &venueFontBody;
+        //venue.tag.snapToTargetSize(); // FIXME: crash, buggy ofxFBO!
         eventSite.addVenue(venue);
         
         if (xmlChanged)

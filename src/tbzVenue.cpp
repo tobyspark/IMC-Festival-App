@@ -13,8 +13,6 @@
 #define kTBZVenue_Radius 5
 #define kTBZVenue_ArrowSize 10 // this is side length of arrow and height bubble is raised
 #define kTBZVenue_AnimInDistance 150
-#define kTBZVenue_Damping 0.1f
-
 
 int tbzVenueSlot::minutesFromDayStart(tm time)
 {
@@ -38,51 +36,18 @@ bool tbzVenueSlot::operator < (tbzVenueSlot comp)
 
 tbzVenue::tbzVenue()
 {
-    fontTitle = NULL;
-    fontBody = NULL;
+    tag.setStyle(kTBZVenue_Radius, kTBZVenue_ArrowSize, ofColor(255), ofColor(255), ofColor(255,0,0));
+    tag.fontTitle = NULL;
+    tag.fontBody = NULL;
     
-    setTagTextType(nothing);
+    tagTextType = uninitialised;
 }
 
 void tbzVenue::update()
 {
     // TASK: Animate tag as appropriate, set by content
     
-    float difference;
-    bool update = false;
-    
-    difference = tagTextHeightTarget-tagTextHeight;
-    if (fabs(difference) > 0.001)
-    {
-        tagTextHeight += (tagTextHeightTarget - tagTextHeight) * kTBZVenue_Damping;
-        
-        difference = tagTextHeightTarget-tagTextHeight;
-        if (fabs(difference) < 0.001) 
-        {
-            tagTextHeight = tagTextHeightTarget;
-        }
-        
-        update = true;
-    }
-    
-    difference = tagTextWidthTarget-tagTextWidth;
-    if (fabs(difference) > 0.001)
-    {
-        tagTextWidth += (tagTextWidthTarget - tagTextWidth) * kTBZVenue_Damping;
-        
-        difference = tagTextWidthTarget-tagTextWidth;
-        if (fabs(difference) < 0.001) 
-        {
-            tagTextWidth = tagTextWidthTarget;
-        }
-        
-        update = true;
-    }
-    
-    if (update) 
-    {
-        updateTagFBO();
-    }
+    tag.update();
 }
 
 list<tbzVenueSlot>::iterator tbzVenue::slotAtTime(tm time)
@@ -154,138 +119,9 @@ list<tbzVenueSlot>::iterator tbzVenue::slotAfterTime(tm time)
     return returnSlot;
 }
 
-void tbzVenue::updateTagFBO(bool resize)
-{
-    if (fontTitle)
-    {
-        // Just a reminder: origin is top left, and this is an arrow pointing down.
-        
-        if (!tagFBO.isAllocated() || resize)
-        {
-            // TASK: Determine tagTextTarget sizes given however many subtitle / info lines
-            if (tagTextLines.size() > 0)
-            {
-                // Vertically
-                tagTextHeightTarget = tagTextLines.size() * fontBody->getLineHeight();
-                
-                // Horiztonally
-                tagTextWidthTarget = fontTitle->stringWidth(name);
-                vector<string>::iterator line;
-                for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
-                {
-                    tagTextWidthTarget = max(tagTextWidthTarget, fontBody->stringWidth(*line));
-                }
-            }
-            else
-            {
-                tagTextHeightTarget = 0;
-                tagTextWidthTarget = fontTitle->stringWidth(name);
-            }
-        }
-        
-        // backBounds is the rect of the bubble only, ie. text with border
-        ofRectangle backBounds;
-        backBounds.width    = tagTextWidth + kTBZVenue_Radius*2.0f;
-        backBounds.height   = fontTitle->getLineHeight() + tagTextHeight + kTBZVenue_Radius*2.0f;
-        
-        // tagBounds is the rect of the whole tag, ie. backBounds plus the caption arrow
-        ofRectangle tagBounds;
-        tagBounds           = backBounds;
-        tagBounds.height   += kTBZVenue_ArrowSize;
-        
-        ofRectangle tagTargetBounds;
-        tagTargetBounds.width   = tagTextWidthTarget + kTBZVenue_Radius*2.0f;
-        tagTargetBounds.height  = fontTitle->getLineHeight() + tagTextHeightTarget + kTBZVenue_Radius*2.0f + kTBZVenue_ArrowSize;
-        
-        // Create the empty image to draw into if neccessary
-        if (!tagFBO.isAllocated() ||
-            (resize && tagTargetBounds.height > tagFBO.getHeight()) || // We're getting bigger
-            (tagBounds.height != tagFBO.getHeight() && tagTextHeight == tagTextHeightTarget)) // Having got smaller, we've finished animating down.
-        {
-            ofFbo::Settings s;
-            s.width             = min((int)tagTargetBounds.width, ofGetWidth());
-            s.height            = min((int)tagTargetBounds.height, ofGetHeight());
-            s.internalformat    = GL_RGBA;
-            s.useDepth          = false;
-            
-            tagFBO.setDefaultTextureIndex(0); // oF bug needs this as fix( http://forum.openframeworks.cc/index.php?topic=10536.0 )
-            tagFBO.allocate(s);
-            
-            // We want to draw centered horizontally and aligned to bottom
-            tagFBO.setAnchorPoint(s.width/2, s.height);
-        }
-        
-        tagBounds.x     = (tagFBO.getWidth() - tagBounds.width) / 2.0f; // Center horizontally
-        tagBounds.y     = tagFBO.getHeight() - tagBounds.height;        // Place at bottom
-        
-        backBounds.x        = tagBounds.x;
-        backBounds.y        = tagBounds.y;
-        
-        ofPoint textOrigin;
-        textOrigin.x        = backBounds.x + kTBZVenue_Radius;
-        //textOrigin.y        = backBounds.y + kTBZVenue_Radius + fontTitle->getLineHeight(); 
-        textOrigin.y        = backBounds.y + kTBZVenue_Radius + fontTitle->stringHeight(name);
-        
-        
-        float centreX = tagFBO.getWidth() / 2.0f;
-        float backBottom = backBounds.y + backBounds.height;
-        ofPoint arrowTL(centreX - kTBZVenue_ArrowSize/2.0f, backBottom);
-        ofPoint arrowTR(centreX + kTBZVenue_ArrowSize/2.0f, backBottom);
-        ofPoint arrowB(centreX, backBottom + kTBZVenue_ArrowSize * sin(ofDegToRad(60.0f)));
-        
-        // Draw into image
-        ofPushStyle();
-        tagFBO.begin();
-        {
-            // Clear the image
-            ofClear(255,255,255, 0);
-            
-            // Draw container shape
-            ofSetColor(255,0,0);
-            ofRectRounded(backBounds, kTBZVenue_Radius);
-            ofTriangle(arrowTL, arrowTR, arrowB);
-            
-            // Draw text
-            ofSetColor(255);
-            
-            fontTitle->drawString(name, textOrigin.x, textOrigin.y);
-            
-            vector<string>::iterator line;
-            for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
-            {
-                if (textOrigin.y > backBottom - fontBody->getLineHeight()) break;
-                
-                textOrigin.y += fontBody->getLineHeight();
-                
-                float lineWidth = fontBody->stringWidth(*line);
-                float availableWidth = tagTextWidth + kTBZVenue_Radius;
-                if (lineWidth > availableWidth)
-                {
-                    int charsToDraw = line->length() * (tagTextWidth / lineWidth);
-                    fontBody->drawString(line->substr(0,charsToDraw), textOrigin.x, textOrigin.y);
-                }
-                else
-                {
-                    fontBody->drawString(*line, textOrigin.x, textOrigin.y);
-                }
-            }
-        }
-        tagFBO.end();
-        ofPopStyle();
-    }
-    else
-    {
-        ofLog(OF_LOG_WARNING, "TBZSocialMessage: Setup: fontTitle not allocated");
-    }
-    
-}
-
 void tbzVenue::drawTag(float animPos)
 {
-    if (fontTitle)
-    {
-        if (!tagFBO.isAllocated()) updateTagFBO();
-
+    
 //        ofPushStyle();
 //        
 //            ofColor fadeInAlpha(255, animPos*255.0f);
@@ -296,12 +132,7 @@ void tbzVenue::drawTag(float animPos)
 //        
 //        ofPopStyle();
         
-        tagFBO.draw(0,0);
-    }
-    else
-    {
-        ofDrawBitmapString(name, 0, 0);
-    }
+    tag.draw();
 }
 
 void tbzVenue::setTagTextType(TagTextType type)
@@ -310,7 +141,7 @@ void tbzVenue::setTagTextType(TagTextType type)
     {
         tagTextType = type;
         
-        tagTextLines.clear();
+        list<string> tagTextLines;
         
         if (type == nowAndNext)
         {
@@ -345,115 +176,13 @@ void tbzVenue::setTagTextType(TagTextType type)
             tagTextType = nothing;
         }
         
-        // Resize and redraw FBO
-        updateTagFBO(true);
+        tag.setContent(name, tagTextLines);
     }
 }
 
 tbzVenue::TagTextType tbzVenue::tbzVenue::getTagTextType()
 {
     return tagTextType;
-}
-
-void tbzVenue::updateProgrammeFBO()
-{
-    if (true && fontTitle && fontBody)
-    {
-        // Create the empty image to draw into
-        ofFbo::Settings s;
-        s.width             = ofGetWidth();
-        s.height            = ofGetHeight();
-        s.internalformat    = GL_RGBA;
-        s.useDepth          = false;
-        
-        // Create the correctly sized FBO if neccessary
-        if (!programmeFBO.isAllocated())
-        {
-            programmeFBO.setDefaultTextureIndex(0); // oF bug needs this as fix( http://forum.openframeworks.cc/index.php?topic=10536.0 )
-            programmeFBO.allocate(s);
-        }
-        
-        // Draw into image
-        ofPushStyle();
-        programmeFBO.begin();
-        {
-            // Clear the image
-            ofClear(255, 255, 255, 0); // Clearing with white to antialias onto background colour
-        
-            // TASK: Draw background fading in over model
-            // Perhaps loading a PNG would be more flexible, but this is fast if we're just doing a simple gradient and solid
-            ofColor whiteOpaque(255, 255);
-            ofColor whiteClear(whiteOpaque, 0);
-            float maxX = ofGetWidth();
-            float maxY = ofGetHeight();
-            float midX = maxX * 0.2f;
-            
-            ofMesh backgroundFillMesh;
-            
-            backgroundFillMesh.addVertex(ofVec3f(0,0));
-            backgroundFillMesh.addColor(whiteClear);
-            
-            backgroundFillMesh.addVertex(ofVec3f(0,maxY));
-            backgroundFillMesh.addColor(whiteClear);
-            
-            backgroundFillMesh.addVertex(ofVec3f(midX, 0));
-            backgroundFillMesh.addColor(whiteOpaque);
-            
-            backgroundFillMesh.addVertex(ofVec3f(midX, maxY));
-            backgroundFillMesh.addColor(whiteOpaque);
-            
-            backgroundFillMesh.addVertex(ofVec3f(maxX,0));
-            backgroundFillMesh.addColor(whiteOpaque);
-            
-            backgroundFillMesh.addVertex(ofVec3f(maxX, maxY));
-            backgroundFillMesh.addColor(whiteOpaque);
-            
-            ofVbo backgroundFillVBO;
-            backgroundFillVBO.setMesh(backgroundFillMesh, GL_STATIC_DRAW);
-            
-            backgroundFillVBO.draw(GL_TRIANGLE_STRIP, 0, 6);
-            
-            // TASK: Draw Text
-            
-            int yPos = 0;
-            int xPos = midX + kTBZVenue_Radius;
-            
-            // Title
-            ofSetColor(0, 0, 0, 255);
-            yPos += 10 + fontTitle->getSize();
-            fontTitle->drawString(name, xPos, yPos);
-            
-            // Slots
-            list<tbzVenueSlot>::iterator slot;
-            for (slot = slots.begin(); slot != slots.end(); slot++)
-            {
-                yPos += fontBody->getLineHeight();
-                
-                fontBody->drawString(slotTextForSlot(*slot), xPos, yPos);
-            }
-        }
-        programmeFBO.end();
-        ofPopStyle();
-    }
-    else
-    {
-        ofLog(OF_LOG_WARNING, "TBZVenue: updateProgrammeFBO: fontTitle not allocated");
-    }
-    
-}
-
-void tbzVenue::drawProgramme(float animPos)
-{
-    if (fontTitle && fontBody)
-    {
-        if (!programmeFBO.isAllocated()) updateProgrammeFBO();
-        ofSetColor(255, 255*animPos);
-        programmeFBO.draw(0,0);
-    }
-    else
-    {
-        ofDrawBitmapString(name, 0, 0);
-    }
 }
 
 string tbzVenue::slotTextForSlot(tbzVenueSlot &slot)

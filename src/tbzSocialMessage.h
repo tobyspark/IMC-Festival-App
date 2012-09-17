@@ -10,29 +10,19 @@
 #define __IMCFestivalApp__tbzSocialMessage__
 
 #include "ofMain.h"
+#include "tbzCaptionGraphic.h"
+#include <list>
 
 class tbzSocialMessage
 {
     public:
-        tbzSocialMessage(string text, float latitude, float longitude, ofTrueTypeFont *font = NULL);
-        ~tbzSocialMessage();
+        tbzSocialMessage(string text, float latitude, float longitude);
         
-        void setupFBO();
-        void draw(float animPos = 1.0f);
+        tbzCaptionGraphic tag;
     
         ofPoint geoLocation;
     
-        ofTrueTypeFont *font;
-    
-    protected:
-        string text;
-        ofRectangle bounds;
-        
-        // GL resources don't copy on c++ object copy.
-        // See draw() for why this is a pointer.
-        ofFbo *fbo;
-    
-        // perhaps should have material.
+        void draw(float animPos = 1.0f);
 };
 
 #endif /* defined(__IMCFestivalApp__tbzSocialMessage__) */

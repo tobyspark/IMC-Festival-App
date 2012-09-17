@@ -227,6 +227,13 @@ void tbzEventSite::updateContent()
     {
         venue->update();
     }
+
+    //// TASK: Update messages, this tasks their animation etc.
+    list<tbzSocialMessage>::iterator message;
+    for (message = socialMessages.begin(); message != socialMessages.end(); message++)
+    {
+        message->tag.update();
+    }
     
     //// TASK: Translate between graphical rendering for plan view and lit rendering for elevated
     ofColor whiteIfPlanView((1.0f - elevationFactor) * 255);
@@ -312,7 +319,8 @@ void tbzEventSite::drawContent()
                         ofRotate(-90, 1, 0, 0);
                         
                         message->draw(elevationFactor);
-                    };
+                    }
+                    ofPopMatrix();
                 }
             }
             
@@ -327,7 +335,8 @@ void tbzEventSite::drawContent()
                         ofRotate(-elevationAngle, 1, 0, 0);
                         
                         venue->drawTag();
-                    };
+                    }
+                    ofPopMatrix();
                 }
         }
         ofPopMatrix();
