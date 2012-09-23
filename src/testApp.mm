@@ -1,41 +1,24 @@
 #include "testApp.h"
 
-void imcFestivalApp::updateSocialMessagesDisplayed()
-{
-    // TODO: Base on time, in the meantime...
-    
-    // TASK: Cycle through social messages
-    if (socialMessageStore.getNumTags("message") == 0) return;
-    
-    int indexToDisplay = ofGetFrameNum() % socialMessageStore.getNumTags("message");
-    
-    socialMessageStore.pushTag("message", indexToDisplay);
-    {
-        tbzSocialMessage socialMessage(socialMessageStore.getValue("text", ""), socialMessageStore.getValue("latitude", 0.0f), socialMessageStore.getValue("longitude", 0.0f));
-        socialMessage.tag.fontTitle = &socialMessageFont;
-        socialMessage.tag.fontBody = &socialMessageFont;
-        //socialMessage.tag.snapToTargetSize(); // FIXME: crash, buggy ofxFBO!
-        eventSite.socialMessages.push_front(socialMessage);
-    }
-    socialMessageStore.popTag();
-    
-    if (eventSite.socialMessages.size() > 10)
-    {
-        eventSite.socialMessages.pop_back();
-    }
-}
-
 //--------------------------------------------------------------
 void imcFestivalApp::setup(){
+    
     ofSetLogLevel(OF_LOG_WARNING);
     
     #include "tbzPlatformDefineTests.h"
-        
+    
     bool success = false;
     
-    //// TASK: Make fonts right
+    //// TASK: Setup Retina detection
+    tbzScreenScale::detectScale();
+    
+    //// TASK: Setup Fonts
     // The iOS font example has 72 dpi set, but thats fugly in this app.
     ofTrueTypeFont::setGlobalDpi(96);
+    
+    venueFontTitle.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 18, true, true);
+    venueFontBody.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
+    socialMessageFont.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
     
     // TASK: Set base directory
     // iOS - this is done for us.
@@ -44,7 +27,7 @@ void imcFestivalApp::setup(){
         ofSetDataPathRoot("../Resources/");
     #endif
     
-    //// TASK: Load our eventSite event details from the app bundle
+    //// TASK: Load and act on our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
     
     if (!success) ofLog(OF_LOG_WARNING, "Failed to load eventSiteSettings.xml");
@@ -65,9 +48,6 @@ void imcFestivalApp::setup(){
     eventSiteSettings.popTag();
     
     // Use venue / programme data
-    
-    venueFontTitle.loadFont("Arial Narrow.ttf", 18, true, true);
-    venueFontBody.loadFont("Arial Narrow.ttf", 12, true, true);
     
     int venueCount = eventSiteSettings.getNumTags("venue");
         
@@ -91,6 +71,23 @@ void imcFestivalApp::setup(){
         }
     }
     
+    // User person / social media data
+    
+    int peopleCount = eventSiteSettings.getNumTags("person");
+    
+    for (int i = peopleCount-1; i >= 0; i--)
+    {
+        Poco::SharedPtr<tbzPerson> person = new tbzPerson;
+        
+        ofxXmlSettings newXML;
+        bool xmlChanged;
+        
+        person->setupFromXML(eventSiteSettings, newXML, xmlChanged, i);
+        person->fontTitle = &socialMessageFont;
+        
+        eventSite.addPerson(person);
+    }
+    
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     eventSite.origin = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
@@ -109,30 +106,67 @@ void imcFestivalApp::setup(){
     glAlphaFunc ( GL_GREATER, 0.1);
     glEnable ( GL_ALPHA_TEST );
     
+    
+    
+    
     //// TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
-    socialMessageStoreFileLoc = "socialMessageStore.xml";
+    if (IMCFestivalApp_TwitterUseCached)
+    {
+        socialMessageStoreFileLoc = "socialMessageStore.xml";
+        
+        //    #if TARGET_OS_IPHONE
+        //    // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
+        //    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + socialMessageStoreFileLoc;
+        //    #endif
+        
+        success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
+        
+        if (!success)
+        {
+            ofLog(OF_LOG_WARNING, "No existing social message store found");
+            //loadAndParseTwitterTestData();
+        }
+        
+        int count = socialMessageStore.getNumTags("message");
+        ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
+    }
+
     
-    #if TARGET_OS_IPHONE
-    // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
-    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + socialMessageStoreFileLoc;
-    #endif
-    
-//    success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
-//    
-//    if (!success)
-//    {
-//        ofLog(OF_LOG_WARNING, "No existing social message store found");
-//        loadAndParseTwitterTestData();
-//    }
-//    
-//    int count = socialMessageStore.getNumTags("message");
-//    ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
-    
-    socialMessageFont.loadFont("Arial Narrow.ttf", 16, true, true);
     
     
-    //// TASK: Startup Twitter
-    twitter.connect(eventSiteSettings.getValue("twitterSeachTerms", "from:@QMUL"), 60);
+    
+    //// TASK: Startup Twitter (Geolocated search)
+    
+    if (IMCFestivalApp_TwitterSearchGeo)
+    {
+        /* API 1.0 - https://dev.twitter.com/docs/using-search
+         *
+         * Location data is only included if the query includes the geocode parameter, and the user Tweeted with Geo information. When conduction Geo searches, the Search API will:
+         *
+         * Attempt to find Tweets which have a place or lat/long within the queried geocode.
+         * Attempt to find Tweets created by users whose profile location can be reverse geocoded into a lat/long within the queried geocode.
+         */
+        
+        int primeNumberAround60 = 79; // hack - try to avoid simultaneous fires of search
+        stringstream geoString;
+        ofPoint center = eventSite.groundBounds.getCenter();
+        
+        // Approximate calculation of search radius
+        // Get approx radius from centre to corner. This should easily encompass our event site, which is likely an irregular shape within that rect bounds.
+        // Latitude: 1 deg = 110.54 km
+        // Longitude: 1 deg = 111.320*cos(latitude) km
+        float heightKM = eventSite.groundBounds.height * 110.54f;
+        float widthKM  = eventSite.groundBounds.width * 111.320f * cos(ofDegToRad(eventSite.groundBounds.height));
+        float radius   = sqrt(heightKM*heightKM + widthKM*widthKM) / 2.0f;
+        
+        // API 1.0: The parameter value is specified by "latitude,longitude,radius", where radius units must be specified as either "mi" (miles) or "km" (kilometers)
+        geoString << "geocode=\"" << center.y << "," << center.x << "," << radius << "km\"";
+        
+        list<string> searchParameters;
+        searchParameters.push_front(geoString.str());
+        
+        twitterGeo.connect("", searchParameters, primeNumberAround60);
+    }
 }
 
 //--------------------------------------------------------------
@@ -159,11 +193,12 @@ void imcFestivalApp::update()
      *  - Can't have both, one is always nearer
      */
     
-    tbzEventSite::ViewState state = eventSite.getViewState();
+    tbzEventSite::ViewState state;
+    bool stateChanged;
+    stateChanged = eventSite.updateViewState(state);
     
     if (state == tbzEventSite::planView || state == tbzEventSite::transitioningToPlanView)
-    {
-        // Test to see if a venue is over eventSite origin
+    {   // Test to see if a venue is over eventSite origin
         float searchRadius = ofGetWidth()*0.2f;
         float radius = searchRadius;
         tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
@@ -204,14 +239,19 @@ void imcFestivalApp::update()
 
     if (state == tbzEventSite::sideElevationView || state == tbzEventSite::transitioningToElevationView)
     {
-        if (venueFocussed)
+        if (stateChanged)
         {
-            venueFocussed->setTagTextType(tbzVenue::programme);
+            if (venueFocussed)
+            {
+                venueFocussed->setTagTextType(tbzVenue::programme);
+                eventSite.peopleDraw = false;
+            }
+            else
+            {
+                eventSite.peopleDraw = true;
+            }
         }
-        else
-        {
-            updateSocialMessagesDisplayed();
-        }
+
     }
     
     /* TASK: Ingest any new social messages
@@ -220,26 +260,86 @@ void imcFestivalApp::update()
      *
      */
     
-    while(twitter.hasNewTweets()) {
-		ofxTweet t = twitter.getNextTweet();
-		cout << "text:" << t.getText() << endl;
-		cout << "avatar:" << t.getAvatar() << endl;
-		cout << "---" << endl;
-        
-        socialMessageStore.addTag("message");
-        socialMessageStore.pushTag("message", socialMessageStore.getNumTags("message") - 1);
+    if (IMCFestivalApp_TwitterSearchGeo)
+    {
+        while(twitterGeo.hasNewTweets())
         {
-            // Note: Twitter IDs can exceed max int size, so keep IDs as strings.
-            socialMessageStore.setValue("text", t.getText());
-            socialMessageStore.setValue("latitude", eventSite.groundBounds.getCenter().y);
-            socialMessageStore.setValue("longitude", eventSite.groundBounds.getCenter().x);
-            socialMessageStore.setValue("twitter:id", t.getID());
-            socialMessageStore.setValue("twitter:userid", t.getUserID());
-//            socialMessageStore.setValue("twitter:in_reply_to_status_id", t.//TODO);
-//            socialMessageStore.setValue("twitter:in_reply_to_user_id", t.//TODO);
+            ofxTweet tweet = twitterGeo.getNextTweet();
+
+            // TASK: Extract location from tweet, skip to next tweet if missing
+            
+            bool    hasGeo;
+            ofPoint geoPoint;
+            
+            hasGeo = tbzTweet::getGeoFromTweet(tweet, geoPoint);
+            
+            // Ignore this tweet if no coordinates attached. A Twitter search with geocoords will return tweets from users whose profile location is within the area specified; we don't want these.
+            if (!hasGeo) continue;
+            
+            // Ignore this tweet if coordinates are not within site bounds (unable to search that precisely on twitter)
+            if (!eventSite.groundBounds.inside(geoPoint)) continue;
+            
+    //        cout << endl;
+    //        cout << "---" << endl;
+    //        cout << "GeoTweet text:" << tweet.getText() << endl;
+    //        //cout << "Name: " << tweet.getScreenName() << endl;
+    //        //cout << "UserID: " << tweet.getUserID() << endl;
+    //        cout << "Geo: " << geoPoint.y << "N, " << geoPoint.x << "E" << endl;
+    //        //cout << "Source:" << tweet.getSourceJSON() << endl;
+            
+            // TASK: Create message and add to eventSite.
+            Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "Twitter", "TODO:Time");
+            message->geoLocation = new ofPoint(geoPoint);
+            message->tag.fontTitle = &socialMessageFont;
+            message->tag.fontBody = &socialMessageFont;
+            message->attributeTo = tweet.getUserID();
+            
+            eventSite.addMessage(message);
+            
+            // TASK: Cache message
+            
+    //        socialMessageStore.addTag("message");
+    //        socialMessageStore.pushTag("message", socialMessageStore.getNumTags("message") - 1);
+    //        {
+    //            // Note: Twitter IDs can exceed max int size, so keep IDs as strings.
+    //            socialMessageStore.setValue("text", tweet.getText());
+    //            socialMessageStore.setValue("author", tweet.getScreenName());
+    //            socialMessageStore.setValue("latitude", geoPoint.x);
+    //            socialMessageStore.setValue("longitude", geoPoint.y);
+    //            socialMessageStore.setValue("twitter:id", tweet.getID());
+    //            socialMessageStore.setValue("twitter:userid", tweet.getUserID());
+    //        }
+    //        socialMessageStore.popTag();
         }
-        socialMessageStore.popTag();
-	}
+    }
+    
+    if (IMCFestivalApp_TwitterUseCached)
+    {
+        int framePeriod = 120;
+        if (ofGetFrameNum() % framePeriod == 0)
+        {
+            if (socialMessageStore.getNumTags("message") == 0) return;
+            
+            int indexToDisplay = (ofGetFrameNum() / framePeriod) % socialMessageStore.getNumTags("message");
+            
+            socialMessageStore.pushTag("message", indexToDisplay);
+            {
+                Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(
+                                                                                socialMessageStore.getValue("text", ""),
+                                                                                socialMessageStore.getValue("twitter:userid", ""),
+                                                                                "Twitter",
+                                                                                "TODO: Time"
+                                                                                );
+                message->geoLocation = new ofPoint(socialMessageStore.getValue("longitude", 0.0f), socialMessageStore.getValue("latitude", 0.0f));
+                message->tag.fontTitle = &socialMessageFont;
+                message->tag.fontBody = &socialMessageFont;
+                message->attributeTo = socialMessageStore.getValue("twitter:userid", "");
+                eventSite.addMessage(message);
+            }
+            socialMessageStore.popTag();
+        }
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -380,119 +480,3 @@ void imcFestivalApp::dragEvent(ofDragInfo dragInfo){
 }
 
 #endif
-
-void imcFestivalApp::loadAndParseTwitterTestData()
-{
-    // TASK: Read in Twitter Test Data from XML and if geolocated within eventSite add it to our message store
-    ofLog(OF_LOG_VERBOSE, "Loading in twitter test data from XML dump");
-    
-    // The XML data dump looks like
-    //    <?xml version="1.0"?>
-    //    
-    //    <!--
-    //    -
-    //    - Sequel Pro XML dump
-    //    - Version 3408
-    //    -
-    //    - http://www.sequelpro.com/
-    //    - http://code.google.com/p/sequel-pro/
-    //    -
-    //    - Host: quark (MySQL 5.0.95)
-    //    - Database: DCS318
-    //    - Generation Time Time: 2012-08-22 16:30:40 +0000
-    //    -
-    //    -->
-    //    
-    //    <DCS318>
-    //    
-    //        <custom>
-    //        <row>
-    //        <id>99630789989371904</id>
-    //        <text>Wind 0.6 mph N. Barometer 1008.7 mb, Falling. Temperature 12.4 Â°C. Rain today 0.0 mm. Humidity 74%</text>
-    //        <favorited>False</favorited>
-    //        <truncated>False</truncated>
-    //        <source>&lt;a href=&quot;http://sandaysoft.com/&quot; rel=&quot;nofollow&quot;&gt;Sandaysoft Cumulus&lt;/a&gt;</source>
-    //        <in_reply_to_screen_name>None</in_reply_to_screen_name>
-    //        <geo>{'type': 'Point', 'coordinates': [53.055277779999997, -2.3011111099999999]}</geo>
-    //        <in_reply_to_status_id>0</in_reply_to_status_id>
-    //        <in_reply_to_user_id>0</in_reply_to_user_id>
-    //        <userid>165919629</userid>
-    //        <created_at>2011-08-06 00:00:06</created_at>
-    //        </row>
-    
-    bool success;
-    
-    ofxXmlSettings xml;
-    xml.setVerbose(true);
-    
-    success = xml.loadFile("twitter-testData.xml");
-    if (success)
-    {
-        bool addedMessage = false;
-        
-        xml.pushTag("DCS318");
-        xml.pushTag("custom");
-        
-        int maxIndex = xml.getNumTags("row") - 1;
-        ofLog(OF_LOG_VERBOSE, "Parsing " + ofToString(maxIndex+1) + " tweets");
-        
-        for (int i = maxIndex; i >= 0; i--)
-        {
-            xml.pushTag("row", i);
-            {
-                // TASK: Our test for inclusion is whether in geographic bounds
-                
-                // This is a hack to read the JSON that forms this value in this database.
-                // The format to parse is {'type': 'Point', 'coordinates': [54.071950999999999, -2.8640210000000002]}
-                // Not using a JSON library as XML can be used to pull from Twitter live, and we've already got XML parsing incorporated.
-                stringstream geo(xml.getValue("geo", ""));
-                
-                string tempString;
-                getline(geo, tempString, '[');
-                
-                getline(geo, tempString, ',');
-                stringstream latitudeString(tempString);
-                
-                getline(geo, tempString, ']');
-                stringstream longitudeString(tempString);
-                
-                float latitude, longitude;
-                longitudeString >> longitude;
-                latitudeString >> latitude;
-                
-                if (eventSite.groundBounds.inside(longitude, latitude))
-                {
-                    // Create our message data structure
-                    socialMessageStore.addTag("message");
-                    socialMessageStore.pushTag("message", socialMessageStore.getNumTags("message") - 1);
-                    {
-                        // Note: Twitter IDs can exceed max int size, so keep IDs as strings.
-                        socialMessageStore.setValue("text", xml.getValue("text", ""));
-                        socialMessageStore.setValue("latitude", latitude);
-                        socialMessageStore.setValue("longitude", longitude);
-                        socialMessageStore.setValue("twitter:id", xml.getValue("id", ""));
-                        socialMessageStore.setValue("twitter:userid", xml.getValue("userid", ""));
-                        socialMessageStore.setValue("twitter:in_reply_to_status_id", xml.getValue("in_reply_to_status_id", ""));
-                        socialMessageStore.setValue("twitter:in_reply_to_user_id", xml.getValue("in_reply_to_user_id", ""));
-                    }
-                    socialMessageStore.popTag();
-                    
-                    addedMessage = true;
-                    ofLog(OF_LOG_VERBOSE, "Added test tweet " + ofToString(i) + ", " + xml.getValue("text", ""));
-                }
-            }
-            xml.popTag();
-            
-            // Now we've used it, lets clear it to reclaim memory. We can do this without indexes being affected as we're counting down not up.
-            //xml.clearTagContents("row", i); //actually, lets not, it mysteriously crashes after some 10k entries
-            
-        }
-        
-        if (addedMessage) socialMessageStore.saveFile(socialMessageStoreFileLoc);
-        
-    }
-    else
-    {
-        ofLog(OF_LOG_WARNING, "Failed to load twitter test data from XML");
-    }
-}

@@ -12,12 +12,18 @@
 #define kTBZSocialMessage_ArrowSize 10 // this is side length of arrow and height bubble is raised
 #define kTBZSocialMessage_AnimInDistance 500
 
-tbzSocialMessage::tbzSocialMessage(string _text, float _latitude, float _longitude)
+tbzSocialMessage::tbzSocialMessage(string _text, string author, string service, string time)
 {
-    list<string> nothingForNow;
-    tag.setContent(_text, nothingForNow);
+    list<string> body;
+    string bodyLine = author + " on " + service + " at " + time;
+    body.push_back(bodyLine);
+    tag.setContent(_text, body);
     tag.setStyle(kTBZSocialMessage_Radius, kTBZSocialMessage_ArrowSize, ofColor(255,0,0), ofColor(255,0,0), ofColor(255));
-    geoLocation.set(_longitude, _latitude);
+}
+
+void tbzSocialMessage::update()
+{
+    tag.update();
 }
 
 void tbzSocialMessage::draw(float animPos)

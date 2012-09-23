@@ -10,6 +10,7 @@
 #define __IMCFestivalApp__tbzCaptionGraphic__
 
 #include "ofMain.h"
+#include "tbzScreenScale.h"
 #include <list>
 
 class tbzCaptionGraphic
@@ -26,6 +27,8 @@ public:
     
     void            update();
     void            draw(float animPos = 1.0f);
+    
+    ofRectangle     getBounds();
     
 protected:
     string          titleText;

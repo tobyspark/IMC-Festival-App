@@ -20,10 +20,12 @@
 
 #include "tbzSocialMessage.h"
 #include "tbzVenue.h"
+#include "tbzPerson.h"
 
 #define kTBZES_ViewElevationAngle 70
 #define kTBZES_MessageElevationHeight 20
 #define kTBZES_Damping 0.1
+#define kTBZES_MaxPeople 20
 
 class tbzEventSite : public ofxMtActionsObject
 {
@@ -31,16 +33,16 @@ class tbzEventSite : public ofxMtActionsObject
 public:
     // Class methods
     
-    tbzEventSite();
-    
     void setup(string modelName, ofxLatLon modelTopLeft, ofxLatLon modelTopRight, ofxLatLon modelBottomLeft, ofxLatLon modelBottomRight);
     
     void addVenue(tbzVenue venue);
+    void addPerson(Poco::SharedPtr<tbzPerson> person);
+    void addMessage(Poco::SharedPtr<tbzSocialMessage> message);
     
     tbzVenue* nearestVenue(float &distance);
     
     enum ViewState { planView, transitioningToPlanView, sideElevationView, transitioningToElevationView };
-    ViewState   getViewState();
+    bool updateViewState(ViewState &viewState);
     
     // ofxMtActionsObject overrides
     
@@ -55,8 +57,9 @@ public:
     ofPoint     origin;
     ofRectangle groundBounds;
     
-    list<tbzSocialMessage> socialMessages;
     list<tbzVenue> venues;
+    list< Poco::SharedPtr<tbzPerson> > people;
+    bool peopleDraw;
     
     float       elevationFactor;
     
@@ -65,6 +68,7 @@ protected:
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
 
     ViewState   viewState;
+    ViewState   lastViewState;
     
     ofxAssimpModelLoader siteModel;
     //float       elevationFactor;

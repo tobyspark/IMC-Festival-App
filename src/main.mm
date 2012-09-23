@@ -3,12 +3,18 @@
 
 /*
  TODO:
- 
- 
- 
+    - Opening animation zooming out to whole site
+    - Change rendering of venues and people tags to a depth sorted list
+    - KMZ code to write out parsed results to separate XML file in writable location
+    - XML code to check for this separate file and merge into in-memory xml before passing to venue / person setup
+    - tweets and twitter max_id cached
+    - TestFlight integration (again obj-c in of setup)
+    
  
  BUGS:
-    
+    - twitter not working as part of person instance?
+    - mangling of (non)unicode eventSiteXML when saving back parsed XML values. Fixes in to-do list.
+    - venue tags when in plan view - depth fighting. could turn off gldepthtest, sort once per modelpos, and draw venues ordered back to front.
  
  
  

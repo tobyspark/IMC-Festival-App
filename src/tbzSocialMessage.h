@@ -16,12 +16,15 @@
 class tbzSocialMessage
 {
     public:
-        tbzSocialMessage(string text, float latitude, float longitude);
+        tbzSocialMessage(string text, string author, string service, string time);
         
+        string attributeTo;
+    
         tbzCaptionGraphic tag;
     
-        ofPoint geoLocation;
+        Poco::SharedPtr<ofPoint> geoLocation;
     
+        void update();
         void draw(float animPos = 1.0f);
 };
 

@@ -241,7 +241,8 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
         else if (xml.tagExists("stageKML"))
         {
             bool ok = false;
-            ok = stageGeoLocationFromKMZ(xml.getValue("stageKML", "no filename could be read from XML"));
+            string filenameKMZ = xml.getValue("stageKML", "no filename could be read from XML");
+            ok = pointFromKMZ(filenameKMZ, stageGeoLocation);
             
             if (ok)
             {
@@ -285,7 +286,8 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
         else if (xml.tagExists("audienceKML"))
         {
             bool ok = false;
-            ok = audienceGeoAreaFromKMZ(xml.getValue("audienceKML", "no filename could be read from XML"));
+            string filenameKMZ = xml.getValue("audienceKML", "no filename could be read from XML")
+            ok = audienceGeoAreaFromKMZ(filenameKMZ, audienceGeoArea);
 
             if (ok)
             {
@@ -358,132 +360,5 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
     
     ofLog(OF_LOG_VERBOSE, "Venue setup: " + name + " with " + ofToString(slots.size()) + " slots");
     ofLog(OF_LOG_VERBOSE, "Location: " + ofToString(stageGeoLocation.x) + ", " + ofToString(stageGeoLocation.y));
-}
-
-bool tbzVenue::stageGeoLocationFromKMZ(string filename)
-{
-    // In an ideal world, we'd use this library. In an ideal world, I'd also be able to compile it.
-    // http://code.google.com/p/libkml
-
-    // Note this will only work in iOS emulator, not on actual iOS devices!
-    // We want this already parsed and in eventSiteSettings.xml for actual iOS startup.
-    
-    bool debugMethod = false;
-    
-    ofLog(OF_LOG_VERBOSE, "Parsing KML: " + filename);
-    
-    bool success = false;
-    
-    string destFileLocation = "unzipTemp";
-    
-    success = ofxUnZip(filename, destFileLocation);
-    if (success)
-    {
-        string docFileLocation = destFileLocation + "/doc.kml";
-        {
-            ofxXmlSettings kml;
-            success = kml.loadFile(docFileLocation);
-            if (success)
-            {
-                string temp;
-                kml.copyXmlToString(temp);
-                
-                kml.pushTag("kml");
-                kml.pushTag("Document");
-                kml.pushTag("Placemark");
-                kml.pushTag("Point");
-                
-                stringstream coordinates(kml.getValue("coordinates", ""));
-                
-                if (debugMethod) ofLog(OF_LOG_VERBOSE, coordinates.str());
-                
-                string tempString;
-                
-                getline(coordinates, tempString, ',');
-                stringstream xString(tempString);
-                
-                getline(coordinates, tempString, ',');
-                stringstream yString(tempString);
-                
-                getline(coordinates, tempString, ' ');
-                stringstream zString(tempString);
-                
-                xString >> stageGeoLocation.x;
-                yString >> stageGeoLocation.y;
-            }
-        }
-        ofFile::removeFile(docFileLocation);
-    }
-
-    return success;
-}
-
-bool tbzVenue::audienceGeoAreaFromKMZ(string filename)
-{
-    // Note this will only work in iOS emulator, not on actual iOS devices!
-    // We want this already parsed and in eventSiteSettings.xml for actual iOS startup.
-    
-    bool debugMethod = false;
-    
-    ofLog(OF_LOG_VERBOSE, "Parsing KML: " + filename);
-    
-    bool success = false;
-    
-    string destFileLocation = "unzipTemp";
-    
-    success = ofxUnZip(filename, destFileLocation);
-    if (success)
-    {
-        string docFileLocation = destFileLocation + "/doc.kml";
-        {
-            ofxXmlSettings kml;
-            success = kml.loadFile(docFileLocation);
-            if (success)
-            {
-                kml.pushTag("kml");
-                kml.pushTag("Document");
-                kml.pushTag("Placemark");
-                kml.pushTag("Polygon");
-                kml.pushTag("outerBoundaryIs");
-                kml.pushTag("LinearRing");
-                
-                stringstream coordinates(kml.getValue("coordinates", ""));
-                
-                if (debugMethod) ofLog(OF_LOG_VERBOSE, coordinates.str());
-                
-                audienceGeoArea.clear();
-                
-                while (true)
-                {
-                    string tempString;
-                    
-                    getline(coordinates, tempString, ',');
-                    if (tempString.length() == 0) break;
-                    stringstream xString(tempString);
-                    
-                    getline(coordinates, tempString, ',');
-                    if (tempString.length() == 0) break;
-                    stringstream yString(tempString);
-
-                    getline(coordinates, tempString, ' ');
-                    if (tempString.length() == 0) break;
-                    stringstream zString(tempString);
-                    
-                    float x,y;
-                    xString >> x;
-                    yString >> y;
-                    
-                    if (debugMethod) ofLog(OF_LOG_VERBOSE, ofToString(x) + ", " + ofToString(y));
-                    
-                    audienceGeoArea.addVertex(x, y);
-                }
-                
-                audienceGeoArea.close();
-            }
-        }
-        ofFile::removeFile(docFileLocation);
-    }
-    
-    return success;
 }
 

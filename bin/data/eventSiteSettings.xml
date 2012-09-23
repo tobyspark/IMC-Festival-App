@@ -17,6 +17,17 @@
         <longitude>0° 1&apos;41.31&quot;W</longitude>
     </BottomRightCorner>
 </model>
+<person>
+    <name>Eat Your Own Ears</name>
+    <modelName>EYOE-3D.dae</modelName>
+    <positionKML>EYOE-location.kmz</positionKML>
+    <position>
+        <longitude>-0.0317333</longitude>
+        <latitude>51.5393</latitude>
+    </position>
+    <twitterAccount>eatyourownears</twitterAccount>
+    <twitterHashtag>#FieldDay</twitterHashtag>
+</person>
 <venue>
     <name>Laneway</name>
     <stageKML>venueGeography/Laneway.kmz</stageKML>

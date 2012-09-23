@@ -24,8 +24,8 @@ tbzCaptionGraphic::tbzCaptionGraphic()
 
 void tbzCaptionGraphic::setStyle(int radius, int size, ofColor title, ofColor body, ofColor back)
 {
-    cornerRadius = radius;
-    arrowSize = size;
+    cornerRadius = tbzScreenScale::retinaScale * radius;
+    arrowSize = tbzScreenScale::retinaScale * size;
     titleTextColour = title;
     bodyTextColour = body;
     backColour = back;
@@ -45,8 +45,14 @@ void tbzCaptionGraphic::setContent(string _title, list<string>_bodyLines)
 
 void tbzCaptionGraphic::snapToTargetSize()
 {
+    // calculate target size
+    updateTagFBO(true);
+    
+    // update display size to target
     tagTextHeight = tagTextHeightTarget;
     tagTextWidth = tagTextWidthTarget;
+    
+    // re-render FBO with new display size
     updateTagFBO();
 }
 
@@ -93,7 +99,7 @@ void tbzCaptionGraphic::update()
 
 void tbzCaptionGraphic::updateTagFBO(bool resize)
 {
-    if (fontTitle)
+    if (fontTitle && fontBody)
     {
         // Just a reminder: origin is top left, and this is an arrow pointing down.
         
@@ -140,8 +146,8 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
             (tagBounds.height != tagFBO.getHeight() && tagTextHeight == tagTextHeightTarget)) // Having got smaller, we've finished animating down.
         {
             ofFbo::Settings s;
-            s.width             = min((int)tagTargetBounds.width, ofGetWidth());
-            s.height            = min((int)tagTargetBounds.height, ofGetHeight());
+            s.width             = tagTargetBounds.width; //min((int)tagTargetBounds.width, ofGetWidth());
+            s.height            = tagTargetBounds.height; //min((int)tagTargetBounds.height, ofGetHeight());
             s.internalformat    = GL_RGBA;
             s.useDepth          = false;
             
@@ -184,8 +190,18 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
             
             // Draw text
             ofSetColor(titleTextColour);
-            fontTitle->drawString(titleText, textOrigin.x, textOrigin.y);
-            
+            float lineWidth = fontTitle->stringWidth(titleText);
+            float availableWidth = tagTextWidth + cornerRadius;
+            if (lineWidth > availableWidth)
+            {
+                int charsToDraw = titleText.length() * (tagTextWidth / lineWidth);
+                fontTitle->drawString(titleText.substr(0,charsToDraw), textOrigin.x, textOrigin.y);
+            }
+            else
+            {
+                fontTitle->drawString(titleText, textOrigin.x, textOrigin.y);
+            }
+                        
             ofSetColor(bodyTextColour);
             list<string>::iterator line;
             for (line = tagTextLines.begin(); line != tagTextLines.end(); line++)
@@ -194,8 +210,8 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
                 
                 textOrigin.y += fontBody->getLineHeight();
                 
-                float lineWidth = fontBody->stringWidth(*line);
-                float availableWidth = tagTextWidth + cornerRadius;
+                lineWidth = fontBody->stringWidth(*line);
+                availableWidth = tagTextWidth + cornerRadius;
                 if (lineWidth > availableWidth)
                 {
                     int charsToDraw = line->length() * (tagTextWidth / lineWidth);
@@ -210,11 +226,6 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
         tagFBO.end();
         ofPopStyle();
     }
-    else
-    {
-        ofLog(OF_LOG_WARNING, "TBZSocialMessage: Setup: fontTitle not allocated");
-    }
-    
 }
 
 void tbzCaptionGraphic::draw(float animPos)
@@ -229,4 +240,17 @@ void tbzCaptionGraphic::draw(float animPos)
     {
         ofDrawBitmapString(titleText, 0, 0);
     }
+}
+
+ofRectangle tbzCaptionGraphic::getBounds()
+{
+    if (!tagFBO.isAllocated())
+    {
+        updateTagFBO();
+    }
+    
+    float width = tagFBO.getWidth();
+    float height = tagFBO.getHeight();
+    
+    return ofRectangle(-width/2.0f, 0, width, height);
 }

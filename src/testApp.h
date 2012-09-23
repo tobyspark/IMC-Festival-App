@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 #include "ofxTwitter.h"
+#include "tbzTweet.h"
+#include "tbzScreenScale.h"
 
 #if TARGET_OS_IPHONE
 #include "ofxiPhone.h"
@@ -10,6 +12,11 @@
 #endif
 
 #include "tbzEventSite.h"
+
+#define IMCFestivalApp_TwitterSearchGeo NO
+#define IMCFestivalApp_TwitterUseCached YES
+
+float gRetinaScale = 1;
 
 #if TARGET_OS_IPHONE
 class imcFestivalApp : public ofxiPhoneApp
@@ -19,10 +26,7 @@ class imcFestivalApp : public ofBaseApp
 #endif
 {
 public:
-    
-    void updateSocialMessagesDisplayed();
-    void updateSocialMessageStore();
-    
+       
     tbzEventSite eventSite;
     ofxXmlSettings eventSiteSettings;
     
@@ -34,8 +38,8 @@ public:
     ofTrueTypeFont venueFontBody;
     
     tbzVenue*      venueFocussed;
-    
-    ofxTwitterSearch     twitter;
+        
+    ofxTwitterSearch twitterGeo;
     
     // openFrameworks app methods
     void setup();
@@ -70,8 +74,5 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
 #endif
-    
-private:
-    void loadAndParseTwitterTestData();
     
 };

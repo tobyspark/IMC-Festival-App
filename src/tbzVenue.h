@@ -12,6 +12,7 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 #include "tbzCaptionGraphic.h"
+#include "tbzKMZReader.h"
 #include <list>
 #include <vector>
 
@@ -54,9 +55,6 @@ class tbzVenue
     
     protected:
         TagTextType     tagTextType;
-    
-        bool            stageGeoLocationFromKMZ(string filename);
-        bool            audienceGeoAreaFromKMZ(string filename);
     
         string          slotTextForSlot(tbzVenueSlot &slot);
 };
