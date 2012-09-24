@@ -45,6 +45,9 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     light.setPosition(0, 0, 0); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number 
     light.enable();
     
+    // Set opening animation
+    width = 5.0f;
+    siteAnimation.addKeyFrame( Playlist::Action::tween(5000.0f, &width, 1, Playlist::TWEEN_CUBIC, TWEEN_EASE_OUT));
 }
 
 void tbzEventSite::addVenue(tbzVenue venue)
@@ -52,16 +55,19 @@ void tbzEventSite::addVenue(tbzVenue venue)
     venues.push_back(venue);
 }
 
-void tbzEventSite::addPerson(Poco::SharedPtr<tbzPerson> person)
+void tbzEventSite::addPromoter(Poco::SharedPtr<tbzPerson> person)
 {
-    people.push_front(person);
+    promoters.push_front(person);
+}
+
+void tbzEventSite::addPunter(Poco::SharedPtr<tbzPerson> person)
+{
+    punters.push_front(person);
     
-    // TASK: Limit number of people displayed, can't visualise everything for ever, both aesthetically and in resources.
-    while (people.size() > kTBZES_MaxPeople)
+    // TASK: Limit number of punters displayed, can't visualise everything for ever, both aesthetically and in resources.
+    while (punters.size() > kTBZES_MaxPunters)
     {
-        // This is causing a hang?
-        cout << "TODO: Should remove this person from people: " << people.back()->name << endl;
-        //people.pop_back();
+        punters.pop_back();
     }
 }
 
@@ -71,7 +77,7 @@ void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
     
     // Attempt to find person message is attributed to
     list< Poco::SharedPtr<tbzPerson> >::iterator person;
-    for (person = people.begin(); person != people.end(); ++person)
+    for (person = punters.begin(); person != punters.end(); ++person)
     {
         if (!(*person)->name.compare(message->attributeTo))
         {
@@ -80,7 +86,7 @@ void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
     }
     
     // If we've found that person, give them the message
-    if (person != people.end())
+    if (person != punters.end())
     {
         (*person)->addMessage(message);
     }
@@ -91,7 +97,7 @@ void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
         newPerson->name = message->attributeTo;
         newPerson->addMessage(message);
         
-        addPerson(newPerson);
+        addPunter(newPerson);
     }
 }
 
@@ -183,7 +189,7 @@ void tbzEventSite::updateContent()
 
     //// TASK: Update messages, this tasks their animation etc.
     list< Poco::SharedPtr<tbzPerson> >::iterator person;
-    for (person = people.begin(); person != people.end(); person++)
+    for (person = punters.begin(); person != punters.end(); person++)
     {
         (*person)->update();
     }
@@ -191,6 +197,10 @@ void tbzEventSite::updateContent()
     //// TASK: Translate between graphical rendering for plan view and lit rendering for elevated
     ofColor whiteIfPlanView((1.0f - elevationFactor) * 255);
     light.setAmbientColor(whiteIfPlanView);
+    
+    
+    //// TASK: Update site animation
+    siteAnimation.update();
 }
 
 void tbzEventSite::drawContent()
@@ -275,10 +285,25 @@ void tbzEventSite::drawContent()
                 ofPopMatrix();
             }
             
-            if (peopleDraw)
+            list< Poco::SharedPtr<tbzPerson> >::iterator person;
+            for (person = promoters.begin(); person != promoters.end(); ++person)
+            {
+                ofPushMatrix();
+                {
+                    ofPoint modelLocation = groundToModel((*person)->geoLocation); // Don't cache - people move!
+                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                    
+                    ofRotate(-90, 1, 0, 0);
+                    
+                    (*person)->draw(elevationFactor);
+                }
+                ofPopMatrix();
+            }
+            
+            if (puntersDraw)
             {
                 list< Poco::SharedPtr<tbzPerson> >::iterator person;
-                for (person = people.begin(); person != people.end(); ++person)
+                for (person = punters.begin(); person != punters.end(); ++person)
                 {
                     ofPushMatrix();
                     {

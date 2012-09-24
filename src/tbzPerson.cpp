@@ -8,8 +8,6 @@
 
 #include "tbzPerson.h"
 
-#define kTBZPerson_AnimInDistance 200
-
 tbzPerson::tbzPerson()
 {
     ofAddListener(newMessageAnimPos.end_E, this, &tbzPerson::onNewMessageAnimationEnd);

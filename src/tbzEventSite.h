@@ -15,6 +15,7 @@
 #include "ofxMtActionsObject.h"
 #include "ofxAssimpModelLoader.h"
 #include "ofxGeometry.h"
+#include "ofxPlaylist.h"
 
 #include "agg_trans_bilinear.h"
 
@@ -25,7 +26,7 @@
 #define kTBZES_ViewElevationAngle 70
 #define kTBZES_MessageElevationHeight 20
 #define kTBZES_Damping 0.1
-#define kTBZES_MaxPeople 20
+#define kTBZES_MaxPunters 20
 
 class tbzEventSite : public ofxMtActionsObject
 {
@@ -36,7 +37,8 @@ public:
     void setup(string modelName, ofxLatLon modelTopLeft, ofxLatLon modelTopRight, ofxLatLon modelBottomLeft, ofxLatLon modelBottomRight);
     
     void addVenue(tbzVenue venue);
-    void addPerson(Poco::SharedPtr<tbzPerson> person);
+    void addPromoter(Poco::SharedPtr<tbzPerson> person);
+    void addPunter(Poco::SharedPtr<tbzPerson> person);
     void addMessage(Poco::SharedPtr<tbzSocialMessage> message);
     
     tbzVenue* nearestVenue(float &distance);
@@ -58,10 +60,13 @@ public:
     ofRectangle groundBounds;
     
     list<tbzVenue> venues;
-    list< Poco::SharedPtr<tbzPerson> > people;
-    bool peopleDraw;
+    list< Poco::SharedPtr<tbzPerson> > punters;
+    list< Poco::SharedPtr<tbzPerson> > promoters;
+    bool puntersDraw;
     
     float       elevationFactor;
+    
+    ofxPlaylist siteAnimation;
     
 protected:
 

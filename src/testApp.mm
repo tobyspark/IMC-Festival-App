@@ -59,7 +59,6 @@ void imcFestivalApp::setup(){
         venue.setupFromXML(eventSiteSettings, xmlChanged, i);
         venue.tag.fontTitle = &venueFontTitle;
         venue.tag.fontBody  = &venueFontBody;
-        //venue.tag.snapToTargetSize(); // FIXME: crash, buggy ofxFBO!
         eventSite.addVenue(venue);
         
         if (xmlChanged)
@@ -85,12 +84,16 @@ void imcFestivalApp::setup(){
         person->setupFromXML(eventSiteSettings, newXML, xmlChanged, i);
         person->fontTitle = &socialMessageFont;
         
-        eventSite.addPerson(person);
+        eventSite.addPromoter(person);
     }
     
     // Load our event site 3D model in.
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
-    eventSite.origin = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
+    
+    // Set origin
+    eventSiteOriginPermanent = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
+    eventSiteOriginDesired = eventSiteOriginPermanent;
+    eventSite.origin = eventSiteOriginPermanent;
     
     //// TASK: Configure rendering
     
@@ -147,7 +150,6 @@ void imcFestivalApp::setup(){
          * Attempt to find Tweets created by users whose profile location can be reverse geocoded into a lat/long within the queried geocode.
          */
         
-        int primeNumberAround60 = 79; // hack - try to avoid simultaneous fires of search
         stringstream geoString;
         ofPoint center = eventSite.groundBounds.getCenter();
         
@@ -165,8 +167,15 @@ void imcFestivalApp::setup(){
         list<string> searchParameters;
         searchParameters.push_front(geoString.str());
         
-        twitterGeo.connect("", searchParameters, primeNumberAround60);
+        twitterGeo.connect("", searchParameters, IMCFestivalApp_TwitterSearchGeoPeriod);
     }
+    
+    
+    //// TASK: Start opening animation
+    
+    eventSite.elevationFactor = 0;
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -198,7 +207,13 @@ void imcFestivalApp::update()
     stateChanged = eventSite.updateViewState(state);
     
     if (state == tbzEventSite::planView || state == tbzEventSite::transitioningToPlanView)
-    {   // Test to see if a venue is over eventSite origin
+    {
+        if (stateChanged)
+        {
+            eventSiteOriginDesired = eventSiteOriginPermanent;
+        }
+        
+        // Test to see if a venue is over eventSite origin
         float searchRadius = ofGetWidth()*0.2f;
         float radius = searchRadius;
         tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
@@ -244,15 +259,30 @@ void imcFestivalApp::update()
             if (venueFocussed)
             {
                 venueFocussed->setTagTextType(tbzVenue::programme);
-                eventSite.peopleDraw = false;
+                eventSite.puntersDraw = false;
+                
+                // If displayed programme goes off top of screen, move the whole thing down
+                float tagHeight = venueFocussed->tag.getBounds().height;
+                if (tagHeight > eventSite.origin.y)
+                {
+                    eventSiteOriginDesired.y = tagHeight; // TODO: need to work out offset to make this fit just so
+                }
             }
             else
             {
-                eventSite.peopleDraw = true;
+                eventSite.puntersDraw = true;
             }
         }
 
     }
+    
+    
+    // Animate site origin in same manner as eventSite elevation tweening
+    if (eventSiteOriginDesired != eventSite.origin)
+    {
+        eventSite.origin += (eventSiteOriginDesired - eventSite.origin) * kTBZES_Damping;
+    }
+    
     
     /* TASK: Ingest any new social messages
      * 

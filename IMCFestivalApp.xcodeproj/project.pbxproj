@@ -33,6 +33,9 @@
 		A662194C15E3B657003B8ACB /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194615E3B657003B8ACB /* tinyxmlparser.cpp */; };
 		A662194D15E3B657003B8ACB /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A662194815E3B657003B8ACB /* ofxXmlSettings.cpp */; };
 		A6621A7815E6A71E003B8ACB /* tbzSocialMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6621A7615E6A71D003B8ACB /* tbzSocialMessage.cpp */; };
+		A68BEE391610889300802EB6 /* ofxEventKeyframe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE011610889300802EB6 /* ofxEventKeyframe.cpp */; };
+		A68BEE3A1610889300802EB6 /* ofxKeyframe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE031610889300802EB6 /* ofxKeyframe.cpp */; };
+		A68BEE3B1610889300802EB6 /* ofxPlaylist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE051610889300802EB6 /* ofxPlaylist.cpp */; };
 		A6ABE76D15F4CE9500D51B3C /* tbzVenue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */; };
 		A6ABE78315F4D68D00D51B3C /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77A15F4D68D00D51B3C /* ioapi.c */; };
 		A6ABE78415F4D68D00D51B3C /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77C15F4D68D00D51B3C /* unzip.c */; };
@@ -173,6 +176,15 @@
 		A6621A8015E6EC22003B8ACB /* agg_simul_eq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = agg_simul_eq.h; path = _thirdParty/agg_simul_eq.h; sourceTree = "<group>"; };
 		A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tbzEventSiteSettingsXMLMaker.h; sourceTree = "<group>"; };
 		A673DBFA160266A6007B5D6D /* tbzScreenScale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tbzScreenScale.h; sourceTree = "<group>"; };
+		A68BEDFF1610889300802EB6 /* ofxBaseKeyframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxBaseKeyframe.h; sourceTree = "<group>"; };
+		A68BEE001610889300802EB6 /* ofxEasingExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxEasingExt.h; sourceTree = "<group>"; };
+		A68BEE011610889300802EB6 /* ofxEventKeyframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxEventKeyframe.cpp; sourceTree = "<group>"; };
+		A68BEE021610889300802EB6 /* ofxEventKeyframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxEventKeyframe.h; sourceTree = "<group>"; };
+		A68BEE031610889300802EB6 /* ofxKeyframe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxKeyframe.cpp; sourceTree = "<group>"; };
+		A68BEE041610889300802EB6 /* ofxKeyframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxKeyframe.h; sourceTree = "<group>"; };
+		A68BEE051610889300802EB6 /* ofxPlaylist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxPlaylist.cpp; sourceTree = "<group>"; };
+		A68BEE061610889300802EB6 /* ofxPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPlaylist.h; sourceTree = "<group>"; };
+		A68BEE071610889300802EB6 /* ofxPlaylistAEHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPlaylistAEHelper.h; sourceTree = "<group>"; };
 		A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = tbzVenue.cpp; sourceTree = "<group>"; };
 		A6ABE76C15F4CE9400D51B3C /* tbzVenue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = tbzVenue.h; sourceTree = "<group>"; };
 		A6ABE77A15F4D68D00D51B3C /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
@@ -447,6 +459,31 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		A68BEDB81610889300802EB6 /* ofxPlaylist */ = {
+			isa = PBXGroup;
+			children = (
+				A68BEDE41610889300802EB6 /* src */,
+			);
+			name = ofxPlaylist;
+			path = ../../../addons/ofxPlaylist;
+			sourceTree = "<group>";
+		};
+		A68BEDE41610889300802EB6 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				A68BEDFF1610889300802EB6 /* ofxBaseKeyframe.h */,
+				A68BEE001610889300802EB6 /* ofxEasingExt.h */,
+				A68BEE011610889300802EB6 /* ofxEventKeyframe.cpp */,
+				A68BEE021610889300802EB6 /* ofxEventKeyframe.h */,
+				A68BEE031610889300802EB6 /* ofxKeyframe.cpp */,
+				A68BEE041610889300802EB6 /* ofxKeyframe.h */,
+				A68BEE051610889300802EB6 /* ofxPlaylist.cpp */,
+				A68BEE061610889300802EB6 /* ofxPlaylist.h */,
+				A68BEE071610889300802EB6 /* ofxPlaylistAEHelper.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		A6ABE77815F4D68D00D51B3C /* ofxUnZip */ = {
 			isa = PBXGroup;
 			children = (
@@ -581,6 +618,7 @@
 		BB16F26B0F2B646B00518274 /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				A68BEDB81610889300802EB6 /* ofxPlaylist */,
 				A6168316160A0B220023D71A /* ofxTween */,
 				A6CA650F1607202D002F6A15 /* ofxTwitterStream */,
 				A6ABE77815F4D68D00D51B3C /* ofxUnZip */,
@@ -853,6 +891,9 @@
 				A6F45A61160B17B900CFB98F /* tbzKMZReader.cpp in Sources */,
 				A6B32432160B688A007DEEB6 /* tbzTweet.cpp in Sources */,
 				A6D7F2F2160CF64100D01D6F /* tbzScreenScale.mm in Sources */,
+				A68BEE391610889300802EB6 /* ofxEventKeyframe.cpp in Sources */,
+				A68BEE3A1610889300802EB6 /* ofxKeyframe.cpp in Sources */,
+				A68BEE3B1610889300802EB6 /* ofxPlaylist.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

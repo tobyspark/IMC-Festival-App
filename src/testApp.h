@@ -14,6 +14,7 @@
 #include "tbzEventSite.h"
 
 #define IMCFestivalApp_TwitterSearchGeo NO
+#define IMCFestivalApp_TwitterSearchGeoPeriod 60
 #define IMCFestivalApp_TwitterUseCached YES
 
 float gRetinaScale = 1;
@@ -28,6 +29,8 @@ class imcFestivalApp : public ofBaseApp
 public:
        
     tbzEventSite eventSite;
+    ofPoint      eventSiteOriginPermanent;
+    ofPoint      eventSiteOriginDesired;
     ofxXmlSettings eventSiteSettings;
     
     ofxXmlSettings socialMessageStore;

@@ -24,6 +24,7 @@
 #define kTBZPerson_TwitterPollPeriod 45
 #define kTBZPerson_DefaultModelName ""
 #define kTBZPerson_MessageTagGrowAnimation false
+#define kTBZPerson_AnimInDistance 1000
 
 class tbzPerson
 {
