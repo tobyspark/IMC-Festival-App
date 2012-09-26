@@ -3,8 +3,6 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 #include "ofxTwitter.h"
-#include "tbzTweet.h"
-#include "tbzScreenScale.h"
 
 #if TARGET_OS_IPHONE
 #include "ofxiPhone.h"
@@ -12,6 +10,9 @@
 #endif
 
 #include "tbzEventSite.h"
+#include "tbzTweet.h"
+#include "tbzScreenScale.h"
+#include "tbzServerConnector.h"
 
 #define IMCFestivalApp_TwitterSearchGeo NO
 #define IMCFestivalApp_TwitterSearchGeoPeriod 60
@@ -41,6 +42,8 @@ public:
     tbzVenue*      venueFocussed;
         
     ofxTwitterSearch twitterGeo;
+    
+    tbzServerConnection server;
     
     // openFrameworks app methods
     void setup();

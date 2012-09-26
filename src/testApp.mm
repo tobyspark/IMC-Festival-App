@@ -95,6 +95,9 @@ void imcFestivalApp::setup(){
     eventSiteOriginDesired = eventSiteOriginPermanent;
     eventSite.origin = eventSiteOriginPermanent;
     
+    // Set our server endpoint
+    //server.setEndPointURL(TODO: From XML)
+    
     //// TASK: Configure rendering
     
     // currently have some frame-by-frame rather than time based decays etc., so lets keep framerate consistent on OSX
@@ -171,11 +174,9 @@ void imcFestivalApp::setup(){
     }
     
     
-    //// TASK: Start opening animation
-    
-    eventSite.elevationFactor = 0;
-    
-    
+    //// TASK: Start server connection
+    server.setEndPointURL("http://localhost:8888");
+    server.startSession();
 }
 
 //--------------------------------------------------------------
@@ -211,6 +212,9 @@ void imcFestivalApp::update()
         if (stateChanged)
         {
             eventSiteOriginDesired = eventSiteOriginPermanent;
+            
+            //TEMP
+            server.uploadData();
         }
         
         // Test to see if a venue is over eventSite origin

@@ -46,8 +46,10 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     light.enable();
     
     // Set opening animation
+    elevationFactor = 0;
     width = 5.0f;
     siteAnimation.addKeyFrame( Playlist::Action::tween(5000.0f, &width, 1, Playlist::TWEEN_CUBIC, TWEEN_EASE_OUT));
+    
 }
 
 void tbzEventSite::addVenue(tbzVenue venue)
