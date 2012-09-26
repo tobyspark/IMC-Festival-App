@@ -17,8 +17,6 @@
 #define IMCFestivalApp_TwitterSearchGeoPeriod 60
 #define IMCFestivalApp_TwitterUseCached YES
 
-float gRetinaScale = 1;
-
 #if TARGET_OS_IPHONE
 class imcFestivalApp : public ofxiPhoneApp
 #endif
