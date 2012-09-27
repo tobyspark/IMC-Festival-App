@@ -91,20 +91,22 @@ void tbzPerson::update()
     // TASK: Grab new tweets
     while(twitter.hasNewTweets())
     {
-        ofxTweet t = twitter.getNextTweet();
+        ofxTweet    tweet = twitter.getNextTweet();
+        tbzTweet*   tTweet = static_cast<tbzTweet*>(&tweet);
+        
         cout << "Person (" << name << ") search tweet" << endl;
-        cout << "text:" << t.getText() << endl;
-        cout << "author:" << t.getScreenName() << endl;
+        cout << "text:" << tweet.getText() << endl;
+        cout << "author:" << tweet.getScreenName() << endl;
         cout << "---" << endl;
         
-        Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(t.getText(), t.getScreenName(), "twitter", "TODO: Time");
+        Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
         message->tag.fontTitle = fontTitle;
         message->tag.fontBody = fontBody;
         
         bool hasGeo;
         ofPoint geoPoint;
         
-        hasGeo = tbzTweet::getGeoFromTweet(t, geoPoint);
+        hasGeo = tTweet->getGeoLocation(geoPoint);
         
         if (hasGeo) message->geoLocation = new ofPoint(geoPoint);
         

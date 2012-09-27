@@ -299,13 +299,14 @@ void imcFestivalApp::update()
         while(twitterGeo.hasNewTweets())
         {
             ofxTweet tweet = twitterGeo.getNextTweet();
-
+            tbzTweet* tTweet = static_cast<tbzTweet*>(&tweet);
+            
             // TASK: Extract location from tweet, skip to next tweet if missing
             
             bool    hasGeo;
             ofPoint geoPoint;
             
-            hasGeo = tbzTweet::getGeoFromTweet(tweet, geoPoint);
+            hasGeo = tTweet->getGeoLocation(geoPoint);
             
             // Ignore this tweet if no coordinates attached. A Twitter search with geocoords will return tweets from users whose profile location is within the area specified; we don't want these.
             if (!hasGeo) continue;

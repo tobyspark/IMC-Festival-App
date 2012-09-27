@@ -8,10 +8,11 @@
 
 #include "tbzTweet.h"
 
-bool tbzTweet::getGeoFromTweet(ofxTweet &tweet, ofPoint &point)
+
+bool tbzTweet::getGeoLocation(ofPoint &point)
 {
     json_error_t error;
-    json_t* tweetJSON = json_loads(tweet.getSourceJSON().c_str(), 0, &error);
+    json_t* tweetJSON = json_loads(sourceJSON.c_str(), 0, &error);
     if(!tweetJSON) {
         cout <<  "error: on line:" << error.line << ", " << error.text << endl;
         return false;

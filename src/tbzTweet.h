@@ -13,12 +13,10 @@
 #include "ofxTweet.h"
 #include "jansson.h"
 
-class tbzTweet
+class tbzTweet : public ofxTweet
 {
     public:
-        // Oh! to have Obj-C and categories on classes.
-        // In the meantime...
-        static bool getGeoFromTweet(ofxTweet &tweet, ofPoint &point);
+        bool getGeoLocation(ofPoint &point);
 };
 
 #endif /* defined(__IMCFestivalApp__tbzTweet__) */
