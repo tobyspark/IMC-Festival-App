@@ -54,6 +54,9 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
 
 void tbzEventSite::addVenue(tbzVenue venue)
 {
+    venue.tag.fontTitle = venueTitleFont;
+    venue.tag.fontBody = venueBodyFont;
+    venue.tag.setStyle(tbzScreenScale::retinaScale * 8, tbzScreenScale::retinaScale * 10, venueForeColour, venueForeColour*0.8, venueBackColour);
     venues.push_back(venue);
 }
 
@@ -73,8 +76,12 @@ void tbzEventSite::addPunter(Poco::SharedPtr<tbzPerson> person)
     }
 }
 
-void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
+void tbzEventSite::addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message)
 {
+    message->tag.fontTitle = personTitleFont;
+    message->tag.fontBody = personBodyFont;
+    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, personForeColour, personForeColour*0.8, personBackColour);
+    
     // TASK: Assign message to person. 
     
     // Attempt to find person message is attributed to
@@ -101,6 +108,16 @@ void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
         
         addPunter(newPerson);
     }
+}
+
+void tbzEventSite::addMessageToPromoters(Poco::SharedPtr<tbzSocialMessage> message)
+{
+    message->tag.fontTitle = promoterTitleFont;
+    message->tag.fontBody = promoterBodyFont;
+    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, promoterForeColour, promoterForeColour*0.8, promoterBackColour);
+    
+    // TODO: Assign to correct promoter
+    promoters.front()->addMessage(message);
 }
 
 tbzVenue* tbzEventSite::nearestVenue(float &distance)
@@ -292,7 +309,7 @@ void tbzEventSite::drawContent()
             {
                 ofPushMatrix();
                 {
-                    ofPoint modelLocation = groundToModel((*person)->geoLocation); // Don't cache - people move!
+                    ofPoint modelLocation = groundToModel((*person)->geoLocation);
                     ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
                     
                     ofRotate(-90, 1, 0, 0);

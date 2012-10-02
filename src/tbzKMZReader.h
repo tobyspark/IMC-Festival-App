@@ -18,6 +18,7 @@ class tbzKMZReader
     public:
         static bool pointFromKMZ(string filename, ofPoint &point);
         static bool polylineFromKMZ(string filename, ofPolyline &polyline);
+        static string unzipTempDirectory;
 };
 
 #endif /* defined(__IMCFestivalApp__tbzKMZReader__) */

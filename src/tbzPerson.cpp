@@ -36,7 +36,7 @@ void tbzPerson::startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> messa
     newMessageAnimPos.setParameters(easing, ofxTween::easeOut, 0, 1, kTBZPerson_MessageAnimationPeriodMillis, 0);
     newMessageHeight = message->tag.getBounds().height;
     
-    if (kTBZPerson_MessageTagGrowAnimation)
+    if (!kTBZPerson_MessageTagGrowAnimation)
     {
         message->tag.snapToTargetSize();
     }
@@ -88,37 +88,16 @@ void tbzPerson::update()
         geoLocation.y = locationTween.getTarget(1);
     }
     
-    // TASK: Grab new tweets
-    while(twitter.hasNewTweets())
-    {
-        ofxTweet    tweet = twitter.getNextTweet();
-        tbzTweet*   tTweet = static_cast<tbzTweet*>(&tweet);
-        
-        cout << "Person (" << name << ") search tweet" << endl;
-        cout << "text:" << tweet.getText() << endl;
-        cout << "author:" << tweet.getScreenName() << endl;
-        cout << "---" << endl;
-        
-        Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
-        message->tag.fontTitle = fontTitle;
-        message->tag.fontBody = fontBody;
-        
-        bool hasGeo;
-        ofPoint geoPoint;
-        
-        hasGeo = tTweet->getGeoLocation(geoPoint);
-        
-        if (hasGeo) message->geoLocation = new ofPoint(geoPoint);
-        
-        addMessage(message);
-    }
-    
     // TASK: Update displayed messages
-    list< Poco::SharedPtr<tbzSocialMessage> >::iterator message;
-    for (message = messagesDisplay.begin(); message != messagesDisplay.end(); ++message)
+    
+    // messages only currently need to update if tag graphic itself is changing
+    if (kTBZPerson_MessageTagGrowAnimation)
     {
-        // for now...
-        (*message)->tag.update();
+        list< Poco::SharedPtr<tbzSocialMessage> >::iterator message;
+        for (message = messagesDisplay.begin(); message != messagesDisplay.end(); ++message)
+        {
+            (*message)->update();
+        }
     }
 }
 
@@ -175,11 +154,13 @@ void tbzPerson::draw(float animPos)
     ofPopStyle();
 }
 
-bool tbzPerson::loadModel(string modelName)
+
+void tbzPerson::setup(string inName, string inModelName, ofPoint inGeoLocation)
 {
-    bool success = false;
+    name = inName;
+    geoLocation = inGeoLocation;
     
-    if(personModel.loadModel(modelName, true))
+    if(personModel.loadModel(inModelName, true))
     {
         personModel.setAnimation(0);
         
@@ -190,10 +171,10 @@ bool tbzPerson::loadModel(string modelName)
         personModel.setScale(scale, scale, scale);
         
         // Centre in x + y, leave z at ground level.
-//        personModel.setPosition(0 - (personModel.getSceneCenter().x * personModel.getNormalizedScale() * scale),
-//                              0 + (personModel.getSceneCenter().y * personModel.getNormalizedScale() * scale),
-//                              0
-//                              );
+        //        personModel.setPosition(0 - (personModel.getSceneCenter().x * personModel.getNormalizedScale() * scale),
+        //                              0 + (personModel.getSceneCenter().y * personModel.getNormalizedScale() * scale),
+        //                              0
+        //                              );
         
         /*
          ofLog(OF_LOG_VERBOSE,"siteModel.getSceneMin() " + ofToString(siteModel.getSceneMin().x) + ", " + ofToString(siteModel.getSceneMin().y) + ", " + ofToString(siteModel.getSceneMin().z));
@@ -201,110 +182,5 @@ bool tbzPerson::loadModel(string modelName)
          ofLog(OF_LOG_VERBOSE,"siteModel.getSceneCenter() " + ofToString(siteModel.getSceneCenter().x) + ", " + ofToString(siteModel.getSceneCenter().y) + ", " + ofToString(siteModel.getSceneCenter().z));
          ofLog(OF_LOG_VERBOSE,"siteModel.getNormalisedScale()" + ofToString(siteModel.getNormalizedScale()));
          */
-        
-        success = true;
     }
-    
-    return success;
-}
-
-void tbzPerson::setupFromXML(ofxXmlSettings &xml, ofxXmlSettings &newXMLFromParsing, bool &xmlChanged, int which)
-{
-    /*
-     
-     XML we're expecting is in the form
-     
-     <person>
-     <name>Eat Your Own Ears</name>
-     <modelName>EOYE-3D.dae</modelName>
-     <positionKML>EYOE-location.kmz</positionKML>
-     <position>
-     <longitude>-0.0317333</longitude>
-     <latitude>51.5393</latitude>
-     <position>
-     <twitterAccount>eatyourownears</twitterAccount>
-     <twitterHashtag>#FieldDay</twitterHashtag>
-     </person>
-     */
-    
-    xmlChanged = false;
-    
-    if (xml.pushTag("person", which))
-    {
-        name = xml.getValue("name", "A Person");
-        
-        // TASK: Setup stage geolocation
-        
-        if (xml.tagExists("position"))
-        {
-            geoLocation.x = xml.getValue("position:longitude", 0.0f);
-            geoLocation.y = xml.getValue("position:latitude", 0.0f);
-        }
-        // We're only going to process KML on OSX, on iOS we need fast startup and so will use the parsed info put back into the XML
-#ifdef TARGET_OSX
-        else if (xml.tagExists("positionKML"))
-        {
-            bool ok = false;
-            string filenameKMZ = xml.getValue("positionKML", "no filename could be read from XML");
-            
-            ok = pointFromKMZ(filenameKMZ, geoLocation);
-            
-            if (ok)
-            {
-                newXMLFromParsing.addTag("position");
-                newXMLFromParsing.pushTag("position");
-                newXMLFromParsing.addValue("longitude", geoLocation.x);
-                newXMLFromParsing.addValue("latitude", geoLocation.y);
-                newXMLFromParsing.popTag();
-                
-                xmlChanged = true;
-            }
-        }
-#endif
-        else
-        {
-            ofLog(OF_LOG_WARNING, "Failed to locate person: " + name);
-        }
-
-        // TASK: Setup 3D model
-        
-        string modelName = xml.getValue("modelName", kTBZPerson_DefaultModelName);
-        if (modelName.compare("") != 0)
-        {
-            loadModel(modelName);
-        }
-        
-        
-        // TASK: Setup twitter
-        
-        string searchTerms;
-        
-        if (xml.tagExists("twitterAccount"))
-        {
-            searchTerms += "from:" + xml.getValue("twitterAccount", "");
-        }
-        
-        if (xml.tagExists("twitterHashtag"))
-        {
-            if (searchTerms.length()>0)
-            {
-                searchTerms += " OR ";
-            }
-            
-            searchTerms += xml.getValue("twitterHashtag", "");
-        }
-        
-        // If multiple people, this will somewhat avoid simultaneous fires of search
-        int pollPeriod = ofRandom(kTBZPerson_TwitterPollPeriod - 4, kTBZPerson_TwitterPollPeriod + 4);
-        
-        list<string> searchParameters;
-        if (searchTerms.length() > 0)
-        {
-            twitter.connect(searchTerms, searchParameters, pollPeriod);
-        }
-        
-        // TASK: Pop back out of the person settings data before returning
-        xml.popTag();
-    }
-    
 }

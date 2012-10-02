@@ -11,15 +11,11 @@
 
 #include "ofMain.h"
 #include "ofxTween.h"
-#include "ofxXmlSettings.h"
 #include "ofxAssimpModelLoader.h"
-#include "ofxTwitter.h"
-#include "tbzTweet.h"
-#include "tbzKMZReader.h"
 #include "tbzSocialMessage.h"
 #include <list>
 
-#define kTBZPerson_MaxMessagesDisplayed 5
+#define kTBZPerson_MaxMessagesDisplayed 3
 #define kTBZPerson_MessageAnimationPeriodMillis 2000
 #define kTBZPerson_TwitterPollPeriod 45
 #define kTBZPerson_DefaultModelName ""
@@ -40,13 +36,7 @@ public:
     void            update();
     void            draw(float animPos = 1.0f);
     
-    void            setupFromXML(ofxXmlSettings &xml, ofxXmlSettings &newXMLFromParsing, bool &xmlChanged, int which = 0);
-    bool            loadModel(string modelName);
-    
-    ofxTwitterSearch twitter;
-    
-    ofTrueTypeFont* fontTitle;
-    ofTrueTypeFont* fontBody;
+    void            setup(string name, string modelName, ofPoint geoLocation);
     
 protected:
     void            startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> message);

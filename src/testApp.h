@@ -14,10 +14,12 @@
 #include "tbzScreenScale.h"
 #include "tbzServerConnector.h"
 #include "tbzDataLogger.h"
+#include "tbzKMZReader.h"
 
 #define IMCFestivalApp_TwitterSearchGeo NO
-#define IMCFestivalApp_TwitterSearchGeoPeriod 60
-#define IMCFestivalApp_TwitterUseCached YES
+#define IMCFestivalApp_TwitterSearchPromoters YES
+#define IMCFestivalApp_TwitterSearchPeriod 60
+#define IMCFestivalApp_TwitterUseCached NO
 
 #if TARGET_OS_IPHONE
 class imcFestivalApp : public ofxiPhoneApp
@@ -34,13 +36,13 @@ public:
     ofxXmlSettings eventSiteSettings;
     
     ofxXmlSettings socialMessageStore;
-    ofTrueTypeFont socialMessageFont;
     
-    ofTrueTypeFont venueFontTitle;
-    ofTrueTypeFont venueFontBody;
+    ofTrueTypeFont arial18;
+    ofTrueTypeFont arial12;
     
     tbzVenue*      venueFocussed;
-        
+    
+    ofxTwitterSearch twitter;
     ofxTwitterSearch twitterGeo;
     
     ofxXmlSettings serverSettings;

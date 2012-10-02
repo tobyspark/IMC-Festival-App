@@ -22,6 +22,7 @@
 #include "tbzSocialMessage.h"
 #include "tbzVenue.h"
 #include "tbzPerson.h"
+#include "tbzScreenScale.h"
 
 #define kTBZES_ViewElevationAngle 70
 #define kTBZES_MessageElevationHeight 20
@@ -39,7 +40,23 @@ public:
     void addVenue(tbzVenue venue);
     void addPromoter(Poco::SharedPtr<tbzPerson> person);
     void addPunter(Poco::SharedPtr<tbzPerson> person);
-    void addMessage(Poco::SharedPtr<tbzSocialMessage> message);
+    void addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message);
+    void addMessageToPromoters(Poco::SharedPtr<tbzSocialMessage> message);
+    
+    ofTrueTypeFont* venueTitleFont;
+    ofTrueTypeFont* venueBodyFont;
+    ofColor venueForeColour;
+    ofColor venueBackColour;
+    
+    ofTrueTypeFont* promoterTitleFont;
+    ofTrueTypeFont* promoterBodyFont;
+    ofColor promoterForeColour;
+    ofColor promoterBackColour;
+    
+    ofTrueTypeFont* personTitleFont;
+    ofTrueTypeFont* personBodyFont;
+    ofColor personForeColour;
+    ofColor personBackColour;
     
     tbzVenue* nearestVenue(float &distance);
     

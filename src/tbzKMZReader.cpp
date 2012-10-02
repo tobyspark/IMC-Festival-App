@@ -8,6 +8,8 @@
 
 #include "tbzKMZReader.h"
 
+string tbzKMZReader::unzipTempDirectory = "unzipTemp";
+
 bool tbzKMZReader::pointFromKMZ(string filename, ofPoint &point)
 {
     // In an ideal world, we'd use this library. In an ideal world, I'd also be able to compile it.
@@ -24,10 +26,10 @@ bool tbzKMZReader::pointFromKMZ(string filename, ofPoint &point)
     
     string destFileLocation = "unzipTemp";
     
-    success = ofxUnZip(filename, destFileLocation);
+    success = ofxUnZip(filename, unzipTempDirectory);
     if (success)
     {
-        string docFileLocation = destFileLocation + "/doc.kml";
+        string docFileLocation = ofFilePath::addTrailingSlash(unzipTempDirectory) + "doc.kml";
         {
             ofxXmlSettings kml;
             success = kml.loadFile(docFileLocation);
@@ -79,10 +81,10 @@ bool tbzKMZReader::polylineFromKMZ(string filename, ofPolyline &polyline)
     
     string destFileLocation = "unzipTemp";
     
-    success = ofxUnZip(filename, destFileLocation);
+    success = ofxUnZip(filename, unzipTempDirectory);
     if (success)
     {
-        string docFileLocation = destFileLocation + "/doc.kml";
+        string docFileLocation = ofFilePath::addTrailingSlash(unzipTempDirectory) + "doc.kml";
         {
             ofxXmlSettings kml;
             success = kml.loadFile(docFileLocation);

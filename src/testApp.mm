@@ -12,13 +12,28 @@ void imcFestivalApp::setup(){
     //// TASK: Setup Retina detection
     tbzScreenScale::detectScale();
     
-    //// TASK: Setup Fonts
+    //// TASK: Setup Fonts and Colours
+    
     // The iOS font example has 72 dpi set, but thats fugly in this app.
     ofTrueTypeFont::setGlobalDpi(96);
     
-    venueFontTitle.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 18, true, true);
-    venueFontBody.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
-    socialMessageFont.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
+    arial18.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 18, true, true);
+    arial12.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
+    
+    eventSite.venueTitleFont = &arial18;
+    eventSite.venueBodyFont = &arial12;
+    eventSite.venueForeColour.set(255);
+    eventSite.venueBackColour.set(255, 0, 0);
+    
+    eventSite.promoterTitleFont = &arial12;
+    eventSite.promoterBodyFont = &arial12;
+    eventSite.promoterForeColour.set(255);
+    eventSite.promoterBackColour.set(255, 0, 0);
+    
+    eventSite.personTitleFont = &arial12;
+    eventSite.personBodyFont = &arial12;
+    eventSite.personForeColour.set(255, 0, 0);
+    eventSite.personBackColour.set(255);
     
     //// TASK: Set base directory
     // iOS - this is done for us.
@@ -56,6 +71,7 @@ void imcFestivalApp::setup(){
     
     //// TASK: Load and act on our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
+    tbzKMZReader::unzipTempDirectory = tempDirAbsolutePath; // Needed for any KMZ unzipping of position files from Google Earth, ie. tbzVenue, tbzPerson.
     
     if (!success) ofLog(OF_LOG_WARNING, "Failed to load eventSiteSettings.xml");
     
@@ -74,6 +90,14 @@ void imcFestivalApp::setup(){
                                     eventSiteSettings.getValue("bottomRightCorner:longitude", "0° 1'41.31\"W"));
     eventSiteSettings.popTag();
     
+    // Load our event site 3D model in.
+    eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
+    
+    // Set origin
+    eventSiteOriginPermanent = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
+    eventSiteOriginDesired = eventSiteOriginPermanent;
+    eventSite.origin = eventSiteOriginPermanent;
+    
     // Use venue / programme data
     
     int venueCount = eventSiteSettings.getNumTags("venue");
@@ -84,8 +108,6 @@ void imcFestivalApp::setup(){
         
         bool xmlChanged = false;
         venue.setupFromXML(eventSiteSettings, xmlChanged, i);
-        venue.tag.fontTitle = &venueFontTitle;
-        venue.tag.fontBody  = &venueFontBody;
         eventSite.addVenue(venue);
         
         if (xmlChanged)
@@ -99,28 +121,112 @@ void imcFestivalApp::setup(){
     
     // User person / social media data
     
+    string twitterSearchTerms;
+    
     int peopleCount = eventSiteSettings.getNumTags("person");
     
     for (int i = peopleCount-1; i >= 0; i--)
     {
         Poco::SharedPtr<tbzPerson> person = new tbzPerson;
         
-        ofxXmlSettings newXML;
-        bool xmlChanged;
-        
-        person->setupFromXML(eventSiteSettings, newXML, xmlChanged, i);
-        person->fontTitle = &socialMessageFont;
-        
-        eventSite.addPromoter(person);
+        /*
+         
+         XML we're expecting is in the form
+         
+         <person>
+         <name>Eat Your Own Ears</name>
+         <modelName>EOYE-3D.dae</modelName>
+         <positionKML>EYOE-location.kmz</positionKML>
+         <position>
+         <longitude>-0.0317333</longitude>
+         <latitude>51.5393</latitude>
+         <position>
+         <twitterAccount>eatyourownears</twitterAccount>
+         <twitterHashtag>#FieldDay</twitterHashtag>
+         </person>
+         */
+    
+        if (eventSiteSettings.pushTag("person", i))
+        {
+            string name = eventSiteSettings.getValue("name", "A Person");
+            
+            // Person geolocation
+            
+            ofPoint geoLocation;
+            if (eventSiteSettings.tagExists("position"))
+            {
+                geoLocation.x = eventSiteSettings.getValue("position:longitude", 0.0f);
+                geoLocation.y = eventSiteSettings.getValue("position:latitude", 0.0f);
+            }
+            else if (eventSiteSettings.tagExists("positionKML"))
+            {
+                bool ok = false;
+                string filenameKMZ = eventSiteSettings.getValue("positionKML", "no filename could be read from XML");
+
+                #if TARGET_OS_IPHONE
+                    ofLog(OF_LOG_WARNING, "Loading KML on iOS. This shouldn't be necessary. File: " + filenameKMZ);
+                #endif
+                
+                ok = tbzKMZReader::pointFromKMZ(filenameKMZ, geoLocation);
+                
+                #ifdef TARGET_OSX
+                    ofLog(OF_LOG_WARNING, "Saving KML back to XML. This should be checked for charset corruption. File: " + filenameKMZ);
+                    if (ok)
+                    {
+                        eventSiteSettings.addTag("position");
+                        eventSiteSettings.pushTag("position");
+                        eventSiteSettings.addValue("longitude", geoLocation.x);
+                        eventSiteSettings.addValue("latitude", geoLocation.y);
+                        eventSiteSettings.popTag();
+                        
+                        eventSiteSettings.saveFile();
+                    }
+                #endif
+            }
+            else
+            {
+                ofLog(OF_LOG_WARNING, "Failed to locate person: " + name);
+            }
+            
+            // Person 3D model
+            
+            string modelName = eventSiteSettings.getValue("modelName", kTBZPerson_DefaultModelName);
+            
+            // Add any person twitter search terms
+            
+            string searchTerms;
+            
+            if (eventSiteSettings.tagExists("twitterAccount"))
+            {
+                if (twitterSearchTerms.length()>0)
+                {
+                    twitterSearchTerms += " OR ";
+                }
+                
+                twitterSearchTerms += "from:" + eventSiteSettings.getValue("twitterAccount", "");
+            }
+            
+            if (eventSiteSettings.tagExists("twitterHashtag"))
+            {
+                if (twitterSearchTerms.length()>0)
+                {
+                    twitterSearchTerms += " OR ";
+                }
+                
+                twitterSearchTerms += eventSiteSettings.getValue("twitterHashtag", "");
+            }
+
+            // Pop back out of the person settings data
+            eventSiteSettings.popTag();
+
+            // Setup person from parsed data and add to event site
+            person->setup(name, modelName, geoLocation);
+            eventSite.addPromoter(person);
+        }
     }
+
     
-    // Load our event site 3D model in.
-    eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
-    // Set origin
-    eventSiteOriginPermanent = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
-    eventSiteOriginDesired = eventSiteOriginPermanent;
-    eventSite.origin = eventSiteOriginPermanent;
     
     //// TASK: Configure rendering
     
@@ -166,7 +272,17 @@ void imcFestivalApp::setup(){
 
     
     
-    //// TASK: Startup Twitter (Geolocated search)
+    //// TASK: Startup Twitter
+    
+    if (IMCFestivalApp_TwitterSearchPromoters)
+    {
+        // A non-geolocated search using search terms aggregated from eventSiteSetting's people
+        list<string> searchParameters;
+        if (twitterSearchTerms.length() > 0)
+        {
+            twitter.connect(twitterSearchTerms, searchParameters, IMCFestivalApp_TwitterSearchPeriod);
+        }
+    }
     
     if (IMCFestivalApp_TwitterSearchGeo)
     {
@@ -195,7 +311,7 @@ void imcFestivalApp::setup(){
         list<string> searchParameters;
         searchParameters.push_front(geoString.str());
         
-        twitterGeo.connect("", searchParameters, IMCFestivalApp_TwitterSearchGeoPeriod);
+        twitterGeo.connect("", searchParameters, IMCFestivalApp_TwitterSearchPeriod);
     }
     
     
@@ -425,11 +541,9 @@ void imcFestivalApp::update()
             // TASK: Create message and add to eventSite.
             Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "Twitter", "TODO:Time");
             message->geoLocation = new ofPoint(geoPoint);
-            message->tag.fontTitle = &socialMessageFont;
-            message->tag.fontBody = &socialMessageFont;
             message->attributeTo = tweet.getUserID();
             
-            eventSite.addMessage(message);
+            eventSite.addMessageToPunters(message);
             
             // TASK: Cache message
             
@@ -445,6 +559,35 @@ void imcFestivalApp::update()
     //            socialMessageStore.setValue("twitter:userid", tweet.getUserID());
     //        }
     //        socialMessageStore.popTag();
+        }
+    }
+    
+    if (IMCFestivalApp_TwitterSearchPromoters)
+    {
+        while(twitter.hasNewTweets())
+        {
+            ofxTweet    tweet = twitter.getNextTweet();
+            tbzTweet*   tTweet = static_cast<tbzTweet*>(&tweet);
+            
+            cout << endl;
+            cout << "---" << endl;
+            cout << "GeoTweet text:" << tweet.getText() << endl;
+            //cout << "Name: " << tweet.getScreenName() << endl;
+            //cout << "UserID: " << tweet.getUserID() << endl;
+            //cout << "Geo: " << geoPoint.y << "N, " << geoPoint.x << "E" << endl;
+            //cout << "Source:" << tweet.getSourceJSON() << endl;
+            
+            Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
+            
+            bool hasGeo;
+            ofPoint geoPoint;
+            
+            hasGeo = tTweet->getGeoLocation(geoPoint);
+            
+            if (hasGeo) message->geoLocation = new ofPoint(geoPoint);
+            
+            // TODO: Assign to correct promoter, now twitter is not part of tbzPerson class
+            eventSite.addMessageToPromoters(message);
         }
     }
     
@@ -466,10 +609,8 @@ void imcFestivalApp::update()
                                                                                 "TODO: Time"
                                                                                 );
                 message->geoLocation = new ofPoint(socialMessageStore.getValue("longitude", 0.0f), socialMessageStore.getValue("latitude", 0.0f));
-                message->tag.fontTitle = &socialMessageFont;
-                message->tag.fontBody = &socialMessageFont;
                 message->attributeTo = socialMessageStore.getValue("twitter:userid", "");
-                eventSite.addMessage(message);
+                eventSite.addMessageToPunters(message);
             }
             socialMessageStore.popTag();
         }
@@ -502,8 +643,7 @@ void imcFestivalApp::draw()
 
     // Draw FPS
     ofSetColor(255, 255, 255, 255);
-    //ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
-    socialMessageFont.drawString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
+    ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate(), 2), 10, 15);
 
 }
 
