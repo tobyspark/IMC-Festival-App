@@ -40,6 +40,20 @@ void imcFestivalApp::setup(){
     if (tempPath) tempDirAbsolutePath = ofxNSStringToString(tempPath);
     #endif
     
+    //// TASK: Set persistent directory
+    
+    tempDirAbsolutePath = "";
+    #ifdef TARGET_OSX
+    // Can just be app bundle data path for now.
+    persistentDirAbsolutePath = dataPathRoot();
+    #endif
+    
+    #if TARGET_OS_IPHONE
+    // iOS is sandboxed and app store review is picky. We need to put non-user facing persistent files in app's Library folder.
+    NSString* persistentPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    if (persistentPath) persistentDirAbsolutePath = ofxNSStringToString(tempPath);
+    #endif
+    
     //// TASK: Load and act on our eventSite event details from the app bundle
     success = eventSiteSettings.loadFile("eventSiteSettings.xml");
     
@@ -128,14 +142,17 @@ void imcFestivalApp::setup(){
     //// TASK: Load in previously stored social messages, ie tweets and possibly facebook status updates
     if (IMCFestivalApp_TwitterUseCached)
     {
-        socialMessageStoreFileLoc = "socialMessageStore.xml";
+        string readFilePath = "socialMessageStore.xml";
+        string readWriteFilePath = ofFilePath::addTrailingSlash(persistentDirAbsolutePath) + "socialMessageStore.xml";
         
-        //    #if TARGET_OS_IPHONE
-        //    // While we can read from oF app's data dir, we can only read/write to documents dir in iOS
-        //    socialMessageStoreFileLoc = ofxiPhoneGetDocumentsDirectory() + socialMessageStoreFileLoc;
-        //    #endif
-        
-        success = socialMessageStore.loadFile(socialMessageStoreFileLoc);
+        if (serverSettings.loadFile(readWriteFilePath))
+        {
+            success = true;
+        }
+        else
+        {
+            success = serverSettings.loadFile(readFilePath);
+        }
         
         if (!success)
         {
@@ -147,8 +164,6 @@ void imcFestivalApp::setup(){
         ofLog(OF_LOG_VERBOSE, "On startup, socialMessageStore has " + ofToString(count) + " entries");
     }
 
-    
-    
     
     
     //// TASK: Startup Twitter (Geolocated search)
@@ -186,28 +201,45 @@ void imcFestivalApp::setup(){
     
     //// TASK: Setup 'mothership' server
     
-    // Load settings XML
-    
-    serverSettings.loadFile("serverSettings.xml");
-    
-    // Set our server endpoint
-    if (serverSettings.tagExists("serverEndPoint"))
+    // Load settings from XML
     {
-        server.setEndPointURL(serverSettings.getValue("serverEndPoint", ""));
+        string readFilePath = "serverSettings.xml";
+        string readWriteFilePath = ofFilePath::addTrailingSlash(persistentDirAbsolutePath) + "serverSettings.xml";
+        
+        serverSettings.loadFile(readFilePath);
+        
+        // Set our server endpoint from app supplied data (read only on iOS)
+        if (serverSettings.tagExists("serverEndPoint"))
+        {
+            server.setEndPointURL(serverSettings.getValue("serverEndPoint", ""));
+        }
+        
+        // Setup serverSettings to be stored in persistent read-write location.
+        if (persistentDirAbsolutePath.length() > 0)
+        {
+            if (!serverSettings.loadFile(readWriteFilePath))
+            {
+                // Copy the settings file there and re-read from new location
+                ofFile::copyFromTo(readFilePath, readWriteFilePath);
+                serverSettings.loadFile(readWriteFilePath);
+            }
+        }
+        
+        // Load in settings updateable by our app
+        if (serverSettings.tagExists("lastSessionID"))
+        {
+            server.setSessionID(serverSettings.getValue("lastSessionID", ""));
+        }
     }
     
-    if (serverSettings.tagExists("lastSessionID"))
-    {
-        server.setSessionID(serverSettings.getValue("lastSessionID", ""));
-    }
-    
+    // Go...
     ofAddListener(server.onNewSessionID, this, &imcFestivalApp::onNewSessionID);
     server.startSession();
     
     
     //// TASK: Setup Data Logging
     dataLogger.setup();
-    dataLogger.setLogsFolder(tempDirAbsolutePath);
+    dataLogger.setLogsFolder(persistentDirAbsolutePath);
     ofAddListener(dataLogger.onLogFileWritten, this, &imcFestivalApp::onDataLogFileWritten);
     
 }

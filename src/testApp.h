@@ -35,7 +35,6 @@ public:
     
     ofxXmlSettings socialMessageStore;
     ofTrueTypeFont socialMessageFont;
-    string         socialMessageStoreFileLoc;
     
     ofTrueTypeFont venueFontTitle;
     ofTrueTypeFont venueFontBody;
@@ -52,6 +51,7 @@ public:
     void            onDataLogFileWritten(string &filename);
     
     string          tempDirAbsolutePath;
+    string          persistentDirAbsolutePath;
     
     // openFrameworks app methods
     void setup();
