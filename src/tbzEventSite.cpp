@@ -81,7 +81,7 @@ void tbzEventSite::addMessage(Poco::SharedPtr<tbzSocialMessage> message)
     list< Poco::SharedPtr<tbzPerson> >::iterator person;
     for (person = punters.begin(); person != punters.end(); ++person)
     {
-        if (!(*person)->name.compare(message->attributeTo))
+        if ((*person)->name.compare(message->attributeTo) == 0)
         {
             break;
         }

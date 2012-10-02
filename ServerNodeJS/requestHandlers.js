@@ -1,9 +1,14 @@
+var dataRootDir = "./data"; // currently relative to current path, ie. shell node.js launched from
+
 var querystring = require("querystring"),
     fs          = require("fs"),
 	formidable  = require("formidable"),
 	util		= require("util");
+
+try {fs.mkdirSync(dataRootDir)}
+catch(e){}
 	
-var sessionLogStream = fs.createWriteStream("sessionLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
+var sessionLogStream = fs.createWriteStream(dataRootDir + "/" + "sessionLogStream.txt", {flags: 'a', encoding: 'utf8', mode: 0666});
 
 /* Client makes POST request to registerID on session start
  * Fields
@@ -64,14 +69,49 @@ function clientv1UploadData(response, request) {
   console.log("about to parse");
   form.parse(request, function(error, fields, files) {
     console.log("parsing done");
-    response.writeHead(200, {'content-type': 'text/plain'});
+    response.writeHead(200, {'content-type': 'text/json'});
+
 	var body;
 	body  = 'received upload:\n\n';
 	body += util.inspect({fields: fields, files: files});
-	
 	console.log(body);
-    response.write(body);
+		
+	// Store the file
+	
+	var success = false;
+	
+	var sessionID = fields['folder']
+	if (validateUUID(sessionID)) {
+		// TODO: ASYNC THIS!
+		
+		try 
+		{
+			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles", 0750);
+			fs.mkdirSync(dataRootDir + "/" + "uploadedFiles" + "/" + sessionID, 0750);
+		}
+		catch(e) {console.log("Directory already present");}		
+		var newPath = dataRootDir + "/" + "uploadedFiles" + "/" + sessionID + "/" + files.file.name;
+		
+		try 
+		{
+			fs.renameSync(files.file.path, newPath);
+			console.log("Uploaded file moved to " + newPath);
+			success = true;
+		}
+		catch(e) {console.log("Failed to move uploaded file from " + files.file.path);}
+	}
+	
+	// Return success (or not)
+	
+	var returnInfo = new Object();
+	returnInfo['logSessionID'] = sessionID;
+	returnInfo['fileName'] = files.file.name;
+	returnInfo['success'] = success;
+	
+    response.write(JSON.stringify(returnInfo));
     response.end();
+
+	console.log("Sent response body " + JSON.stringify(returnInfo));
   });
 }
 

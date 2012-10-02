@@ -20,11 +20,24 @@ void imcFestivalApp::setup(){
     venueFontBody.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
     socialMessageFont.loadFont("Arial Narrow.ttf", tbzScreenScale::retinaScale * 12, true, true);
     
-    // TASK: Set base directory
+    //// TASK: Set base directory
     // iOS - this is done for us.
     // OSX - we are bundling the data dir within the app as an extra build phase
     #ifdef TARGET_OSX
         ofSetDataPathRoot("../Resources/");
+    #endif
+    
+    //// TASK: Set temporary directory
+    
+    tempDirAbsolutePath = "";
+    #ifdef TARGET_OSX
+    NSString* tempPath = NSTemporaryDirectory();
+    if (tempPath) tempDirAbsolutePath = ofxNSStringToString(tempPath);
+    #endif
+    
+    #if TARGET_OS_IPHONE
+    NSString* tempPath = NSTemporaryDirectory();
+    if (tempPath) tempDirAbsolutePath = ofxNSStringToString(tempPath);
     #endif
     
     //// TASK: Load and act on our eventSite event details from the app bundle
@@ -94,9 +107,6 @@ void imcFestivalApp::setup(){
     eventSiteOriginPermanent = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
     eventSiteOriginDesired = eventSiteOriginPermanent;
     eventSite.origin = eventSiteOriginPermanent;
-    
-    // Set our server endpoint
-    //server.setEndPointURL(TODO: From XML)
     
     //// TASK: Configure rendering
     
@@ -174,9 +184,63 @@ void imcFestivalApp::setup(){
     }
     
     
-    //// TASK: Start server connection
-    server.setEndPointURL("http://localhost:8888");
+    //// TASK: Setup 'mothership' server
+    
+    // Load settings XML
+    
+    serverSettings.loadFile("serverSettings.xml");
+    
+    // Set our server endpoint
+    if (serverSettings.tagExists("serverEndPoint"))
+    {
+        server.setEndPointURL(serverSettings.getValue("serverEndPoint", ""));
+    }
+    
+    if (serverSettings.tagExists("lastSessionID"))
+    {
+        server.setSessionID(serverSettings.getValue("lastSessionID", ""));
+    }
+    
+    ofAddListener(server.onNewSessionID, this, &imcFestivalApp::onNewSessionID);
     server.startSession();
+    
+    
+    //// TASK: Setup Data Logging
+    dataLogger.setup();
+    dataLogger.setLogsFolder(tempDirAbsolutePath);
+    ofAddListener(dataLogger.onLogFileWritten, this, &imcFestivalApp::onDataLogFileWritten);
+    
+}
+
+void imcFestivalApp::onDataLogFileWritten(string &filename)
+{
+    server.addFileForUpload(filename);
+    
+    server.startFileUploads(); // TODO: Do this after initial network activity dies down
+}
+
+void imcFestivalApp::onNewSessionID(string &sessionID)
+{
+    string sessionLogFolder = ofFilePath::addTrailingSlash(tempDirAbsolutePath) + sessionID;
+    
+    // Create it
+    ofDirectory folder(sessionLogFolder);
+    folder.create();
+//    if (!folder.canWrite())
+//    {
+//        ofLog(OF_LOG_ERROR, "Cannot write logs; aborting logging");
+//        return;
+//    }
+    
+    // Use it
+    server.scanFolderForUpload(sessionLogFolder);
+    dataLogger.setLogsFolder(sessionLogFolder);
+    
+    server.startFileUploads(); // TODO: Do this after initial network activity dies down
+    
+    // Store it
+    serverSettings.setValue("lastSessionID", sessionID);
+    serverSettings.saveFile();
 }
 
 //--------------------------------------------------------------
@@ -212,9 +276,6 @@ void imcFestivalApp::update()
         if (stateChanged)
         {
             eventSiteOriginDesired = eventSiteOriginPermanent;
-            
-            //TEMP
-            server.uploadData();
         }
         
         // Test to see if a venue is over eventSite origin
@@ -286,6 +347,13 @@ void imcFestivalApp::update()
     {
         eventSite.origin += (eventSiteOriginDesired - eventSite.origin) * kTBZES_Damping;
     }
+    
+    /* TASK: Update data logger
+     *
+     */
+    
+    // TODO: If Opted-in
+    dataLogger.update();
     
     
     /* TASK: Ingest any new social messages

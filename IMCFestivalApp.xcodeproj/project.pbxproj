@@ -39,6 +39,7 @@
 		A68BEE391610889300802EB6 /* ofxEventKeyframe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE011610889300802EB6 /* ofxEventKeyframe.cpp */; };
 		A68BEE3A1610889300802EB6 /* ofxKeyframe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE031610889300802EB6 /* ofxKeyframe.cpp */; };
 		A68BEE3B1610889300802EB6 /* ofxPlaylist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A68BEE051610889300802EB6 /* ofxPlaylist.cpp */; };
+		A6A894911615D2C80011E0F4 /* tbzDataLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6A8948F1615D2C80011E0F4 /* tbzDataLogger.cpp */; };
 		A6ABE76D15F4CE9500D51B3C /* tbzVenue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */; };
 		A6ABE78315F4D68D00D51B3C /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77A15F4D68D00D51B3C /* ioapi.c */; };
 		A6ABE78415F4D68D00D51B3C /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A6ABE77C15F4D68D00D51B3C /* unzip.c */; };
@@ -193,6 +194,8 @@
 		A68BEE051610889300802EB6 /* ofxPlaylist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxPlaylist.cpp; sourceTree = "<group>"; };
 		A68BEE061610889300802EB6 /* ofxPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPlaylist.h; sourceTree = "<group>"; };
 		A68BEE071610889300802EB6 /* ofxPlaylistAEHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPlaylistAEHelper.h; sourceTree = "<group>"; };
+		A6A8948F1615D2C80011E0F4 /* tbzDataLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tbzDataLogger.cpp; sourceTree = "<group>"; };
+		A6A894901615D2C80011E0F4 /* tbzDataLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tbzDataLogger.h; sourceTree = "<group>"; };
 		A6ABE76B15F4CE9400D51B3C /* tbzVenue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = tbzVenue.cpp; sourceTree = "<group>"; };
 		A6ABE76C15F4CE9400D51B3C /* tbzVenue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = tbzVenue.h; sourceTree = "<group>"; };
 		A6ABE77A15F4D68D00D51B3C /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
@@ -723,12 +726,14 @@
 				A6F45A60160B17B900CFB98F /* tbzKMZReader.h */,
 				A6B32430160B688A007DEEB6 /* tbzTweet.cpp */,
 				A6B32431160B688A007DEEB6 /* tbzTweet.h */,
+				A672EACD1613631200C347E0 /* tbzServerConnector.cpp */,
+				A672EACE1613631200C347E0 /* tbzServerConnector.h */,
+				A6A8948F1615D2C80011E0F4 /* tbzDataLogger.cpp */,
+				A6A894901615D2C80011E0F4 /* tbzDataLogger.h */,
 				A663E08915ED333F00846683 /* tbzEventSiteSettingsXMLMaker.h */,
 				A673DBFA160266A6007B5D6D /* tbzScreenScale.h */,
 				A6D7F2F1160CF64100D01D6F /* tbzScreenScale.mm */,
 				A656A27615EF82AF007802DB /* tbzPlatformDefineTests.h */,
-				A672EACD1613631200C347E0 /* tbzServerConnector.cpp */,
-				A672EACE1613631200C347E0 /* tbzServerConnector.h */,
 				A6B3153E15D2E737002F427A /* addons stripped of examples */,
 			);
 			path = src;
@@ -934,6 +939,7 @@
 				A672EAB4161361E500C347E0 /* ofxHttpUtils.cpp in Sources */,
 				A672EACC1613622000C347E0 /* ofxMSAInteractiveObject.cpp in Sources */,
 				A672EACF1613631200C347E0 /* tbzServerConnector.cpp in Sources */,
+				A6A894911615D2C80011E0F4 /* tbzDataLogger.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

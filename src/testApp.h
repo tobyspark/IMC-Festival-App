@@ -13,6 +13,7 @@
 #include "tbzTweet.h"
 #include "tbzScreenScale.h"
 #include "tbzServerConnector.h"
+#include "tbzDataLogger.h"
 
 #define IMCFestivalApp_TwitterSearchGeo NO
 #define IMCFestivalApp_TwitterSearchGeoPeriod 60
@@ -43,7 +44,14 @@ public:
         
     ofxTwitterSearch twitterGeo;
     
+    ofxXmlSettings serverSettings;
     tbzServerConnection server;
+    void            onNewSessionID(string &sessionID);
+    
+    tbzDataLogger   dataLogger;
+    void            onDataLogFileWritten(string &filename);
+    
+    string          tempDirAbsolutePath;
     
     // openFrameworks app methods
     void setup();

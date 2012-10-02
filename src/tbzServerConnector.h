@@ -9,25 +9,46 @@
 #pragma once
 
 #include "ofxHttpUtils.h"
+#include "jansson.h"
+#include <list>
 
-#define TBZServerConnector_EndPointURL "http://localhost:8888/" 
+#define TBZServerConnector_EndPointURL "http://localhost:8888/"
+
+struct tbzFileToUpload
+{
+    string          path;
+    string          folderName;
+    string          fileName;
+    int             uploadStartCount;
+    unsigned int    uploadStartTime;
+    bool            uploadInProgress;
+};
 
 class tbzServerConnection
 {
     public:
         tbzServerConnection();
-        void startSession();
-        void uploadData();
-    
-        void setSessionID(string inSessionID);
+   
         void setEndPointURL(string inURL);
-        string URLWithPath(string inPath);
+        void setSessionID(string inSessionID);
+        
+        void startSession();
+        ofEvent<string> onNewSessionID;
     
-        void responseHandler(ofxHttpResponse & response);
+        void addFileForUpload(string filepath);
+        void scanFolderForUpload(string path);
+    
+        void startFileUploads();
     
     private:
+        string URLWithPath(string inPath);
+        void uploadFile(list<tbzFileToUpload>::iterator fileToUpload);
+        void responseHandler(ofxHttpResponse & response);
+    
         ofxHttpUtils httpUtils;
         string endPointURL;
         string sessionID;
         bool sessionActive;
+        list<tbzFileToUpload> uploadQueue;
+        bool shouldUpload;
 };

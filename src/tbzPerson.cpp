@@ -269,7 +269,7 @@ void tbzPerson::setupFromXML(ofxXmlSettings &xml, ofxXmlSettings &newXMLFromPars
         // TASK: Setup 3D model
         
         string modelName = xml.getValue("modelName", kTBZPerson_DefaultModelName);
-        if (modelName.compare(""))
+        if (modelName.compare("") != 0)
         {
             loadModel(modelName);
         }
