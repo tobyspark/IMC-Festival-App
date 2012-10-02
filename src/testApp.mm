@@ -145,13 +145,13 @@ void imcFestivalApp::setup(){
         string readFilePath = "socialMessageStore.xml";
         string readWriteFilePath = ofFilePath::addTrailingSlash(persistentDirAbsolutePath) + "socialMessageStore.xml";
         
-        if (serverSettings.loadFile(readWriteFilePath))
+        if (socialMessageStore.loadFile(readWriteFilePath))
         {
             success = true;
         }
         else
         {
-            success = serverSettings.loadFile(readFilePath);
+            success = socialMessageStore.loadFile(readFilePath);
         }
         
         if (!success)
