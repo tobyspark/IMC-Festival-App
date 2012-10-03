@@ -12,10 +12,10 @@
 
 tbzCaptionGraphic::tbzCaptionGraphic()
 {
-    tagTextHeight = 1.0f;
-    tagTextHeightTarget = 1.0f;
-    tagTextWidth = 1.0f;
-    tagTextWidthTarget = 1.0f;
+    tagTextHeight = 0.0f;
+    tagTextHeightTarget = 0.0f;
+    tagTextWidth = 0.0f;
+    tagTextWidthTarget = 0.0f;
     
     cornerRadius = 5;
     arrowSize = 10;
