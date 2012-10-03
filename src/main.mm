@@ -12,9 +12,7 @@
     - Only update people when they're drawn. Need to change tweens to playlists for this to work?
  
  BUGS:
-    - twitter not working as part of person instance
     - mangling of (non)unicode eventSiteXML when saving back parsed XML values. Fixes in to-do list.
-    - venue tags when in plan view - depth fighting. could turn off gldepthtest, sort once per modelpos, and draw venues ordered back to front.
     - display of non-unicode text in tweets etc.
  
  

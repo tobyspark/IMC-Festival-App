@@ -52,12 +52,18 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     
 }
 
-void tbzEventSite::addVenue(tbzVenue venue)
+void tbzEventSite::addVenue(Poco::SharedPtr<tbzVenue> venue)
 {
-    venue.tag.fontTitle = venueTitleFont;
-    venue.tag.fontBody = venueBodyFont;
-    venue.tag.setStyle(tbzScreenScale::retinaScale * 8, tbzScreenScale::retinaScale * 10, venueForeColour, venueForeColour*0.8, venueBackColour);
+    venue->tag.fontTitle = venueTitleFont;
+    venue->tag.fontBody = venueBodyFont;
+    venue->tag.setStyle(tbzScreenScale::retinaScale * 8, tbzScreenScale::retinaScale * 10, venueForeColour, venueForeColour*0.8, venueBackColour);
     venues.push_back(venue);
+    
+    tbzVenueAndDist venueAndDist;
+    venueAndDist.venue = venue;
+    venueAndDist.distance = 0.0f;
+    venuesDistanceFromOriginSorted.push_back(venueAndDist);
+    venuesDistanceSort();
 }
 
 void tbzEventSite::addPromoter(Poco::SharedPtr<tbzPerson> person)
@@ -105,6 +111,7 @@ void tbzEventSite::addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message
     {
         Poco::SharedPtr<tbzPerson> newPerson = new tbzPerson;
         newPerson->name = message->attributeTo;
+        newPerson->geoLocation = *(message->geoLocation);
         newPerson->addMessage(message);
         
         addPunter(newPerson);
@@ -121,42 +128,32 @@ void tbzEventSite::addMessageToPromoters(Poco::SharedPtr<tbzSocialMessage> messa
     promoters.front()->addMessage(message);
 }
 
-tbzVenue* tbzEventSite::nearestVenue(float &distance)
+tbzVenue* tbzEventSite::nearestVenueTest(float &distance)
 {
-    tbzVenue*   venuePointer = NULL;
+    tbzVenue* venuePointer = NULL;
     
-    list<tbzVenue>::iterator venue;
-    for (venue = venues.begin(); venue != venues.end(); venue++)
+    tbzVenueAndDist venueAndDist;
+    venueAndDist = venuesDistanceFromOriginSorted.front();
+
+    if (venueAndDist.distance < distance)
     {
-        ofPoint venueModelPoint = groundToModel(venue->stageGeoLocation);
-        venueModelPoint *= width; // width is co-opted for our model scale var
-        
-        float venueDistance = venueModelPoint.distance(ofVec3f(-x,-y));
-        
-        if (venueDistance < distance)
-        {
-            venuePointer = &(*venue);
-            distance = venueDistance;
-        }
+        venuePointer = venueAndDist.venue.get();
+        distance = venueAndDist.distance;
     }
     
     return venuePointer;
-}
-
-bool tbzEventSite::updateViewState(ViewState &vs)
-{
-    bool changed = (lastViewState != viewState);
-
-    vs = viewState;
-    lastViewState = viewState;
-    
-    return changed;
 }
 
 bool tbzEventSite::actionTouchHitTest(float _x, float _y)
 {
     // We're ignoring the 2D rect inheritance, and spinning a 3D model using all the screen as gesture space.
     return true;
+}
+
+void tbzEventSite::setOrigin(ofPoint origin)
+{
+    originAsSet = origin;
+    originDesired = origin;
 }
 
 void tbzEventSite::updateContent()
@@ -199,12 +196,22 @@ void tbzEventSite::updateContent()
         if (elevationDifference < 0)        viewState = transitioningToPlanView;
     }
     else                                    viewState = sideElevationView;
+    
+    // Determine if state has changed
+    viewStateChanged = (lastViewState != viewState);
+    lastViewState = viewState;
+    
+    // If we're dragging, then our venue distances from origin need to be recalculated
+    if (state == DRAGGING)
+    {
+        venuesDistanceSort();
+    }
 
     //// TASK: Update venues, this tasks their animation etc.
-    list<tbzVenue>::iterator venue;
+    list< Poco::SharedPtr<tbzVenue> >::iterator venue;
     for (venue = venues.begin(); venue != venues.end(); venue++)
     {
-        venue->update();
+        (*venue)->update();
     }
 
     //// TASK: Update people, this tasks their animation etc.
@@ -225,6 +232,105 @@ void tbzEventSite::updateContent()
     
     //// TASK: Update site animation
     siteAnimation.update();
+    
+    
+    /* TASK: Act on app State
+     *
+     * Idling; displaying event site
+     *  - Display venue name tags
+     *  - Display people with name tags
+     *  - Display social messages
+     *
+     * Idling; displaying focussed venue
+     *  - Display venue tag with full programme
+     *  - Event site repositioned if neccessary so tag fits screen
+     *
+     * Idling; displaying focussed person
+     *  - Display person + friends with name tags
+     *  - Display social messages from friends
+     *
+     * User is navigating event site
+     *  - Venue tag pops up on being centered on screen, it is focussed
+     *  - Person tag pops up being centered, it is focussed
+     *  - Can't have both, one is always nearer
+     */
+    
+    if (viewState == tbzEventSite::planView || viewState == tbzEventSite::transitioningToPlanView)
+    {
+        if (viewStateChanged)
+        {
+            originDesired = originAsSet;
+        }
+        
+        // Test to see if a venue is over eventSite origin
+        float searchRadius = ofGetWidth()*0.2f;
+        float radius = searchRadius;
+        tbzVenue* nearestVenue = nearestVenueTest(radius);
+        
+        // If we have a venue within range, "focus" on it
+        if (nearestVenue)
+        {
+            /* Vestigal 'rollover' animation position calculation
+             // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
+             float hitRadius = searchRadius * 0.4f;
+             
+             float animPos;
+             if (radius > searchRadius) animPos = 0;
+             if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
+             else animPos = 1;
+             */
+            
+            // We have a new venue
+            if (nearestVenue != venueFocussed)
+            {
+                // Deselect old venue
+                if (venueFocussed != NULL) venueFocussed->setTagTextType(tbzVenue::nothing);
+                
+                // Select new
+                venueFocussed = nearestVenue;
+            }
+            
+            // Ensure selected venue is showing now and next
+            venueFocussed->setTagTextType(tbzVenue::nowAndNext);
+        }
+        // If we don't, but one is still focussed, deselect
+        else if (venueFocussed != NULL)
+        {
+            venueFocussed->setTagTextType(tbzVenue::nothing);
+            venueFocussed = NULL;
+        }
+    }
+    
+    if (viewState == tbzEventSite::sideElevationView || viewState == tbzEventSite::transitioningToElevationView)
+    {
+        if (viewStateChanged)
+        {
+            if (venueFocussed)
+            {
+                venueFocussed->setTagTextType(tbzVenue::programme);
+                puntersDraw = false;
+                
+                // If displayed programme goes off top of screen, move the whole thing down
+                float tagHeight = venueFocussed->tag.getBounds().height;
+                if (tagHeight > originCurrent.y)
+                {
+                    originDesired.y = tagHeight; // TODO: need to work out offset to make this fit just so
+                }
+            }
+            else
+            {
+                puntersDraw = true;
+            }
+        }
+        
+    }
+    
+    
+    // Animate site origin in same manner as eventSite elevation tweening
+    if (originDesired != originCurrent)
+    {
+        originCurrent += (originDesired - originCurrent) * kTBZES_Damping;
+    }
 }
 
 void tbzEventSite::drawContent()
@@ -240,7 +346,7 @@ void tbzEventSite::drawContent()
     ofPushMatrix();
     {
         // TASK: Translate to origin
-        ofTranslate(origin);
+        ofTranslate(originCurrent);
         
         // TASK: Rotate model for viewing elevation
         // We want to maintain the current viewing point of the model and change elevation from plan to a view looking across model from above head height.
@@ -294,20 +400,81 @@ void tbzEventSite::drawContent()
         {
             // CAN I PUSH THE MATRIX AND APPLY TRANS_PERSPECTIVE DERIVED MATRIX SO THAT GEOCOORDS WORK?
             
-            list<tbzVenue>::iterator venue;
-            for (venue = venues.begin(); venue != venues.end(); ++venue)
+            //// TASK: Draw VENUES
+            
+            // If we're in plan view, we are selecting the venue that is closest to origin
+            // Render strategy is to ignore 3D depth and render a stack ordered by distance so the nearest is on top.
+            // Interaction works best when we fade in nearest venues - declutters and reinforces "pan around, highlight what at centre"
+            if (viewState == tbzEventSite::planView || viewState == tbzEventSite::transitioningToPlanView)
             {
-                ofPushMatrix();
+                glDisable(GL_DEPTH_TEST);
+                
+                list< tbzVenueAndDist >::reverse_iterator venueAndDist;
+                for (venueAndDist = venuesDistanceFromOriginSorted.rbegin(); venueAndDist != venuesDistanceFromOriginSorted.rend(); ++venueAndDist)
                 {
-                    ofPoint modelLocation = groundToModel(venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
-                    //ofRotate(-90, 1, 0, 0);
-                    ofRotate(-elevationAngle, 1, 0, 0);
-                    
-                    venue->drawTag();
+                    ofPushMatrix();
+                    ofPushStyle();
+                    {
+                        ofPoint modelLocation = groundToModel(venueAndDist->venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
+                        ofRotate(-elevationAngle, 1, 0, 0);
+                        if (venueAndDist->venue->getTagTextType() == tbzVenue::nothing)
+                            ofSetColor(255,ofMap(venueAndDist->distance, ofGetWidth()*0.3f, ofGetWidth()*0.2f, 0, 255));
+                        venueAndDist->venue->drawTag();
+                    }
+                    ofPopStyle();
+                    ofPopMatrix();
                 }
-                ofPopMatrix();
+                
+                glEnable(GL_DEPTH_TEST);
             }
+            // If we're in elevated view, we want to render in proper 3D space alongside people etc.
+            // We're going to animate up and fade in
+            // Caveat - need to animate between our venue tag displayed as 2D planar graphic on screen and true 3D angle
+            // Caveat - need to render the venue displaying its programme on top of any others, as continuation of plan view programme display
+            else
+            {
+                if (venueFocussed)
+                {
+                    ofPushMatrix();
+                    {
+                        glDisable(GL_DEPTH_TEST);
+                        
+                        ofPoint modelLocation = groundToModel(venueFocussed->stageGeoLocation);
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
+                        ofRotate(-elevationAngle, 1, 0, 0);
+                        
+                        venueFocussed->drawTag();
+                        
+                        glEnable(GL_DEPTH_TEST);
+                    }
+                    ofPopMatrix();
+                }
+                else
+                {
+                    list< Poco::SharedPtr<tbzVenue> >::iterator venue;
+                    ofPushStyle();
+                    {
+                        ofSetColor(255, elevationFactor*255);
+                        for (venue = venues.begin(); venue != venues.end(); ++venue)
+                        {
+                            ofPushMatrix();
+                            {
+                                ofPoint modelLocation = groundToModel((*venue)->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                                ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
+                                
+                                ofRotate(((1.0f-elevationFactor) * -elevationAngle) + (elevationFactor * -90.0f), 1, 0, 0);
+                                
+                                (*venue)->drawTag();
+                            }
+                            ofPopMatrix();
+                        }
+                    }
+                    ofPopStyle();
+                }
+            }
+            
+            //// TASK: Draw People
             
             list< Poco::SharedPtr<tbzPerson> >::iterator person;
             for (person = promoters.begin(); person != promoters.end(); ++person)
@@ -315,7 +482,7 @@ void tbzEventSite::drawContent()
                 ofPushMatrix();
                 {
                     ofPoint modelLocation = groundToModel((*person)->geoLocation);
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale * elevationFactor);
                     
                     ofRotate(-90, 1, 0, 0);
                     
@@ -332,7 +499,7 @@ void tbzEventSite::drawContent()
                     ofPushMatrix();
                     {
                         ofPoint modelLocation = groundToModel((*person)->geoLocation); // Don't cache - people move!
-                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_MessageElevationHeight * scale);
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale);
                         
                         ofRotate(-90, 1, 0, 0);
                         
@@ -353,6 +520,25 @@ void tbzEventSite::drawContent()
         ofSetColor(0, 0, 255, 255);
         ofDrawBitmapString("eventSite 0,0,r" + ofToString(ofRadToDeg(rotation),0) + " at " + ofToString(x,0) + "," + ofToString(y,0), 0 ,0);
     }
+}
+
+bool tbzVenueAndDist::operator < (tbzVenueAndDist comp)
+{
+    return distance < comp.distance;
+}
+
+void tbzEventSite::venuesDistanceSort()
+{
+    list< tbzVenueAndDist >::iterator venueAndDist;
+    for (venueAndDist = venuesDistanceFromOriginSorted.begin(); venueAndDist != venuesDistanceFromOriginSorted.end(); ++venueAndDist)
+    {
+        ofPoint venueModelPoint = groundToModel(venueAndDist->venue->stageGeoLocation);
+        venueModelPoint *= width; // width is co-opted for our model scale var
+        
+        venueAndDist->distance = venueModelPoint.distance(ofPoint(-x, -y));
+    }
+    
+    venuesDistanceFromOriginSorted.sort();
 }
 
 bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight)

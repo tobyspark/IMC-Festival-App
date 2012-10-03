@@ -40,8 +40,6 @@ public:
     ofTrueTypeFont arial18;
     ofTrueTypeFont arial12;
     
-    tbzVenue*      venueFocussed;
-    
     ofxTwitterSearch twitter;
     ofxTwitterSearch twitterGeo;
     

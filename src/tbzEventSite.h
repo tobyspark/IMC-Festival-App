@@ -25,9 +25,19 @@
 #include "tbzScreenScale.h"
 
 #define kTBZES_ViewElevationAngle 70
-#define kTBZES_MessageElevationHeight 20
+#define kTBZES_VenueTagElevationHeight (20 * tbzScreenScale::retinaScale)
+#define kTBZES_PersonTagElevationHeight (10 * tbzScreenScale::retinaScale)
 #define kTBZES_Damping 0.1
 #define kTBZES_MaxPunters 20
+
+class tbzVenueAndDist
+{
+public:
+    Poco::SharedPtr<tbzVenue>   venue;
+    float                       distance;
+    
+    bool operator < (tbzVenueAndDist);
+};
 
 class tbzEventSite : public ofxMtActionsObject
 {
@@ -37,7 +47,7 @@ public:
     
     void setup(string modelName, ofxLatLon modelTopLeft, ofxLatLon modelTopRight, ofxLatLon modelBottomLeft, ofxLatLon modelBottomRight);
     
-    void addVenue(tbzVenue venue);
+    void addVenue(Poco::SharedPtr<tbzVenue> venue);
     void addPromoter(Poco::SharedPtr<tbzPerson> person);
     void addPunter(Poco::SharedPtr<tbzPerson> person);
     void addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message);
@@ -58,10 +68,9 @@ public:
     ofColor personForeColour;
     ofColor personBackColour;
     
-    tbzVenue* nearestVenue(float &distance);
-    
+    void setOrigin(ofPoint origin);
+        
     enum ViewState { planView, transitioningToPlanView, sideElevationView, transitioningToElevationView };
-    bool updateViewState(ViewState &viewState);
     
     // ofxMtActionsObject overrides
     
@@ -73,12 +82,9 @@ public:
     
     // Class properties
     
-    ofPoint     origin;
+
     ofRectangle groundBounds;
-    
-    list<tbzVenue> venues;
-    list< Poco::SharedPtr<tbzPerson> > punters;
-    list< Poco::SharedPtr<tbzPerson> > promoters;
+
     bool puntersDraw;
     
     float       elevationFactor;
@@ -87,8 +93,23 @@ public:
     
 protected:
 
+    list< Poco::SharedPtr<tbzVenue> > venues;
+    list< Poco::SharedPtr<tbzPerson> > punters;
+    list< Poco::SharedPtr<tbzPerson> > promoters;
+    
+    void venuesDistanceSort();
+    list< tbzVenueAndDist > venuesDistanceFromOriginSorted;
+    
+    tbzVenue*   nearestVenueTest(float &distance);
+    tbzVenue*   venueFocussed;
+
+    ofPoint     originCurrent;
+    ofPoint     originDesired;
+    ofPoint     originAsSet;
+    
     bool loadModel(string modelName, float initialSize, ofxLatLon geoTopLeft, ofxLatLon geoTopRight, ofxLatLon geoBottomLeft, ofxLatLon geoBottomRight);
 
+    bool        viewStateChanged;
     ViewState   viewState;
     ViewState   lastViewState;
     

@@ -94,9 +94,7 @@ void imcFestivalApp::setup(){
     eventSite.setup(modelName, geoTopLeft, geoTopRight, geoBottomLeft, geoBottomRight);
     
     // Set origin
-    eventSiteOriginPermanent = ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f);
-    eventSiteOriginDesired = eventSiteOriginPermanent;
-    eventSite.origin = eventSiteOriginPermanent;
+    eventSite.setOrigin(ofPoint(ofGetWidth()/2.0f, ofGetHeight()/2.0f));
     
     // Use venue / programme data
     
@@ -104,10 +102,10 @@ void imcFestivalApp::setup(){
         
     for (int i = venueCount-1; i >= 0; i--)
     {
-        tbzVenue venue;
+        Poco::SharedPtr<tbzVenue> venue = new tbzVenue;
         
         bool xmlChanged = false;
-        venue.setupFromXML(eventSiteSettings, xmlChanged, i);
+        venue->setupFromXML(eventSiteSettings, xmlChanged, i);
         eventSite.addVenue(venue);
         
         if (xmlChanged)
@@ -394,107 +392,7 @@ void imcFestivalApp::onNewSessionID(string &sessionID)
 //--------------------------------------------------------------
 void imcFestivalApp::update()
 {
-    /* TASK: Act on app State
-     *
-     * Idling; displaying event site
-     *  - Display venue name tags
-     *  - Display people with name tags
-     *  - Display social messages
-     *
-     * Idling; displaying focussed venue
-     *  - Display venue tag with full programme
-     *  - Event site repositioned if neccessary so tag fits screen
-     *
-     * Idling; displaying focussed person
-     *  - Display person + friends with name tags
-     *  - Display social messages from friends
-     *
-     * User is navigating event site
-     *  - Venue tag pops up on being centered on screen, it is focussed
-     *  - Person tag pops up being centered, it is focussed
-     *  - Can't have both, one is always nearer
-     */
-    
-    tbzEventSite::ViewState state;
-    bool stateChanged;
-    stateChanged = eventSite.updateViewState(state);
-    
-    if (state == tbzEventSite::planView || state == tbzEventSite::transitioningToPlanView)
-    {
-        if (stateChanged)
-        {
-            eventSiteOriginDesired = eventSiteOriginPermanent;
-        }
-        
-        // Test to see if a venue is over eventSite origin
-        float searchRadius = ofGetWidth()*0.2f;
-        float radius = searchRadius;
-        tbzVenue* nearestVenue = eventSite.nearestVenue(radius);
-        
-        // If we have a venue within range, "focus" on it
-        if (nearestVenue)
-        {
-            /* Vestigal 'rollover' animation position calculation
-            // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
-            float hitRadius = searchRadius * 0.4f;
-            
-            float animPos;
-            if (radius > searchRadius) animPos = 0;
-            if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
-            else animPos = 1;
-            */
-            
-            // We have a new venue
-            if (nearestVenue != venueFocussed)
-            {
-                // Deselect old venue
-                if (venueFocussed != NULL) venueFocussed->setTagTextType(tbzVenue::nothing);
-                
-                // Select new
-                venueFocussed = nearestVenue;
-            }
-            
-            // Ensure selected venue is showing now and next
-            venueFocussed->setTagTextType(tbzVenue::nowAndNext);
-        }
-        // If we don't, but one is still focussed, deselect
-        else if (venueFocussed != NULL)
-        {
-            venueFocussed->setTagTextType(tbzVenue::nothing);
-            venueFocussed = NULL;
-        }
-    }
 
-    if (state == tbzEventSite::sideElevationView || state == tbzEventSite::transitioningToElevationView)
-    {
-        if (stateChanged)
-        {
-            if (venueFocussed)
-            {
-                venueFocussed->setTagTextType(tbzVenue::programme);
-                eventSite.puntersDraw = false;
-                
-                // If displayed programme goes off top of screen, move the whole thing down
-                float tagHeight = venueFocussed->tag.getBounds().height;
-                if (tagHeight > eventSite.origin.y)
-                {
-                    eventSiteOriginDesired.y = tagHeight; // TODO: need to work out offset to make this fit just so
-                }
-            }
-            else
-            {
-                eventSite.puntersDraw = true;
-            }
-        }
-
-    }
-    
-    
-    // Animate site origin in same manner as eventSite elevation tweening
-    if (eventSiteOriginDesired != eventSite.origin)
-    {
-        eventSite.origin += (eventSiteOriginDesired - eventSite.origin) * kTBZES_Damping;
-    }
     
     /* TASK: Update data logger
      *
@@ -572,10 +470,7 @@ void imcFestivalApp::update()
             cout << endl;
             cout << "---" << endl;
             cout << "Promoter Tweet text:" << tweet.getText() << endl;
-            //cout << "Name: " << tweet.getScreenName() << endl;
-            //cout << "UserID: " << tweet.getUserID() << endl;
-            //cout << "Geo: " << geoPoint.y << "N, " << geoPoint.x << "E" << endl;
-            //cout << "Source:" << tweet.getSourceJSON() << endl;
+            cout << "Name: " << tweet.getScreenName() << endl;
             
             Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
             
