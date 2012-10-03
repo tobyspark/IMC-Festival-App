@@ -46,7 +46,7 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     light.enable();
     
     // Set opening animation
-    elevationFactor = 0;
+    elevationFactor = 0.0f;
     width = 5.0f;
     siteAnimation.addKeyFrame( Playlist::Action::tween(5000.0f, &width, 1, Playlist::TWEEN_CUBIC, TWEEN_EASE_OUT));
     
@@ -187,6 +187,7 @@ void tbzEventSite::updateContent()
     
     float elevationDifference = elevationFactorTarget - elevationFactor;
     elevationFactor += elevationDifference * kTBZES_Damping;
+    planFactor = 1.0f - elevationFactor;
     
     // Determine state from elevation factor
     if (elevationFactor < 0.001f)           viewState = planView;
@@ -308,7 +309,6 @@ void tbzEventSite::updateContent()
             if (venueFocussed)
             {
                 venueFocussed->setTagTextType(tbzVenue::programme);
-                puntersDraw = false;
                 
                 // If displayed programme goes off top of screen, move the whole thing down
                 float tagHeight = venueFocussed->tag.getBounds().height;
@@ -317,12 +317,7 @@ void tbzEventSite::updateContent()
                     originDesired.y = tagHeight; // TODO: need to work out offset to make this fit just so
                 }
             }
-            else
-            {
-                puntersDraw = true;
-            }
         }
-        
     }
     
     
@@ -419,7 +414,10 @@ void tbzEventSite::drawContent()
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
                         ofRotate(-elevationAngle, 1, 0, 0);
                         if (venueAndDist->venue->getTagTextType() == tbzVenue::nothing)
-                            ofSetColor(255,ofMap(venueAndDist->distance, ofGetWidth()*0.3f, ofGetWidth()*0.2f, 0, 255));
+                        {
+                            float nearFadeIn = ofMap(venueAndDist->distance, ofGetWidth()*0.3f, ofGetWidth()*0.2f, 0, 255);
+                            ofSetColor(255, nearFadeIn * (planFactor));
+                        }
                         venueAndDist->venue->drawTag();
                     }
                     ofPopStyle();
@@ -463,7 +461,7 @@ void tbzEventSite::drawContent()
                                 ofPoint modelLocation = groundToModel((*venue)->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                                 ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
                                 
-                                ofRotate(((1.0f-elevationFactor) * -elevationAngle) + (elevationFactor * -90.0f), 1, 0, 0);
+                                ofRotate((planFactor * -elevationAngle) + (elevationFactor * -90.0f), 1, 0, 0);
                                 
                                 (*venue)->drawTag();
                             }
@@ -476,32 +474,38 @@ void tbzEventSite::drawContent()
             
             //// TASK: Draw People
             
-            list< Poco::SharedPtr<tbzPerson> >::iterator person;
-            for (person = promoters.begin(); person != promoters.end(); ++person)
+            if (viewState != planView && !venueFocussed)
             {
-                ofPushMatrix();
-                {
-                    ofPoint modelLocation = groundToModel((*person)->geoLocation);
-                    ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale * elevationFactor);
-                    
-                    ofRotate(-90, 1, 0, 0);
-                    
-                    (*person)->draw(elevationFactor);
-                }
-                ofPopMatrix();
-            }
-            
-            if (puntersDraw)
-            {
+                float personScale = scale / maxSize; // maxSize is max scale, part of co-opting MSAIntObj.width for scale.
+                
                 list< Poco::SharedPtr<tbzPerson> >::iterator person;
-                for (person = punters.begin(); person != punters.end(); ++person)
+            
+                for (person = promoters.begin(); person != promoters.end(); ++person)
                 {
                     ofPushMatrix();
                     {
-                        ofPoint modelLocation = groundToModel((*person)->geoLocation); // Don't cache - people move!
+                        ofPoint modelLocation = groundToModel((*person)->geoLocation);
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale * elevationFactor);
+                        
+                        ofRotate(-90, 1, 0, 0);
+                        
+                        (*person)->draw(elevationFactor);
+                    }
+                    ofPopMatrix();
+                }
+            
+                for (person = punters.begin(); person != punters.end(); ++person)
+                {
+                    ofPoint modelLocation = groundToModel((*person)->geoLocation);
+                    if (modelLocation.y * scale > -y) continue; // don't draw if inbetween origin area and viewpoint
+                    
+                    ofPushMatrix();
+                    {
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale);
                         
                         ofRotate(-90, 1, 0, 0);
+                        
+                        ofScale(personScale, personScale, 1.0f);
                         
                         (*person)->draw(elevationFactor);
                     }

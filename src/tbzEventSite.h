@@ -25,7 +25,7 @@
 #include "tbzScreenScale.h"
 
 #define kTBZES_ViewElevationAngle 70
-#define kTBZES_VenueTagElevationHeight (20 * tbzScreenScale::retinaScale)
+#define kTBZES_VenueTagElevationHeight (15 * tbzScreenScale::retinaScale)
 #define kTBZES_PersonTagElevationHeight (10 * tbzScreenScale::retinaScale)
 #define kTBZES_Damping 0.1
 #define kTBZES_MaxPunters 20
@@ -82,12 +82,7 @@ public:
     
     // Class properties
     
-
     ofRectangle groundBounds;
-
-    bool puntersDraw;
-    
-    float       elevationFactor;
     
     ofxPlaylist siteAnimation;
     
@@ -102,7 +97,7 @@ protected:
     
     tbzVenue*   nearestVenueTest(float &distance);
     tbzVenue*   venueFocussed;
-
+    
     ofPoint     originCurrent;
     ofPoint     originDesired;
     ofPoint     originAsSet;
@@ -114,7 +109,8 @@ protected:
     ViewState   lastViewState;
     
     ofxAssimpModelLoader siteModel;
-    //float       elevationFactor;
+    float       elevationFactor;
+    float       planFactor;
     float       elevationFactorTarget;
     
     ofPoint     groundToModel(const ofPoint &groundPoint);
