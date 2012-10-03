@@ -72,6 +72,7 @@ void tbzEventSite::addPunter(Poco::SharedPtr<tbzPerson> person)
     // TASK: Limit number of punters displayed, can't visualise everything for ever, both aesthetically and in resources.
     while (punters.size() > kTBZES_MaxPunters)
     {
+        cout << "popping punter" << endl;
         punters.pop_back();
     }
 }
@@ -80,7 +81,7 @@ void tbzEventSite::addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message
 {
     message->tag.fontTitle = personTitleFont;
     message->tag.fontBody = personBodyFont;
-    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, personForeColour, personForeColour*0.8, personBackColour);
+    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, personForeColour, personForeColour, personBackColour);
     
     // TASK: Assign message to person. 
     
@@ -114,7 +115,7 @@ void tbzEventSite::addMessageToPromoters(Poco::SharedPtr<tbzSocialMessage> messa
 {
     message->tag.fontTitle = promoterTitleFont;
     message->tag.fontBody = promoterBodyFont;
-    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, promoterForeColour, promoterForeColour*0.8, promoterBackColour);
+    message->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, promoterForeColour, promoterForeColour, promoterBackColour);
     
     // TODO: Assign to correct promoter
     promoters.front()->addMessage(message);
@@ -206,9 +207,13 @@ void tbzEventSite::updateContent()
         venue->update();
     }
 
-    //// TASK: Update messages, this tasks their animation etc.
+    //// TASK: Update people, this tasks their animation etc.
     list< Poco::SharedPtr<tbzPerson> >::iterator person;
     for (person = punters.begin(); person != punters.end(); person++)
+    {
+        (*person)->update();
+    }
+    for (person = promoters.begin(); person != promoters.end(); person++)
     {
         (*person)->update();
     }
@@ -360,6 +365,10 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
     if(siteModel.loadModel(modelName, true))
     {
         siteModel.setAnimation(0);
+//        siteModel.enableTextures();
+//        siteModel.enableNormals();
+//        siteModel.enableColors();
+//        siteModel.enableMaterials();
         
         // TASK: Set model position and scale in bounding rect
         

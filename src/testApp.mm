@@ -571,7 +571,7 @@ void imcFestivalApp::update()
             
             cout << endl;
             cout << "---" << endl;
-            cout << "GeoTweet text:" << tweet.getText() << endl;
+            cout << "Promoter Tweet text:" << tweet.getText() << endl;
             //cout << "Name: " << tweet.getScreenName() << endl;
             //cout << "UserID: " << tweet.getUserID() << endl;
             //cout << "Geo: " << geoPoint.y << "N, " << geoPoint.x << "E" << endl;

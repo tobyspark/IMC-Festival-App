@@ -61,7 +61,16 @@ void tbzPerson::onNewMessageAnimationEnd(int &tweenID)
     // If we've gone over our display size, remove the oldest from the list
     while (messagesDisplay.size() > kTBZPerson_MaxMessagesDisplayed)
     {
-        messagesDisplay.pop_back();
+        if (messagesDisplayMutex.tryLock())
+        {
+            messagesDisplay.pop_back();
+            messagesDisplayMutex.unlock();
+        }
+        else
+        {
+            ofLog(OF_LOG_WARNING, "tbzPerson: Couldn't pop messagesDisplay. List should be updated outside of draw.");
+            break;
+        }
     }
     
     // TASK: Start animation cycle if needed
@@ -77,9 +86,9 @@ void tbzPerson::onNewMessageAnimationEnd(int &tweenID)
 
 void tbzPerson::update()
 {
-    // FIXME: This is polling hack as event listener is not working?
-    int dummy = 0;
-    if (newMessageAnimPos.isCompleted()) onNewMessageAnimationEnd(dummy);
+    // TASK: Update tweens
+    // Do this here so end events happen within update stage not draw
+    newMessageAnimPos.update();
     
     // TASK: Animate to new position
     if (locationTween.isRunning())
@@ -114,9 +123,10 @@ void tbzPerson::draw(float animPos)
             float   animInPos = (1.0f-animPos)*kTBZPerson_AnimInDistance;
 
             ofSetColor(fadeInAlpha);
-            float newMessageAnimHeight = newMessageHeight * (1.0f - newMessageAnimPos.update());
+            float newMessageAnimHeight = newMessageHeight * (1.0f - newMessageAnimPos.getTarget(0));
             ofTranslate(0, -animInPos + newMessageAnimHeight);
             
+            messagesDisplayMutex.lock();
             list< Poco::SharedPtr<tbzSocialMessage> >::iterator message;
             for (message = messagesDisplay.begin(); message != messagesDisplay.end(); ++message)
             {
@@ -132,7 +142,7 @@ void tbzPerson::draw(float animPos)
                     {
                         // Fade it out
                         ofPushStyle();
-                            ofSetColor(255, 255*(1.0f - newMessageAnimPos.update()));
+                            ofSetColor(255, 255*(1.0f - newMessageAnimPos.getTarget(0)));
                             (*message)->tag.draw();
                         ofPopStyle();
                     }
@@ -148,6 +158,7 @@ void tbzPerson::draw(float animPos)
                 
                 ofTranslate(0, -(*message)->tag.getBounds().height);
             }
+            messagesDisplayMutex.unlock();
         }
     }
     ofPopMatrix();

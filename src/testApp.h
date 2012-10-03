@@ -17,9 +17,9 @@
 #include "tbzKMZReader.h"
 
 #define IMCFestivalApp_TwitterSearchGeo NO
-#define IMCFestivalApp_TwitterSearchPromoters YES
+#define IMCFestivalApp_TwitterSearchPromoters NO
 #define IMCFestivalApp_TwitterSearchPeriod 60
-#define IMCFestivalApp_TwitterUseCached NO
+#define IMCFestivalApp_TwitterUseCached YES
 
 #if TARGET_OS_IPHONE
 class imcFestivalApp : public ofxiPhoneApp

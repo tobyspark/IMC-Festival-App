@@ -42,6 +42,7 @@ protected:
     void            startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> message);
     void            onNewMessageAnimationEnd(int &tweenID);
     
+    ofMutex         messagesDisplayMutex;
     list< Poco::SharedPtr<tbzSocialMessage> >  messagesDisplay;
     queue< Poco::SharedPtr<tbzSocialMessage> > messagesQueue;
     
