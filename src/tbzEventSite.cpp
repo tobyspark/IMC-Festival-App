@@ -40,6 +40,7 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     
     // Create our lights
     ofSetSmoothLighting(true);
+    ofEnableSeparateSpecularLight();
     light.setSpecularColor(ofColor(255.f, 255.f, 255.f)); // White
     light.setDiffuseColor( ofColor(255.f, 255.f, 200.f)); // A slight golden tone, sun!
     light.setPosition(0, 0, 0); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number 
@@ -436,15 +437,11 @@ void tbzEventSite::drawContent()
                 {
                     ofPushMatrix();
                     {
-                        glDisable(GL_DEPTH_TEST);
-                        
                         ofPoint modelLocation = groundToModel(venueFocussed->stageGeoLocation);
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
                         ofRotate(-elevationAngle, 1, 0, 0);
                         
                         venueFocussed->drawTag();
-                        
-                        glEnable(GL_DEPTH_TEST);
                     }
                     ofPopMatrix();
                 }
@@ -488,6 +485,8 @@ void tbzEventSite::drawContent()
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale * elevationFactor);
                         
                         ofRotate(-90, 1, 0, 0);
+                        
+                        ofScale(personScale, personScale, 1.0f);
                         
                         (*person)->draw(elevationFactor);
                     }

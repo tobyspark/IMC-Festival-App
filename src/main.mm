@@ -18,7 +18,7 @@
  
  NOTES:
     "ofxFBOTexture with Fonts showing as a white box" - http://forum.openframeworks.cc/index.php?topic=3805.0
- 
+    "Displaying material colors correctly without textures using Assimp" - http://forum.openframeworks.cc/index.php?topic=8708.0
  
  
  
