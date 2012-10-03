@@ -12,6 +12,11 @@
 
 tbzCaptionGraphic::tbzCaptionGraphic()
 {
+    tagTextHeight = 1.0f;
+    tagTextHeightTarget = 1.0f;
+    tagTextWidth = 1.0f;
+    tagTextWidthTarget = 1.0f;
+    
     cornerRadius = 5;
     arrowSize = 10;
     titleTextColour = ofColor(255);
@@ -98,7 +103,7 @@ void tbzCaptionGraphic::update()
 }
 
 void tbzCaptionGraphic::updateTagFBO(bool resize)
-{
+{    
     if (fontTitle && fontBody)
     {
         // Just a reminder: origin is top left, and this is an arrow pointing down.
@@ -143,6 +148,7 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
         // Create the empty image to draw into if neccessary
         if (!tagFBO.isAllocated() ||
             (resize && tagTargetBounds.height > tagFBO.getHeight()) || // We're getting bigger
+            (resize && tagTargetBounds.width > tagFBO.getWidth()) ||
             (tagBounds.height != tagFBO.getHeight() && tagTextHeight == tagTextHeightTarget)) // Having got smaller, we've finished animating down.
         {
             ofFbo::Settings s;
@@ -189,17 +195,18 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
             ofTriangle(arrowTL, arrowTR, arrowB);
             
             // Draw text
+            // Am keeping text position calcs as float, but pixel aligning to draw
             ofSetColor(titleTextColour);
             float lineWidth = fontTitle->stringWidth(titleText);
             float availableWidth = tagTextWidth + cornerRadius;
             if (lineWidth > availableWidth)
             {
                 int charsToDraw = titleText.length() * (tagTextWidth / lineWidth);
-                fontTitle->drawString(titleText.substr(0,charsToDraw), textOrigin.x, textOrigin.y);
+                fontTitle->drawString(titleText.substr(0,charsToDraw), roundf(textOrigin.x), roundf(textOrigin.y));
             }
             else
             {
-                fontTitle->drawString(titleText, textOrigin.x, textOrigin.y);
+                fontTitle->drawString(titleText, roundf(textOrigin.x), roundf(textOrigin.y));
             }
                         
             ofSetColor(bodyTextColour);
@@ -215,11 +222,11 @@ void tbzCaptionGraphic::updateTagFBO(bool resize)
                 if (lineWidth > availableWidth)
                 {
                     int charsToDraw = line->length() * (tagTextWidth / lineWidth);
-                    fontBody->drawString(line->substr(0,charsToDraw), textOrigin.x, textOrigin.y);
+                    fontBody->drawString(line->substr(0,charsToDraw), roundf(textOrigin.x), roundf(textOrigin.y));
                 }
                 else
                 {
-                    fontBody->drawString(*line, textOrigin.x, textOrigin.y);
+                    fontBody->drawString(*line, roundf(textOrigin.x), roundf(textOrigin.y));
                 }
             }
         }
