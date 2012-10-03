@@ -28,8 +28,16 @@ void tbzDataLogger::exit()
 
 void tbzDataLogger::setLogsFolder(string folderPath)
 {
-    
-    logsFolder = folderPath;
+    // Only set if folder is writeable
+    ofFile dir(folderPath);
+    if (dir.isDirectory() && dir.canWrite())
+    {
+        logsFolder = folderPath;
+    }
+    else
+    {
+        ofLog(OF_LOG_WARNING, "tbzDataLogger: Aborting set of logs folder. <" + folderPath + "> cannot be written to.");
+    }
 }
 
 void tbzDataLogger::update()
@@ -81,14 +89,22 @@ void tbzDataLogger::update()
         
         string filename = ofFilePath::addTrailingSlash(logsFolder) + ofGetTimestampString(); 
         
-        json_dump_file(json, filename.c_str(), JSON_COMPACT);
+        int success = json_dump_file(json, filename.c_str(), JSON_COMPACT);
         
+        // TASK: Notify host app that there is new file for upload etc.
+        if (success >= 0)
+        {
+            ofNotifyEvent(onLogFileWritten, filename);
+        }
+        else
+        {
+            ofLog(OF_LOG_WARNING, "tbzDataLogger: Failed to write log");
+        }
+            
         // TASK: Clear sensorData for new samples
         
         sensorData.clear();
         
-        // TASK: Notify host app that there is new file for upload etc.
         
-        ofNotifyEvent(onLogFileWritten, filename);
     }
 }

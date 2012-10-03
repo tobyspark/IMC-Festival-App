@@ -57,7 +57,7 @@ void imcFestivalApp::setup(){
     
     //// TASK: Set persistent directory
     
-    tempDirAbsolutePath = "";
+    persistentDirAbsolutePath = "";
     #ifdef TARGET_OSX
     // Can just be app bundle data path for now.
     persistentDirAbsolutePath = dataPathRoot();
