@@ -465,7 +465,6 @@ void imcFestivalApp::update()
         while(twitter.hasNewTweets())
         {
             ofxTweet    tweet = twitter.getNextTweet();
-            tbzTweet*   tTweet = static_cast<tbzTweet*>(&tweet);
             
             cout << endl;
             cout << "---" << endl;
@@ -474,12 +473,9 @@ void imcFestivalApp::update()
             
             Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
             
-            bool hasGeo;
-            ofPoint geoPoint;
-            
-            hasGeo = tTweet->getGeoLocation(geoPoint);
-            
-            if (hasGeo) message->geoLocation = new ofPoint(geoPoint);
+            // Note: do not extract geolocation, "promoters" are to stay where they are on the eventSite.
+            // If you do, if any do come through with geolocation (the API suggests otherwise, but some have), it could be for anywhere.
+            // That said, could bounds check and apply this if present and in-bounds, and apply eventSettings.xml position if not.
             
             // TODO: Assign to correct promoter, now twitter is not part of tbzPerson class
             eventSite.addMessageToPromoters(message);

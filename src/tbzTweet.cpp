@@ -20,13 +20,13 @@ bool tbzTweet::getGeoLocation(ofPoint &point)
     
     json_t* geo = json_object_get(tweetJSON, "geo");
     if(!json_is_object(geo)) {
-        cout << "error: cannot get geo from tweet" << endl;
+        // No geo key or unexpected format
         return false;
     }
     
     json_t* coords = json_object_get(geo, "coordinates");
     if (!json_is_array(coords)) {
-        cout << "error: cannot get coords from tweet" << endl;
+        cout << "error: cannot get coords from tweet geo" << endl;
         return false;
     }
     

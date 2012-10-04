@@ -109,6 +109,7 @@ protected:
     ViewState   lastViewState;
     
     ofxAssimpModelLoader siteModel;
+    float       scale;
     float       elevationFactor;
     float       planFactor;
     float       elevationFactorTarget;

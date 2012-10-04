@@ -50,7 +50,6 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     elevationFactor = 0.0f;
     width = 5.0f;
     siteAnimation.addKeyFrame( Playlist::Action::tween(5000.0f, &width, 1, Playlist::TWEEN_CUBIC, TWEEN_EASE_OUT));
-    
 }
 
 void tbzEventSite::addVenue(Poco::SharedPtr<tbzVenue> venue)
@@ -159,7 +158,8 @@ void tbzEventSite::setOrigin(ofPoint origin)
 
 void tbzEventSite::updateContent()
 {
-    float scale = width;
+    float scaleDelta = width - scale;
+    scale = width;
     
     //// TASK: Respond to interaction: clamp position of model so it can't be dragged offscreen etc.
     
@@ -173,6 +173,10 @@ void tbzEventSite::updateContent()
 //    // if scale = 2, bounds are 0, screenwidth
 //    x = max(x, ofGetWidth() - scale*ofGetWidth()/2);
 //    x = min(x, scale*ofGetWidth()/2);
+    
+    // Adjust centre so scaling happens about centre of screen not centre of eventSite
+    x *= 1 + scaleDelta/width;
+    y *= 1 + scaleDelta/width;
     
     //// TASK: Respond to interaction: if we're dragging, elevate to plan view.
     
@@ -315,7 +319,7 @@ void tbzEventSite::updateContent()
                 float tagHeight = venueFocussed->tag.getBounds().height;
                 if (tagHeight > originCurrent.y)
                 {
-                    originDesired.y = tagHeight; // TODO: need to work out offset to make this fit just so
+                    originDesired.y = tagHeight - tbzScreenScale::retinaScale * 20; // TODO: need to work out offset to make this fit just so. Arrow height?
                 }
             }
         }
@@ -536,7 +540,7 @@ void tbzEventSite::venuesDistanceSort()
     for (venueAndDist = venuesDistanceFromOriginSorted.begin(); venueAndDist != venuesDistanceFromOriginSorted.end(); ++venueAndDist)
     {
         ofPoint venueModelPoint = groundToModel(venueAndDist->venue->stageGeoLocation);
-        venueModelPoint *= width; // width is co-opted for our model scale var
+        venueModelPoint *= scale;
         
         venueAndDist->distance = venueModelPoint.distance(ofPoint(-x, -y));
     }
