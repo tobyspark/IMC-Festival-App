@@ -8,6 +8,8 @@
 
 #include "tbzDataLogger.h"
 
+// Note, for iOS ensure file type is set to Objective-C++ in Xcode. Not using .mm extension to keep cross platform.
+
 tbzDataLogger::tbzDataLogger()
 {
     pollingIntervalFrames = 10; // 10 Hz at 60fps
@@ -55,11 +57,22 @@ void tbzDataLogger::update()
         
         tbzSensorData dataFrame;
         dataFrame.timestamp = ofGetTimestampString();
-        dataFrame.forceX = force.x;
-        dataFrame.forceY = force.y;
-        dataFrame.forceZ = force.z;
-        dataFrame.pitch = orientation.x;
-        dataFrame.roll  = orientation.y;
+        dataFrame.accForceX = force.x;
+        dataFrame.accForceY = force.y;
+        dataFrame.accForceZ = force.z;
+        dataFrame.accPitch = orientation.x;
+        dataFrame.accRoll  = orientation.y;
+        dataFrame.locLatitude = coreLocation.getLatitude();
+        dataFrame.locLongitude = coreLocation.getLongitude();
+        dataFrame.locAccuracy = coreLocation.getLocationAccuracy();
+        dataFrame.comHeading = coreLocation.getTrueHeading();
+        dataFrame.comAccuracy = coreLocation.getHeadingAccuracy();
+        dataFrame.comX = coreLocation.getCompassX();
+        dataFrame.comY = coreLocation.getCompassY();
+        dataFrame.comZ = coreLocation.getCompassZ();
+        
+        // TODO: Get when corelocation last updated, and only add if data is new.
+        // TODO: This should be a circular buffer not building and clearing a list, dumping out when cycles round.
         
         sensorData.push_back(dataFrame);
     }
@@ -78,11 +91,21 @@ void tbzDataLogger::update()
         {
             json_t* dataFrameJSON = json_object();
             json_object_set_new(dataFrameJSON, "timestamp", json_string(dataFrame->timestamp.c_str()));
-            json_object_set_new(dataFrameJSON, "forceX", json_real(dataFrame->forceX));
-            json_object_set_new(dataFrameJSON, "forceY", json_real(dataFrame->forceY));
-            json_object_set_new(dataFrameJSON, "forceZ", json_real(dataFrame->forceZ));
-            json_object_set_new(dataFrameJSON, "pitch", json_real(dataFrame->pitch));
-            json_object_set_new(dataFrameJSON, "roll", json_real(dataFrame->roll));
+            json_object_set_new(dataFrameJSON, "accForceX", json_real(dataFrame->accForceX));
+            json_object_set_new(dataFrameJSON, "accForceY", json_real(dataFrame->accForceY));
+            json_object_set_new(dataFrameJSON, "accForceZ", json_real(dataFrame->accForceZ));
+            json_object_set_new(dataFrameJSON, "accPitch", json_real(dataFrame->accPitch));
+            json_object_set_new(dataFrameJSON, "accRoll", json_real(dataFrame->accRoll));
+            json_object_set_new(dataFrameJSON, "locLatitude", json_real(dataFrame->locLatitude));
+            json_object_set_new(dataFrameJSON, "locLongitude", json_real(dataFrame->locLongitude));
+            json_object_set_new(dataFrameJSON, "locAccuracy", json_real(dataFrame->locAccuracy));
+            json_object_set_new(dataFrameJSON, "comHeading", json_real(dataFrame->comHeading));
+            json_object_set_new(dataFrameJSON, "comAccuracy", json_real(dataFrame->comAccuracy));
+            json_object_set_new(dataFrameJSON, "comX", json_real(dataFrame->comX));
+            json_object_set_new(dataFrameJSON, "comY", json_real(dataFrame->comY));
+            json_object_set_new(dataFrameJSON, "comZ", json_real(dataFrame->comZ));
+            
+            // TODO: More compact form ie. { time: xxx, accXYZPR: [x,y,z,p,r], locLtLnA: [lt, ln, a], comHXYZA
             
             json_array_append_new(json, dataFrameJSON);
         }

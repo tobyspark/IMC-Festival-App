@@ -14,14 +14,26 @@
 #include "jansson.h"
 #include <list>
 
+#if TARGET_OS_IPHONE
+#include "ofxiPhoneCoreLocation.h"
+#endif
+
 struct tbzSensorData
 {
     string timestamp;
-    float forceX;
-    float forceY;
-    float forceZ;
-    float pitch;
-    float roll;
+    float accForceX;
+    float accForceY;
+    float accForceZ;
+    float accPitch;
+    float accRoll;
+    float locLatitude;
+    float locLongitude;
+    float locAccuracy;
+    float comHeading;
+    float comAccuracy;
+    float comX;
+    float comY;
+    float comZ;
 };
 
 class tbzDataLogger
@@ -41,6 +53,11 @@ class tbzDataLogger
         int newFileIntervalFrames;
         list<tbzSensorData>sensorData;
         string logsFolder;
+    
+        
+        ofxiPhoneCoreLocation coreLocation;
+    
+    
 };
 
 
