@@ -95,6 +95,10 @@ protected:
     void venuesDistanceSort();
     list< tbzVenueAndDist > venuesDistanceFromOriginSorted;
     
+    // TODO: Make tbzSiteObject superclass for venues and people
+    //void siteObjectsDepthSort();
+    //list< Poco::SharedPtr<tbzEventSiteObject> > siteObjectsDepthSorted;
+    
     tbzVenue*   nearestVenueTest(float &distance);
     tbzVenue*   venueFocussed;
     

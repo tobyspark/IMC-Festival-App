@@ -3,8 +3,9 @@
 
 /*
  TODO:
+    - Make people selectable as well as venues, to show tweets clearly.
+    - Change rendering of venues and people to a depth sorted list. Only way to get alpha blending.
     - Animate around site as tweets come in
-    - Change rendering of venues and people tags to a depth sorted list
     - KMZ code to write out parsed results to separate XML file in writable location
     - XML code to check for this separate file and merge into in-memory xml before passing to venue / person setup
     - tweets and twitter max_id cached
