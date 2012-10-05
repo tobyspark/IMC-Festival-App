@@ -47,7 +47,16 @@ void tbzPerson::startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> messa
         locationTween.addValue(geoLocation.y, message->geoLocation->y);
         locationTween.start();
     }
-    
+    else
+    {
+        // If there isn't a location, then make sure we're back at the default location
+        if (geoLocation != geoLocationDefault)
+        {
+            locationTween.setParameters(easing, ofxTween::easeOut, geoLocation.x, geoLocationDefault.x, kTBZPerson_MessageAnimationPeriodMillis, 0);
+            locationTween.addValue(geoLocation.y, geoLocationDefault.y);
+            locationTween.start();
+        }
+    }
     // Start tween animating
     newMessageAnimPos.start();
 
@@ -170,6 +179,7 @@ void tbzPerson::setup(string inName, string inModelName, ofPoint inGeoLocation)
 {
     name = inName;
     geoLocation = inGeoLocation;
+    geoLocationDefault = inGeoLocation;
     
     if(personModel.loadModel(inModelName, true))
     {

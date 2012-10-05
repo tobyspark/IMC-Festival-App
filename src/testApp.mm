@@ -413,10 +413,10 @@ void imcFestivalApp::update()
         while(twitterGeo.hasNewTweets())
         {
             ofxTweet tweet = twitterGeo.getNextTweet();
-            tbzTweet* tTweet = static_cast<tbzTweet*>(&tweet);
             
             // TASK: Extract location from tweet, skip to next tweet if missing
             
+            tbzTweet* tTweet = static_cast<tbzTweet*>(&tweet);
             bool    hasGeo;
             ofPoint geoPoint;
             
@@ -466,6 +466,14 @@ void imcFestivalApp::update()
         {
             ofxTweet    tweet = twitter.getNextTweet();
             
+            // TASK: Extract location from tweet, skip to next tweet if missing
+            
+            tbzTweet* tTweet = static_cast<tbzTweet*>(&tweet);
+            bool    hasGeo;
+            ofPoint geoPoint;
+            
+            hasGeo = tTweet->getGeoLocation(geoPoint);
+            
             cout << endl;
             cout << "---" << endl;
             cout << "Promoter Tweet text:" << tweet.getText() << endl;
@@ -473,10 +481,12 @@ void imcFestivalApp::update()
             
             Poco::SharedPtr<tbzSocialMessage> message = new tbzSocialMessage(tweet.getText(), tweet.getScreenName(), "twitter", "TODO: Time");
             
-            // Note: do not extract geolocation, "promoters" are to stay where they are on the eventSite.
-            // If you do, if any do come through with geolocation (the API suggests otherwise, but some have), it could be for anywhere.
-            // That said, could bounds check and apply this if present and in-bounds, and apply eventSettings.xml position if not.
-            
+            // If any geo location is within the site, add it to the message
+            if (hasGeo && eventSite.groundBounds.inside(geoPoint))
+            {
+                message->geoLocation = new ofPoint(geoPoint);
+            }
+        
             // TODO: Assign to correct promoter, now twitter is not part of tbzPerson class
             eventSite.addMessageToPromoters(message);
         }
