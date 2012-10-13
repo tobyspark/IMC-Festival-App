@@ -10,6 +10,7 @@
 #define __IMCFestivalApp__tbzPerson__
 
 #include "ofMain.h"
+#include "tbzEventSiteFeature.h"
 #include "ofxTween.h"
 #include "ofxAssimpModelLoader.h"
 #include "tbzSocialMessage.h"
@@ -22,19 +23,19 @@
 #define kTBZPerson_MessageTagGrowAnimation false
 #define kTBZPerson_AnimInDistance 1000
 
-class tbzPerson
+class tbzPerson : public tbzEventSiteFeature
 {
 public:
     tbzPerson();
     ~tbzPerson();
     
-    string          name;
-    ofPoint         geoLocation;
+    ofPoint         geoLocationDefault;
     
     void            addMessage(Poco::SharedPtr<tbzSocialMessage> message);
     
     void            update();
-    void            draw(float animPos = 1.0f);
+    void            drawTag();
+    void            drawFeature();
     
     void            setup(string name, string modelName, ofPoint geoLocation);
     
@@ -46,7 +47,7 @@ protected:
     list< Poco::SharedPtr<tbzSocialMessage> >  messagesDisplay;
     queue< Poco::SharedPtr<tbzSocialMessage> > messagesQueue;
     
-    ofxAssimpModelLoader    personModel;
+    ofxAssimpModelLoader    model;
     
     ofxTween        newMessageAnimPos;
     float           newMessageHeight;

@@ -10,6 +10,7 @@
 #define __IMCFestivalApp__tbzVenue__
 
 #include "ofMain.h"
+#include "tbzEventSiteFeature.h"
 #include "ofxXmlSettings.h"
 #include "tbzCaptionGraphic.h"
 #include "tbzKMZReader.h"
@@ -29,21 +30,20 @@ class tbzVenueSlot
 
 };
 
-class tbzVenue
+class tbzVenue : public tbzEventSiteFeature
 {
     public:
         tbzVenue();
     
-        string          name;
         list<tbzVenueSlot>    slots;
-        ofPoint         stageGeoLocation;
         ofPolyline      audienceGeoArea;
     
         list<tbzVenueSlot>::iterator    slotAtTime(tm time);
         list<tbzVenueSlot>::iterator    slotAfterTime(tm time);
     
         void            update();
-        void            drawTag(float animPos = 1.0f);
+        void            drawTag();
+        void            drawFeature();
         
         tbzCaptionGraphic tag;
         enum            TagTextType {nowAndNext, programme, nothing, uninitialised};

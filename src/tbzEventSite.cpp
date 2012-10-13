@@ -415,7 +415,7 @@ void tbzEventSite::drawContent()
                     ofPushMatrix();
                     ofPushStyle();
                     {
-                        ofPoint modelLocation = groundToModel(venueAndDist->venue->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                        ofPoint modelLocation = groundToModel(venueAndDist->venue->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
                         ofRotate(-elevationAngle, 1, 0, 0);
                         if (venueAndDist->venue->getTagTextType() == tbzVenue::nothing)
@@ -441,7 +441,7 @@ void tbzEventSite::drawContent()
                 {
                     ofPushMatrix();
                     {
-                        ofPoint modelLocation = groundToModel(venueFocussed->stageGeoLocation);
+                        ofPoint modelLocation = groundToModel(venueFocussed->geoLocation);
                         ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
                         ofRotate(-elevationAngle, 1, 0, 0);
                         
@@ -459,7 +459,7 @@ void tbzEventSite::drawContent()
                         {
                             ofPushMatrix();
                             {
-                                ofPoint modelLocation = groundToModel((*venue)->stageGeoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                                ofPoint modelLocation = groundToModel((*venue)->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
                                 ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
                                 
                                 ofRotate((planFactor * -elevationAngle) + (elevationFactor * -90.0f), 1, 0, 0);
@@ -492,7 +492,8 @@ void tbzEventSite::drawContent()
                         
                         ofScale(personScale, personScale, 1.0f);
                         
-                        (*person)->draw(elevationFactor);
+                        (*person)->transition = elevationFactor;
+                        (*person)->drawTag();
                     }
                     ofPopMatrix();
                 }
@@ -510,7 +511,8 @@ void tbzEventSite::drawContent()
                         
                         ofScale(personScale, personScale, 1.0f);
                         
-                        (*person)->draw(elevationFactor);
+                        (*person)->transition = elevationFactor;
+                        (*person)->drawTag();
                     }
                     ofPopMatrix();
                 }
@@ -539,7 +541,7 @@ void tbzEventSite::venuesDistanceSort()
     list< tbzVenueAndDist >::iterator venueAndDist;
     for (venueAndDist = venuesDistanceFromOriginSorted.begin(); venueAndDist != venuesDistanceFromOriginSorted.end(); ++venueAndDist)
     {
-        ofPoint venueModelPoint = groundToModel(venueAndDist->venue->stageGeoLocation);
+        ofPoint venueModelPoint = groundToModel(venueAndDist->venue->geoLocation);
         venueModelPoint *= scale;
         
         venueAndDist->distance = venueModelPoint.distance(ofPoint(-x, -y));

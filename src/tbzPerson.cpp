@@ -119,17 +119,24 @@ void tbzPerson::update()
     }
 }
 
-void tbzPerson::draw(float animPos)
+void tbzPerson::drawFeature()
+{
+    
+    
+    
+}
+
+void tbzPerson::drawTag()
 {
     ofPushMatrix();
     ofPushStyle();
     {
-        personModel.drawFaces();
+        model.drawFaces();
         
         if (!messagesDisplay.empty())
         {
-            ofColor fadeInAlpha(255, animPos*255.0f);
-            float   animInPos = (1.0f-animPos)*kTBZPerson_AnimInDistance;
+            ofFloatColor fadeInAlpha(1.0f, transition);
+            float   animInPos = (1.0f-transition)*kTBZPerson_AnimInDistance;
 
             ofSetColor(fadeInAlpha);
             float newMessageAnimHeight = newMessageHeight * (1.0f - newMessageAnimPos.getTarget(0));
@@ -181,19 +188,19 @@ void tbzPerson::setup(string inName, string inModelName, ofPoint inGeoLocation)
     geoLocation = inGeoLocation;
     geoLocationDefault = inGeoLocation;
     
-    if(personModel.loadModel(inModelName, true))
+    if(model.loadModel(inModelName, true))
     {
-        personModel.setAnimation(0);
+        model.setAnimation(0);
         
         // TASK: Set model position and scale in bounding rect
         
         // siteModel.scale is normalised to GL units, so to fill screen width (initialsize of 1) we need a scale of 2
         float scale = 0.5f;
-        personModel.setScale(scale, scale, scale);
+        model.setScale(scale, scale, scale);
         
         // Centre in x + y, leave z at ground level.
-        //        personModel.setPosition(0 - (personModel.getSceneCenter().x * personModel.getNormalizedScale() * scale),
-        //                              0 + (personModel.getSceneCenter().y * personModel.getNormalizedScale() * scale),
+        //        model.setPosition(0 - (model.getSceneCenter().x * model.getNormalizedScale() * scale),
+        //                              0 + (model.getSceneCenter().y * model.getNormalizedScale() * scale),
         //                              0
         //                              );
         

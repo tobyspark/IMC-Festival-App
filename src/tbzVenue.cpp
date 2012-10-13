@@ -119,20 +119,24 @@ list<tbzVenueSlot>::iterator tbzVenue::slotAfterTime(tm time)
     return returnSlot;
 }
 
-void tbzVenue::drawTag(float animPos)
+void tbzVenue::drawFeature()
 {
-    
-//        ofPushStyle();
-//        
-//            ofColor fadeInAlpha(255, animPos*255.0f);
-//            float   animInPos = (1.0f-animPos)*kTBZVenue_AnimInDistance;
-//            
-//            ofSetColor(fadeInAlpha);
-//            tagFBO.draw(0, 0 - animInPos);
-//        
-//        ofPopStyle();
+    ofPushStyle();
+    {
+        ofFloatColor selectedColour(255, 1.0f-selected, 1.0f-selected); // Red if selected
+        ofSetColor(selectedColour);
         
-    tag.draw();
+        model.drawFaces();
+    }
+    ofPopStyle();
+}
+
+void tbzVenue::drawTag()
+{
+    if (transition > 0.0f)
+    {
+        tag.draw();
+    }
 }
 
 void tbzVenue::setTagTextType(TagTextType type)
@@ -233,8 +237,8 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
         
         if (xml.tagExists("stageCenter"))
         {
-            stageGeoLocation.x = xml.getValue("stageCenter:longitude", 0.0f);
-            stageGeoLocation.y = xml.getValue("stageCenter:latitude", 0.0f);
+            geoLocation.x = xml.getValue("stageCenter:longitude", 0.0f);
+            geoLocation.y = xml.getValue("stageCenter:latitude", 0.0f);
         }
         // We're only going to process KML on OSX, on iOS we need fast startup and so will use the parsed info put back into the XML
         #ifdef TARGET_OSX
@@ -242,14 +246,14 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
         {
             bool ok = false;
             string filenameKMZ = xml.getValue("stageKML", "no filename could be read from XML");
-            ok = pointFromKMZ(filenameKMZ, stageGeoLocation);
+            ok = pointFromKMZ(filenameKMZ, geoLocation);
             
             if (ok)
             {
                 xml.addTag("stageCenter");
                 xml.pushTag("stageCenter");
-                    xml.addValue("longitude", stageGeoLocation.x);
-                    xml.addValue("latitude", stageGeoLocation.y);
+                    xml.addValue("longitude", geoLocation.x);
+                    xml.addValue("latitude", geoLocation.y);
                 xml.popTag();
                 
                 xmlChanged = true;
@@ -359,6 +363,6 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
     setTagTextType(nothing);
     
     ofLog(OF_LOG_VERBOSE, "Venue setup: " + name + " with " + ofToString(slots.size()) + " slots");
-    ofLog(OF_LOG_VERBOSE, "Location: " + ofToString(stageGeoLocation.x) + ", " + ofToString(stageGeoLocation.y));
+    ofLog(OF_LOG_VERBOSE, "Location: " + ofToString(geoLocation.x) + ", " + ofToString(geoLocation.y));
 }
 
