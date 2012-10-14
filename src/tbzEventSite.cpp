@@ -354,7 +354,6 @@ void tbzEventSite::drawContent()
     // Scale here is true, this is the world that everything artificial will then sit in.
     // Do this in any order, we need depth test to render 3D models correctly
     
-    glEnable(GL_DEPTH_TEST);
     ofPushMatrix();
     {
         // TASK: Translate to origin
@@ -380,6 +379,7 @@ void tbzEventSite::drawContent()
         ofTranslate(0, elevationFactor * y);
         
         // TASK: Draw model, coord space will be scaled
+        glEnable(GL_DEPTH_TEST);
         ofPushMatrix();
         ofPushStyle();
         ofEnableLighting();
@@ -445,8 +445,6 @@ void tbzEventSite::drawContent()
                     ofPopStyle();
                     ofPopMatrix();
                 }
-                
-                glEnable(GL_DEPTH_TEST);
             }
             // If we're in elevated view, we want to render in proper 3D space alongside people etc.
             // We're going to animate up and fade in
@@ -468,73 +466,24 @@ void tbzEventSite::drawContent()
                 }
                 else
                 {
-                    list< Poco::SharedPtr<tbzVenue> >::iterator venue;
-                    ofPushStyle();
+                    list< tbzFeatureAndDist >::reverse_iterator featureAndDist;
+                    for (featureAndDist = featuresDepthSorted.rbegin(); featureAndDist != featuresDepthSorted.rend(); ++featureAndDist)
                     {
-                        // TODO: put venues and people here
-                        ofSetColor(255, elevationFactor*255);
-                        for (venue = venues.begin(); venue != venues.end(); ++venue)
+                        ofPushMatrix();
                         {
-                            ofPushMatrix();
-                            {
-                                ofPoint modelLocation = groundToModel((*venue)->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                                ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
-                                
-                                ofRotate((planFactor * -elevationAngle) + (elevationFactor * -90.0f), 1, 0, 0);
-                                
-                                (*venue)->drawTag();
-                            }
-                            ofPopMatrix();
+                            ofPoint modelLocation = groundToModel(featureAndDist->feature->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
+                            ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
+                            
+                            // TODO: Lots of special casing rotation, scale for venues, people, promoters etc?
+                            ofRotate(-90, 1, 0, 0);
+                            
+                            featureAndDist->feature->transition = elevationFactor;
+                            featureAndDist->feature->drawTag();
                         }
+                        ofPopMatrix();
                     }
-                    ofPopStyle();
                 }
             }
-            
-            //// TASK: Draw People
-            
-//            if (viewState != planView && !venueFocussed)
-//            {
-//                float personScale = scale / maxSize; // maxSize is max scale, part of co-opting MSAIntObj.width for scale.
-//                
-//                list< Poco::SharedPtr<tbzPerson> >::iterator person;
-//            
-//                for (person = promoters.begin(); person != promoters.end(); ++person)
-//                {
-//                    ofPushMatrix();
-//                    {
-//                        ofPoint modelLocation = groundToModel((*person)->geoLocation);
-//                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale * elevationFactor);
-//                        
-//                        ofRotate(-90, 1, 0, 0);
-//                        
-//                        ofScale(personScale, personScale, 1.0f);
-//                        
-//                        (*person)->transition = elevationFactor;
-//                        (*person)->drawTag();
-//                    }
-//                    ofPopMatrix();
-//                }
-//            
-//                for (person = punters.begin(); person != punters.end(); ++person)
-//                {
-//                    ofPoint modelLocation = groundToModel((*person)->geoLocation);
-//                    if (modelLocation.y * scale > -y) continue; // don't draw if inbetween origin area and viewpoint
-//                    
-//                    ofPushMatrix();
-//                    {
-//                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_PersonTagElevationHeight * scale);
-//                        
-//                        ofRotate(-90, 1, 0, 0);
-//                        
-//                        ofScale(personScale, personScale, 1.0f);
-//                        
-//                        (*person)->transition = elevationFactor;
-//                        (*person)->drawTag();
-//                    }
-//                    ofPopMatrix();
-//                }
-//            }
         }
         ofPopMatrix();
     }
@@ -575,7 +524,7 @@ void tbzEventSite::featuresYPosSort()
     {
         ofPoint featureModelPoint = groundToModel(featureAndDist->feature->geoLocation);
         
-        featureAndDist->distance = featureModelPoint.y;
+        featureAndDist->distance = -featureModelPoint.y;
     }
     
     featuresDepthSorted.sort();
