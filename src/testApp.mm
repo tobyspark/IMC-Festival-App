@@ -237,8 +237,6 @@ void imcFestivalApp::setup(){
     
     // we need alpha blending as we have images with alpha in 3D space
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-    glAlphaFunc ( GL_GREATER, 0.1);
-    glEnable ( GL_ALPHA_TEST );
     
     
     
