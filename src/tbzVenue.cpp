@@ -40,7 +40,7 @@ tbzVenue::tbzVenue()
     tag.fontTitle = NULL;
     tag.fontBody = NULL;
     
-    tagTextType = uninitialised;
+    state = uninitialised;
 }
 
 void tbzVenue::update()
@@ -139,15 +139,15 @@ void tbzVenue::drawTag()
     }
 }
 
-void tbzVenue::setTagTextType(TagTextType type)
+void tbzVenue::setState(State inState)
 {
-    if (tagTextType != type)
+    if (state != inState)
     {
-        tagTextType = type;
+        state = inState;
         
         list<string> tagTextLines;
         
-        if (type == nowAndNext)
+        if (inState == preview)
         {
             time_t rawtime;
             tm* now;
@@ -167,7 +167,7 @@ void tbzVenue::setTagTextType(TagTextType type)
                 tagTextLines.push_back("Next: " + nextSlot->name);
             }
         }
-        else if (type == programme)
+        else if (inState == full)
         {
             list<tbzVenueSlot>::iterator slot;
             for (slot = slots.begin(); slot != slots.end(); slot++)
@@ -177,16 +177,21 @@ void tbzVenue::setTagTextType(TagTextType type)
         }
         else
         {
-            tagTextType = nothing;
+            state = nothing;
         }
         
         tag.setContent(name, tagTextLines);
     }
 }
 
-tbzVenue::TagTextType tbzVenue::tbzVenue::getTagTextType()
+tbzEventSiteFeature::State tbzVenue::getState()
 {
-    return tagTextType;
+    return state;
+}
+
+float tbzVenue::getTagHeight()
+{
+    return tag.getBounds().height;
 }
 
 string tbzVenue::slotTextForSlot(tbzVenueSlot &slot)
@@ -360,7 +365,7 @@ void tbzVenue::setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which)
     
     slots.sort();
     
-    setTagTextType(nothing);
+    setState(nothing);
     
     ofLog(OF_LOG_VERBOSE, "Venue setup: " + name + " with " + ofToString(slots.size()) + " slots");
     ofLog(OF_LOG_VERBOSE, "Location: " + ofToString(geoLocation.x) + ", " + ofToString(geoLocation.y));

@@ -11,6 +11,7 @@
 tbzPerson::tbzPerson()
 {
     ofAddListener(newMessageAnimPos.end_E, this, &tbzPerson::onNewMessageAnimationEnd);
+    state = uninitialised;
 }
 
 tbzPerson::~tbzPerson()
@@ -93,6 +94,39 @@ void tbzPerson::onNewMessageAnimationEnd(int &tweenID)
     }
 }
 
+void tbzPerson::setState(State inState)
+{
+    if (state != inState)
+    {
+        state = inState;
+        
+        list<string> tagTextLines;
+        
+        if (inState == preview)
+        {
+            // switch to showing name?
+        }
+        else if (inState == full)
+        {
+            // switch to showing full message stack?
+        }
+        else
+        {
+            state = nothing;
+        }
+    }
+}
+
+tbzEventSiteFeature::State tbzPerson::getState()
+{
+    return state;
+}
+
+float tbzPerson::getTagHeight()
+{
+    return 0; // TODO
+}
+
 void tbzPerson::update()
 {
     // TASK: Update tweens
@@ -121,9 +155,7 @@ void tbzPerson::update()
 
 void tbzPerson::drawFeature()
 {
-    
-    
-    
+    model.drawFaces();
 }
 
 void tbzPerson::drawTag()
@@ -131,8 +163,6 @@ void tbzPerson::drawTag()
     ofPushMatrix();
     ofPushStyle();
     {
-        model.drawFaces();
-        
         if (!messagesDisplay.empty())
         {
             ofFloatColor fadeInAlpha(1.0f, transition);
@@ -211,4 +241,6 @@ void tbzPerson::setup(string inName, string inModelName, ofPoint inGeoLocation)
          ofLog(OF_LOG_VERBOSE,"siteModel.getNormalisedScale()" + ofToString(siteModel.getNormalizedScale()));
          */
     }
+    
+    setState(nothing);
 }

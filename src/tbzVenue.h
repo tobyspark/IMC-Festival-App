@@ -41,21 +41,20 @@ class tbzVenue : public tbzEventSiteFeature
         list<tbzVenueSlot>::iterator    slotAtTime(tm time);
         list<tbzVenueSlot>::iterator    slotAfterTime(tm time);
     
+        void            setState(State inState);
+        State           getState();
+    
         void            update();
         void            drawTag();
         void            drawFeature();
         
         tbzCaptionGraphic tag;
-        enum            TagTextType {nowAndNext, programme, nothing, uninitialised};
-        void            setTagTextType(TagTextType type = nothing);
-        TagTextType     getTagTextType();
+        float           getTagHeight();
     
         void            setupFromXML(ofxXmlSettings &xml, int which = 0);
         void            setupFromXML(ofxXmlSettings &xml, bool &xmlChanged, int which = 0);
     
-    protected:
-        TagTextType     tagTextType;
-    
+    protected:    
         string          slotTextForSlot(tbzVenueSlot &slot);
 };
 

@@ -33,6 +33,11 @@ public:
     
     void            addMessage(Poco::SharedPtr<tbzSocialMessage> message);
     
+    void            setState(tbzEventSiteFeature::State inState);
+    State           getState();
+    
+    float           getTagHeight();
+    
     void            update();
     void            drawTag();
     void            drawFeature();

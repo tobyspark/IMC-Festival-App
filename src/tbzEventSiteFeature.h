@@ -17,13 +17,23 @@ class tbzEventSiteFeature {
 public:
     string          name;
     ofPoint         geoLocation;
+    ofPoint         siteModelLocation;
     float           selected;
     float           transition;
     ofxAssimpModelLoader model;
     
-    virtual void    update() {};
-    virtual void    drawFeature() {};
-    virtual void    drawTag() {};
+    enum            State {uninitialised, nothing, preview, full};
+    virtual void    setState(State inState) = 0;
+    virtual State   getState() = 0;
+    
+    virtual float   getTagHeight() = 0;
+    
+    virtual void    update() = 0;
+    virtual void    drawFeature() = 0;
+    virtual void    drawTag() = 0;
+    
+protected:
+    State           state;
 };
 
 #endif

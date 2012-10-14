@@ -30,13 +30,13 @@
 #define kTBZES_Damping 0.1
 #define kTBZES_MaxPunters 20
 
-class tbzVenueAndDist
+class tbzFeatureAndDist
 {
 public:
-    Poco::SharedPtr<tbzVenue>   venue;
-    float                       distance;
+    Poco::SharedPtr<tbzEventSiteFeature> feature;
+    float                                distance;
     
-    bool operator < (tbzVenueAndDist);
+    bool operator < (tbzFeatureAndDist);
 };
 
 class tbzEventSite : public ofxMtActionsObject
@@ -92,15 +92,13 @@ protected:
     list< Poco::SharedPtr<tbzPerson> > punters;
     list< Poco::SharedPtr<tbzPerson> > promoters;
     
-    void venuesDistanceSort();
-    list< tbzVenueAndDist > venuesDistanceFromOriginSorted;
+    void featuresDistanceFromOriginSort();
+    void featuresYPosSort();
+    list< tbzFeatureAndDist > featuresDepthSorted;
     
-    // TODO: Make tbzSiteObject superclass for venues and people
-    //void siteObjectsDepthSort();
-    //list< Poco::SharedPtr<tbzEventSiteObject> > siteObjectsDepthSorted;
-    
-    tbzVenue*   nearestVenueTest(float &distance);
-    tbzVenue*   venueFocussed;
+    // This should be redone now we have tbzEventSiteFeature with selected property.
+    tbzEventSiteFeature* nearestFeatureTest(float &distance);
+    tbzEventSiteFeature* featureFocussed;
     
     ofPoint     originCurrent;
     ofPoint     originDesired;
