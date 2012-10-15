@@ -43,6 +43,11 @@ tbzVenue::tbzVenue()
     state = uninitialised;
 }
 
+tbzVenue::~tbzVenue()
+{
+    // nothing on the heap?
+}
+
 void tbzVenue::update()
 {
     // TASK: Animate tag as appropriate, set by content

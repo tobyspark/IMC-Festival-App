@@ -15,6 +15,8 @@
 class tbzEventSiteFeature {
     
 public:
+    // TODO: initialise tbzEventSiteFeature with font and style info
+    
     string          name;
     ofPoint         geoLocation;
     ofPoint         siteModelLocation;
@@ -31,6 +33,8 @@ public:
     virtual void    update() = 0;
     virtual void    drawFeature() = 0;
     virtual void    drawTag() = 0;
+    
+    virtual         ~tbzEventSiteFeature() {};
     
 protected:
     State           state;

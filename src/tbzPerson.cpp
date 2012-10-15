@@ -100,11 +100,15 @@ void tbzPerson::setState(State inState)
     {
         state = inState;
         
-        list<string> tagTextLines;
-        
         if (inState == preview)
         {
-            // switch to showing name?
+            list<string> lines;
+            stringstream summaryLine;
+            
+            summaryLine << messagesDisplay.size() + messagesQueue.size() << " messages";
+            
+            lines.push_back(summaryLine.str());
+            tag.setContent(name, lines);
         }
         else if (inState == full)
         {
@@ -113,6 +117,8 @@ void tbzPerson::setState(State inState)
         else
         {
             state = nothing;
+            list<string> noLines;
+            tag.setContent(name, noLines);
         }
     }
 }
@@ -142,6 +148,8 @@ void tbzPerson::update()
     
     // TASK: Update displayed messages
     
+    tag.update();
+    
     // messages only currently need to update if tag graphic itself is changing
     if (kTBZPerson_MessageTagGrowAnimation)
     {
@@ -163,48 +171,58 @@ void tbzPerson::drawTag()
     ofPushMatrix();
     ofPushStyle();
     {
-        if (!messagesDisplay.empty())
-        {
-            ofFloatColor fadeInAlpha(1.0f, transition);
-            float   animInPos = (1.0f-transition)*kTBZPerson_AnimInDistance;
-
-            ofSetColor(fadeInAlpha);
-            float newMessageAnimHeight = newMessageHeight * (1.0f - newMessageAnimPos.getTarget(0));
-            ofTranslate(0, -animInPos + newMessageAnimHeight);
-            
-            messagesDisplayMutex.lock();
-            list< Poco::SharedPtr<tbzSocialMessage> >::iterator message;
-            for (message = messagesDisplay.begin(); message != messagesDisplay.end(); ++message)
-            {
-                if (newMessageAnimPos.isRunning()) {
-                    // Is the newest message?
-                    if (message == messagesDisplay.begin())
-                    {
-                        // Do something special to the message animating in?
-                        (*message)->tag.draw();
-                    }
-                    // Is this the oldest message which will be removed at animation end?
-                    else if (message == --messagesDisplay.end() && messagesDisplay.size() > kTBZPerson_MaxMessagesDisplayed)
-                    {
-                        // Fade it out
-                        ofPushStyle();
-                            ofSetColor(255, 255*(1.0f - newMessageAnimPos.getTarget(0)));
-                            (*message)->tag.draw();
-                        ofPopStyle();
-                    }
-                    else
-                    {
-                        (*message)->tag.draw();
-                    }
-                }
-                else
+        switch (state) {
+            case uninitialised:
+                break;
+            case nothing:
+            case preview:
+                tag.draw();
+                break;
+            case full:
+                if (!messagesDisplay.empty())
                 {
-                    (*message)->tag.draw();
+                    ofFloatColor fadeInAlpha(1.0f, transition);
+                    float   animInPos = (1.0f-transition)*kTBZPerson_AnimInDistance;
+                    
+                    ofSetColor(fadeInAlpha);
+                    float newMessageAnimHeight = newMessageHeight * (1.0f - newMessageAnimPos.getTarget(0));
+                    ofTranslate(0, -animInPos + newMessageAnimHeight);
+                    
+                    messagesDisplayMutex.lock();
+                    list< Poco::SharedPtr<tbzSocialMessage> >::iterator message;
+                    for (message = messagesDisplay.begin(); message != messagesDisplay.end(); ++message)
+                    {
+                        if (newMessageAnimPos.isRunning()) {
+                            // Is the newest message?
+                            if (message == messagesDisplay.begin())
+                            {
+                                // Do something special to the message animating in?
+                                (*message)->tag.draw();
+                            }
+                            // Is this the oldest message which will be removed at animation end?
+                            else if (message == --messagesDisplay.end() && messagesDisplay.size() > kTBZPerson_MaxMessagesDisplayed)
+                            {
+                                // Fade it out
+                                ofPushStyle();
+                                ofSetColor(255, 255*(1.0f - newMessageAnimPos.getTarget(0)));
+                                (*message)->tag.draw();
+                                ofPopStyle();
+                            }
+                            else
+                            {
+                                (*message)->tag.draw();
+                            }
+                        }
+                        else
+                        {
+                            (*message)->tag.draw();
+                        }
+                        
+                        ofTranslate(0, -(*message)->tag.getBounds().height);
+                    }
+                    messagesDisplayMutex.unlock();
                 }
-                
-                ofTranslate(0, -(*message)->tag.getBounds().height);
-            }
-            messagesDisplayMutex.unlock();
+                break;
         }
     }
     ofPopMatrix();

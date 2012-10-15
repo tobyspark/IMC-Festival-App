@@ -34,6 +34,7 @@ class tbzVenue : public tbzEventSiteFeature
 {
     public:
         tbzVenue();
+        ~tbzVenue();
     
         list<tbzVenueSlot>    slots;
         ofPolyline      audienceGeoArea;

@@ -36,6 +36,7 @@ public:
     void            setState(tbzEventSiteFeature::State inState);
     State           getState();
     
+    tbzCaptionGraphic tag;
     float           getTagHeight();
     
     void            update();
@@ -43,7 +44,7 @@ public:
     void            drawFeature();
     
     void            setup(string name, string modelName, ofPoint geoLocation);
-    
+
 protected:
     void            startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> message);
     void            onNewMessageAnimationEnd(int &tweenID);

@@ -68,13 +68,23 @@ void tbzEventSite::addVenue(Poco::SharedPtr<tbzVenue> venue)
 
 void tbzEventSite::addPromoter(Poco::SharedPtr<tbzPerson> person)
 {
+    person->tag.fontTitle = promoterTitleFont;
+    person->tag.fontBody = promoterBodyFont;
+    person->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, promoterForeColour, promoterForeColour, promoterBackColour);
     promoters.push_front(person);
     
-    // TODO: Add to depth list
+    tbzFeatureAndDist featureAndDist;
+    featureAndDist.feature = person;
+    featureAndDist.distance = 0.0f;
+    featuresDepthSorted.push_back(featureAndDist);
 }
 
 void tbzEventSite::addPunter(Poco::SharedPtr<tbzPerson> person)
 {
+    person->tag.fontTitle = personTitleFont;
+    person->tag.fontBody = personBodyFont;
+    person->tag.setStyle(tbzScreenScale::retinaScale * 5, tbzScreenScale::retinaScale * 10, personForeColour, personForeColour, personBackColour);
+    
     punters.push_front(person);
     
     // TASK: Limit number of punters displayed, can't visualise everything for ever, both aesthetically and in resources.
@@ -84,7 +94,10 @@ void tbzEventSite::addPunter(Poco::SharedPtr<tbzPerson> person)
         punters.pop_back();
     }
     
-    // TODO: Add to depth list
+    tbzFeatureAndDist featureAndDist;
+    featureAndDist.feature = person;
+    featureAndDist.distance = 0.0f;
+    featuresDepthSorted.push_back(featureAndDist);
 }
 
 void tbzEventSite::addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message)
@@ -212,6 +225,7 @@ void tbzEventSite::updateContent()
     lastViewState = viewState;
     
     // If we're dragging, then our venue distances from origin need to be recalculated
+    // If we're not, then while venues stay still, people don't and so we need to resort on depth.
     if (state == DRAGGING)
     {
         featuresDistanceFromOriginSort();
