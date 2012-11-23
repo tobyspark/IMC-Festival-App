@@ -25,8 +25,7 @@
 #include "tbzScreenScale.h"
 
 #define kTBZES_ViewElevationAngle 70
-#define kTBZES_VenueTagElevationHeight (15 * tbzScreenScale::retinaScale)
-#define kTBZES_PersonTagElevationHeight (10 * tbzScreenScale::retinaScale)
+#define kTBZES_FeatureTagElevationHeight (10 * tbzScreenScale::retinaScale)
 #define kTBZES_Damping 0.1
 #define kTBZES_MaxPunters 20
 
@@ -83,6 +82,7 @@ public:
     // Class properties
     
     ofRectangle groundBounds;
+    float       siteModelScale;
     
     ofxPlaylist siteAnimation;
     
@@ -97,6 +97,7 @@ protected:
     list< tbzFeatureAndDist > featuresDepthSorted;
     
     // This should be redone now we have tbzEventSiteFeature with selected property.
+    float focusRadius;
     tbzEventSiteFeature* nearestFeatureTest(float &distance);
     tbzEventSiteFeature* featureFocussed;
     
@@ -111,6 +112,7 @@ protected:
     ViewState   lastViewState;
     
     ofxAssimpModelLoader siteModel;
+    ofImage     siteImage;
     float       scale;
     float       elevationFactor;
     float       planFactor;

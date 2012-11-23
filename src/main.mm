@@ -3,6 +3,7 @@
 
 /*
  TODO:
+    - 3D RENDERING WOES GO AWAY WHEN YOU DON'T DRAW ANY ASSIMP MODELS. ASSIMP MUST FUCK GL STATE. GAH AND WOAH.
     - Make people selectable as well as venues, to show tweets clearly.
     - Change rendering of venues and people to a depth sorted list. Only way to get alpha blending.
     - Animate around site as tweets come in

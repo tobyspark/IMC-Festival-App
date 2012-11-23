@@ -131,7 +131,7 @@ void tbzVenue::drawFeature()
         ofFloatColor selectedColour(255, 1.0f-selected, 1.0f-selected); // Red if selected
         ofSetColor(selectedColour);
         
-        model.drawFaces();
+        //model.drawFaces();
     }
     ofPopStyle();
 }

@@ -35,21 +35,29 @@ void tbzEventSite::setup(string modelName, ofxLatLon geoTopLeft, ofxLatLon geoTo
     setIsScalable(true, tRange, 1 );
     delete [] tRange;
     
-    // We can tap on venues?
+    // We can tap to...?
     setIsTappable(true);
+    
+    // Set the radius of the 'focus' zone for interaction
+    focusRadius = ofGetWidth()*0.2f;
     
     // Create our lights
     ofSetSmoothLighting(true);
     ofEnableSeparateSpecularLight();
     light.setSpecularColor(ofColor(255.f, 255.f, 255.f)); // White
     light.setDiffuseColor( ofColor(255.f, 255.f, 200.f)); // A slight golden tone, sun!
-    light.setPosition(0, 0, 0); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number 
+    light.setAttenuation();
+    light.setPosition(-200, -200, 200); // FIXME: This needs to be positioned properly. assumed 0,0, +- a large number
     light.enable();
     
     // Set opening animation
     elevationFactor = 0.0f;
     width = 5.0f;
     siteAnimation.addKeyFrame( Playlist::Action::tween(5000.0f, &width, 1, Playlist::TWEEN_CUBIC, TWEEN_EASE_OUT));
+    
+    // FIXME: 2D Image loads via XML?
+    siteImage.loadImage("FieldDay-2012-2D/texture.png");
+    
 }
 
 void tbzEventSite::addVenue(Poco::SharedPtr<tbzVenue> venue)
@@ -127,8 +135,7 @@ void tbzEventSite::addMessageToPunters(Poco::SharedPtr<tbzSocialMessage> message
     else
     {
         Poco::SharedPtr<tbzPerson> newPerson = new tbzPerson;
-        newPerson->name = message->attributeTo;
-        newPerson->geoLocation = *(message->geoLocation);
+        newPerson->setup(message->attributeTo, *(message->geoLocation));
         newPerson->addMessage(message);
         
         addPunter(newPerson);
@@ -143,22 +150,6 @@ void tbzEventSite::addMessageToPromoters(Poco::SharedPtr<tbzSocialMessage> messa
     
     // TODO: Assign to correct promoter
     promoters.front()->addMessage(message);
-}
-
-tbzEventSiteFeature* tbzEventSite::nearestFeatureTest(float &distance)
-{
-    tbzEventSiteFeature* featurePointer = NULL;
-    
-    tbzFeatureAndDist featureAndDist;
-    featureAndDist = featuresDepthSorted.front();
-
-    if (featureAndDist.distance < distance)
-    {
-        featurePointer = featureAndDist.feature.get();
-        distance = featureAndDist.distance;
-    }
-    
-    return featurePointer;
 }
 
 bool tbzEventSite::actionTouchHitTest(float _x, float _y)
@@ -291,23 +282,13 @@ void tbzEventSite::updateContent()
         }
         
         // Test to see if a venue is over eventSite origin
-        float searchRadius = ofGetWidth()*0.2f;
-        float radius = searchRadius;
-        tbzEventSiteFeature* nearestFeature = nearestFeatureTest(radius);
+        tbzFeatureAndDist featureAndDist;
+        featureAndDist = featuresDepthSorted.front();
+        tbzEventSiteFeature* nearestFeature = (featureAndDist.distance < focusRadius) ? featureAndDist.feature.get() : NULL;
         
         // If we have a venue within range, "focus" on it
         if (nearestFeature)
         {
-            /* Vestigal 'rollover' animation position calculation
-             // If we're within hitRadius, animPos is 1, if we're at searchRadius animPos is 0
-             float hitRadius = searchRadius * 0.4f;
-             
-             float animPos;
-             if (radius > searchRadius) animPos = 0;
-             if (radius > hitRadius) animPos = 1 - ((radius - hitRadius) / (searchRadius - hitRadius));
-             else animPos = 1;
-             */
-            
             // We have a new venue
             if (nearestFeature != featureFocussed)
             {
@@ -401,7 +382,9 @@ void tbzEventSite::drawContent()
             // Perform scale from centre of screen
             ofScale(scale, scale, scale);
             
-            siteModel.drawFaces();
+            // FIXME: Drawing model FUCKS rendering state and everything goes wrong
+            siteImage.draw(modelTopLeft.x, modelTopLeft.y, modelTopRight.x - modelTopLeft.x, modelBottomLeft.y - modelTopLeft.y);
+            //siteModel.drawFaces();
             
             list<tbzFeatureAndDist>::iterator featureAndDist;
             for (featureAndDist = featuresDepthSorted.begin(); featureAndDist != featuresDepthSorted.end(); featureAndDist++)
@@ -423,14 +406,14 @@ void tbzEventSite::drawContent()
                 ofDrawBitmapString("BR: " + ofToString(groundBottomRight.x,2) + ", " + ofToString(groundBottomRight.y,2), modelBottomRight.x, modelBottomRight.y);
             }
         }
-        ofDisableLighting();
+        //ofDisableLighting();
         ofPopStyle();
         ofPopMatrix();
         
         // TASK: Draw graphics etc. that overlay the model
         // Scale here is applied individually, as graphics may not be scaled with world,
         // ie. may want to stay constant size on-screen.
-        // All graphics are perpendicular to screen and have alpha channel, so we render in depth (ie. YPos) order with depth test off.
+        // All graphics have alpha channel, so we render in depth (ie. YPos) order with depth test off.
         glDisable(GL_DEPTH_TEST);
         ofPushMatrix();
         {
@@ -444,19 +427,17 @@ void tbzEventSite::drawContent()
                 for (featureAndDist = featuresDepthSorted.rbegin(); featureAndDist != featuresDepthSorted.rend(); ++featureAndDist)
                 {
                     ofPushMatrix();
-                    ofPushStyle();
                     {
                         ofPoint modelLocation = groundToModel(featureAndDist->feature->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
-                        ofRotate(-elevationAngle, 1, 0, 0);
-                        if (featureAndDist->feature->getState() == tbzEventSiteFeature::nothing)
-                        {
-                            float nearFadeIn = ofMap(featureAndDist->distance, ofGetWidth()*0.3f, ofGetWidth()*0.2f, 0, 255);
-                            ofSetColor(255, nearFadeIn * (planFactor));
-                        }
+                        
+                        float raiseHeight = ofMap(featureAndDist->distance, focusRadius*0.8f, focusRadius*1.2f, 50 , 0, true);
+                        float flipToScreenAngle = ofMap(featureAndDist->distance, focusRadius*0.2f, focusRadius*1.2f, -elevationAngle, -90, true);
+                        
+                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_FeatureTagElevationHeight * scale + raiseHeight);
+                        ofRotate(flipToScreenAngle, 1, 0, 0);
+
                         featureAndDist->feature->drawTag();
                     }
-                    ofPopStyle();
                     ofPopMatrix();
                 }
             }
@@ -466,36 +447,36 @@ void tbzEventSite::drawContent()
             // Caveat - need to render the venue displaying its programme on top of any others, as continuation of plan view programme display
             else
             {
-                if (featureFocussed)
+                list< tbzFeatureAndDist >::reverse_iterator featureAndDist;
+                for (featureAndDist = featuresDepthSorted.rbegin(); featureAndDist != featuresDepthSorted.rend(); ++featureAndDist)
                 {
                     ofPushMatrix();
                     {
-                        ofPoint modelLocation = groundToModel(featureFocussed->geoLocation);
-                        ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale * elevationFactor);
-                        ofRotate(-elevationAngle, 1, 0, 0);
-                        
-                        featureFocussed->drawTag();
-                    }
-                    ofPopMatrix();
-                }
-                else
-                {
-                    list< tbzFeatureAndDist >::reverse_iterator featureAndDist;
-                    for (featureAndDist = featuresDepthSorted.rbegin(); featureAndDist != featuresDepthSorted.rend(); ++featureAndDist)
-                    {
-                        ofPushMatrix();
+                        if (featureAndDist->feature.get() != featureFocussed)
                         {
                             ofPoint modelLocation = groundToModel(featureAndDist->feature->geoLocation); // TODO: This should be cached somehow, no point in recaculating every frame
-                            ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_VenueTagElevationHeight * scale);
+                            ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_FeatureTagElevationHeight * scale);
                             
                             // TODO: Lots of special casing rotation, scale for venues, people, promoters etc?
                             ofRotate(-90, 1, 0, 0);
                             
                             featureAndDist->feature->transition = elevationFactor;
                             featureAndDist->feature->drawTag();
+
                         }
-                        ofPopMatrix();
+                        else // we've come to the focussed feature in the depth stack, so draw it and don't draw any nearer that would occlude it
+                        {
+                            ofPoint modelLocation = groundToModel(featureFocussed->geoLocation);
+                            ofTranslate(modelLocation.x * scale, modelLocation.y * scale, kTBZES_FeatureTagElevationHeight * scale * elevationFactor);
+                            ofRotate(-elevationAngle, 1, 0, 0);
+                            
+                            featureFocussed->drawTag();
+                            
+                            ofPopMatrix();
+                            break;
+                        }
                     }
+                    ofPopMatrix();
                 }
             }
         }
@@ -561,13 +542,15 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
         
         // TASK: Set model position and scale in bounding rect
         
-        // siteModel.scale is normalised to GL units, so to fill screen width (initialsize of 1) we need a scale of 2
-        float scale = initialSize * 2.0f;
-        siteModel.setScale(scale, scale, scale);
+        // We need to establish an overall scale to size all 3D Models. This is set by sizing the eventSite to a scale factor of filling the screen width
+        siteModelScale = siteModel.getNormalizedScale() * initialSize * 2.0f;
+        
+        siteModel.setScaleNomalization(false); // While the event site is effectively normalised, we do this for consistency with eventSiteFeatures.
+        siteModel.setScale(siteModelScale, siteModelScale, siteModelScale);
         
         // Centre in x + y, leave z at ground level.
-        siteModel.setPosition(0 - (siteModel.getSceneCenter().x * siteModel.getNormalizedScale() * scale),
-                              0 + (siteModel.getSceneCenter().y * siteModel.getNormalizedScale() * scale),
+        siteModel.setPosition(0 - (siteModel.getSceneCenter().x * siteModelScale),
+                              0 + (siteModel.getSceneCenter().y * siteModelScale),
                               0
                               );
         
@@ -580,8 +563,8 @@ bool tbzEventSite::loadModel(string modelName, float initialSize, ofxLatLon geoT
         
         // TASK: Register model's earthbound geometry to our eventSite's geometry
         
-        float width     = (siteModel.getSceneMax().x - siteModel.getSceneMin().x) * siteModel.getNormalizedScale() * scale;
-        float height    = (siteModel.getSceneMax().y - siteModel.getSceneMin().y) * siteModel.getNormalizedScale() * scale;
+        float width     = (siteModel.getSceneMax().x - siteModel.getSceneMin().x) * siteModelScale;
+        float height    = (siteModel.getSceneMax().y - siteModel.getSceneMin().y) * siteModelScale;
         
         modelTopLeft.set(-width/2, -height/2);
         modelTopRight.set(width/2, -height/2);

@@ -19,7 +19,7 @@
 #define kTBZPerson_MaxMessagesDisplayed 3
 #define kTBZPerson_MessageAnimationPeriodMillis 2000
 #define kTBZPerson_TwitterPollPeriod 45
-#define kTBZPerson_DefaultModelName ""
+#define kTBZPerson_DefaultModelName "Person.dae"
 #define kTBZPerson_MessageTagGrowAnimation false
 #define kTBZPerson_AnimInDistance 1000
 
@@ -43,7 +43,7 @@ public:
     void            drawTag();
     void            drawFeature();
     
-    void            setup(string name, string modelName, ofPoint geoLocation);
+    void            setup(string name, ofPoint geoLocation, string modelName = "");
 
 protected:
     void            startNewMessageAnimation(Poco::SharedPtr<tbzSocialMessage> message);

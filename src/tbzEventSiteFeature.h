@@ -19,7 +19,6 @@ public:
     
     string          name;
     ofPoint         geoLocation;
-    ofPoint         siteModelLocation;
     float           selected;
     float           transition;
     ofxAssimpModelLoader model;

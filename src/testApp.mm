@@ -218,7 +218,7 @@ void imcFestivalApp::setup(){
             eventSiteSettings.popTag();
 
             // Setup person from parsed data and add to event site
-            person->setup(name, modelName, geoLocation);
+            person->setup(name, geoLocation);
             eventSite.addPromoter(person);
         }
     }

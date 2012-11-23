@@ -163,7 +163,7 @@ void tbzPerson::update()
 
 void tbzPerson::drawFeature()
 {
-    model.drawFaces();
+    //model.drawFaces();
 }
 
 void tbzPerson::drawTag()
@@ -222,6 +222,9 @@ void tbzPerson::drawTag()
                     }
                     messagesDisplayMutex.unlock();
                 }
+                
+                tag.draw();
+                
                 break;
         }
     }
@@ -230,35 +233,47 @@ void tbzPerson::drawTag()
 }
 
 
-void tbzPerson::setup(string inName, string inModelName, ofPoint inGeoLocation)
+void tbzPerson::setup(string inName, ofPoint inGeoLocation, string inModelName)
 {
     name = inName;
     geoLocation = inGeoLocation;
     geoLocationDefault = inGeoLocation;
     
-    if(model.loadModel(inModelName, true))
+//    if (inModelName == "")
+//    {
+//        // TODO: use shared default model
+//    }
+//    else
     {
-        model.setAnimation(0);
-        
-        // TASK: Set model position and scale in bounding rect
-        
-        // siteModel.scale is normalised to GL units, so to fill screen width (initialsize of 1) we need a scale of 2
-        float scale = 0.5f;
-        model.setScale(scale, scale, scale);
-        
-        // Centre in x + y, leave z at ground level.
-        //        model.setPosition(0 - (model.getSceneCenter().x * model.getNormalizedScale() * scale),
-        //                              0 + (model.getSceneCenter().y * model.getNormalizedScale() * scale),
-        //                              0
-        //                              );
-        
-        /*
-         ofLog(OF_LOG_VERBOSE,"siteModel.getSceneMin() " + ofToString(siteModel.getSceneMin().x) + ", " + ofToString(siteModel.getSceneMin().y) + ", " + ofToString(siteModel.getSceneMin().z));
-         ofLog(OF_LOG_VERBOSE,"siteModel.getSceneMax() " + ofToString(siteModel.getSceneMax().x) + ", " + ofToString(siteModel.getSceneMax().y) + ", " + ofToString(siteModel.getSceneMax().z));
-         ofLog(OF_LOG_VERBOSE,"siteModel.getSceneCenter() " + ofToString(siteModel.getSceneCenter().x) + ", " + ofToString(siteModel.getSceneCenter().y) + ", " + ofToString(siteModel.getSceneCenter().z));
-         ofLog(OF_LOG_VERBOSE,"siteModel.getNormalisedScale()" + ofToString(siteModel.getNormalizedScale()));
-         */
+        model.setScaleNomalization(false);
+        if(model.loadModel(inModelName, true))
+        {
+            model.setAnimation(0);
+            
+            // TODO: Set scale to overall model scale
+            
+            // TODO: Position to 0,0 so the person can be placed according to geocoords
+    //        model.setPosition(0 - (model.getSceneCenter().x * siteModelScale),
+    //                              0 + (model.getSceneCenter().y * siteModelScale),
+    //                              0
+    //                              );
+            model.setScale(1,1,1);
+            
+            //model.setScale(16, 16, 16);
+            //model.setPosition(0 - (model.getSceneCenter().x * 16),
+    //                          0 + (model.getSceneCenter().y * 16),
+    //                          0
+    //                          );
+            
+            
+             ofLog(OF_LOG_VERBOSE,"siteModel.getSceneMin() " + ofToString(model.getSceneMin().x) + ", " + ofToString(model.getSceneMin().y) + ", " + ofToString(model.getSceneMin().z));
+             ofLog(OF_LOG_VERBOSE,"siteModel.getSceneMax() " + ofToString(model.getSceneMax().x) + ", " + ofToString(model.getSceneMax().y) + ", " + ofToString(model.getSceneMax().z));
+             ofLog(OF_LOG_VERBOSE,"siteModel.getSceneCenter() " + ofToString(model.getSceneCenter().x) + ", " + ofToString(model.getSceneCenter().y) + ", " + ofToString(model.getSceneCenter().z));
+             ofLog(OF_LOG_VERBOSE,"siteModel.getNormalisedScale()" + ofToString(model.getNormalizedScale()));
+             
+            cout << "MODEL NAME: " << inModelName << endl;
+            cout << "PERSON SCALE: " << model.getNormalizedScale() << endl;
+        }
     }
-    
     setState(nothing);
 }
